@@ -424,3 +424,123 @@ html[data-intro-seen] .crt-intro:not(.is-replay) {
   border-radius: 50%;
   background: var(--color-brand);
 }
+
+/* ---------- Radio tuner: a 90s Indian radio-cassette set ----------
+   Mustard cabinet, chrome-edged dial window, green LCD, ridged tuning knob.
+   Dial positions are slots in the station list, never invented frequencies. */
+.tuner {
+  position: relative;
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 0.18), transparent 30%),
+    var(--color-radio);
+  border-radius: 1.6rem 1.6rem 1.1rem 1.1rem;
+  box-shadow: 0 10px 0 rgb(22 32 74 / 0.2), inset 0 -6px 0 rgb(22 32 74 / 0.12);
+  padding: 1rem;
+}
+@media (min-width: 640px) {
+  .tuner { padding: 1.4rem 1.6rem 1.5rem; }
+}
+.tuner__grille {
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle, var(--color-ink) 2px, transparent 2.4px) 0 0 / 11px 11px,
+    #c48c1b;
+  box-shadow: inset 0 0 0 4px rgb(22 32 74 / 0.18);
+}
+.tuner__window {
+  position: relative;
+  height: 4.6rem;
+  border-radius: 0.6rem;
+  background: linear-gradient(to bottom, #fdf6e3, #efe2bf);
+  box-shadow: inset 0 0 0 3px #b9c0cf, inset 0 0 0 5px #7d859b, inset 0 6px 10px rgb(0 0 0 / 0.15);
+  cursor: pointer;
+  touch-action: none;
+  overflow: hidden;
+}
+.tuner__tick {
+  position: absolute;
+  bottom: 0.9rem;
+  width: 2px;
+  height: 1.1rem;
+  margin-left: -1px;
+  background: var(--color-ink);
+  opacity: 0.55;
+}
+.tuner__tick[data-major] { height: 1.6rem; opacity: 0.85; }
+.tuner__tick[data-selected] { background: var(--color-brand); opacity: 1; }
+.tuner__label {
+  position: absolute;
+  top: 0.45rem;
+  transform: translateX(-50%);
+  font-family: var(--font-silkscreen), monospace;
+  font-size: 0.65rem;
+  color: var(--color-ink);
+}
+.tuner__needle {
+  position: absolute;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  width: 3px;
+  margin-left: -1.5px;
+  background: #d3261e;
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgb(211 38 30 / 0.55);
+  transition: left 0.25s ease-out;
+}
+.tuner__lcd {
+  border-radius: 0.55rem;
+  background: #a9c3a0;
+  box-shadow: inset 0 0 0 3px #43326f33, inset 0 3px 8px rgb(0 0 0 / 0.25);
+  color: #1d2f1b;
+  font-family: var(--font-silkscreen), monospace;
+  padding: 0.55rem 0.75rem;
+}
+.tuner__knob {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.35), transparent 45%),
+    repeating-conic-gradient(#2a3566 0 6deg, var(--color-ink) 6deg 12deg);
+  box-shadow: 0 5px 0 rgb(0 0 0 / 0.3), inset 0 0 0 6px rgb(0 0 0 / 0.15);
+  cursor: grab;
+  touch-action: none;
+}
+.tuner__knob:active { cursor: grabbing; }
+.tuner__knob[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.tuner__knob-cap {
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f7f0df, #cfc4a8);
+  transition: transform 0.2s ease-out;
+}
+.tuner__knob-cap::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 4px;
+  height: 32%;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--color-brand);
+}
+.tuner__btn {
+  display: grid;
+  place-items: center;
+  height: 2.9rem;
+  min-width: 2.9rem;
+  border-radius: 0.7rem;
+  background: var(--color-panel);
+  color: var(--color-ink);
+  box-shadow: 0 4px 0 rgb(22 32 74 / 0.35);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.tuner__btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgb(22 32 74 / 0.35); }
+.tuner__btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.tuner__btn--main { background: var(--color-ink); color: var(--color-panel); min-width: 3.6rem; }
+@media (prefers-reduced-motion: reduce) {
+  .tuner__needle, .tuner__knob-cap, .tuner__btn { transition: none; }
+}

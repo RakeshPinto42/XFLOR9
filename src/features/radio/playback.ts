@@ -3,6 +3,7 @@
 import { getPlaybackEngine } from "@/lib/playback/browser";
 import type { PlaybackSource } from "@/lib/playback/types";
 import { getPlayability, type Playability } from "./compatibility";
+import { recordRecentPlay } from "./radioStores";
 import type { Station } from "./types";
 
 /** Radio's bridge to the shared playback engine. */
@@ -20,8 +21,9 @@ export function stationSource(station: Station): PlaybackSource {
 
 export function playStation(station: Station) {
   getPlaybackEngine().load(stationSource(station), {
-    // Radio Browser asks clients to count each play; only count plays that actually started.
+    // Only plays that actually started count: for Radio Browser's ranking and our history.
     onStarted: () => {
+      recordRecentPlay(station);
       fetch(`/api/radio/stations/${encodeURIComponent(station.id)}/click`, { method: "POST", keepalive: true }).catch(
         () => {}, // counting is best-effort and must never affect playback
       );

@@ -9,6 +9,9 @@ const PREFIX = "xplor9.";
 export const STORAGE_KEYS = {
   introSeen: `${PREFIX}introSeen`,
   playbackPrefs: `${PREFIX}playbackPrefs`,
+  radioFavourites: `${PREFIX}radio.favourites`,
+  radioRecents: `${PREFIX}radio.recents`,
+  radioPrefs: `${PREFIX}radio.prefs`,
 } as const;
 
 export function readJson<T>(key: string, fallback: T): T {

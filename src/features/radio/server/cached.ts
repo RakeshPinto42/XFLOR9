@@ -1,7 +1,7 @@
 import { cacheLife } from "next/cache";
 import type { FacetKind, StationQuery } from "../types";
 import { radioBrowser } from "./client";
-import { listFacet, searchStations } from "./queries";
+import { listFacet, lookupStations, searchStations } from "./queries";
 
 /**
  * Cached entry points used by the API routes. Arguments form the cache key, so the same
@@ -14,6 +14,13 @@ export async function cachedSearchStations(query: StationQuery) {
   "use cache";
   cacheLife({ stale: 300, revalidate: 600, expire: 3600 }); // station health changes through the day
   return searchStations(radioBrowser, query);
+}
+
+/** `ids` must be sorted by the caller so the same set shares one cache entry. */
+export async function cachedLookupStations(ids: string[]) {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
+  return lookupStations(radioBrowser, ids);
 }
 
 export async function cachedFacet(kind: FacetKind) {

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { rawStation } from "../__fixtures__/stations";
 import { RadioBrowserError, type RadioBrowserClient } from "./client";
-import { listFacet, registerClick, searchStations } from "./queries";
+import { listFacet, lookupStations, registerClick, searchStations } from "./queries";
 
 const clientReturning = (body: unknown): RadioBrowserClient => ({
   getJson: vi.fn(async () => body),
@@ -58,6 +58,30 @@ describe("listFacet", () => {
       "languages",
     );
     expect(facets).toEqual([{ value: "hindi", label: "Hindi", stationCount: 500 }]);
+  });
+});
+
+describe("lookupStations", () => {
+  it("returns saved stations including unavailable ones, and sends only valid ids", async () => {
+    const ok = rawStation();
+    const broken = rawStation({ lastcheckok: 0 });
+    const client = clientReturning([ok, broken]);
+    const out = await lookupStations(client, [ok.stationuuid, broken.stationuuid, "not-an-id"]);
+    expect(out.map((s) => s.availability.status)).toEqual(["available", "unavailable"]);
+    const params = vi.mocked(client.getJson).mock.calls[0][1] as URLSearchParams;
+    expect(params.get("uuids")).toBe(`${ok.stationuuid},${broken.stationuuid}`);
+  });
+
+  it("skips the request when no ids are valid", async () => {
+    const client = clientReturning([]);
+    expect(await lookupStations(client, ["x"])).toEqual([]);
+    expect(client.getJson).not.toHaveBeenCalled();
+  });
+
+  it("ignores stations the API returns that weren't asked for", async () => {
+    const asked = rawStation();
+    const out = await lookupStations(clientReturning([asked, rawStation()]), [asked.stationuuid]);
+    expect(out.map((s) => s.id)).toEqual([asked.stationuuid]);
   });
 });
 

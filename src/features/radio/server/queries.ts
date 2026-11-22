@@ -18,6 +18,21 @@ export async function searchStations(client: RadioBrowserClient, query: StationQ
   return { stations, offset: query.offset, limit: query.limit, hasMore };
 }
 
+export const MAX_LOOKUP_IDS = 50;
+
+/**
+ * Current directory data for saved stations (favourites). Unlike search, unavailable stations
+ * are returned too, so the UI can say why a saved station no longer plays.
+ * Verified live: unknown ids are simply left out of the response.
+ */
+export async function lookupStations(client: RadioBrowserClient, ids: string[]): Promise<Station[]> {
+  const valid = [...new Set(ids)].filter(isStationId).slice(0, MAX_LOOKUP_IDS);
+  if (valid.length === 0) return [];
+  const raw = await client.getJson("/json/stations/byuuid", new URLSearchParams({ uuids: valid.join(",") }));
+  if (!Array.isArray(raw)) throw new RadioBrowserError("bad-response", "Station lookup did not return a list");
+  return raw.map(normalizeStation).filter((s): s is Station => s !== null && valid.includes(s.id));
+}
+
 const FACET_LIMITS: Record<FacetKind, number> = { countries: 250, languages: 150, tags: 150 };
 
 /** Filter options (countries, languages, genres), most stations first. */

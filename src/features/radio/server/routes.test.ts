@@ -2,10 +2,11 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RadioBrowserError } from "./client";
 
-vi.mock("./cached", () => ({ cachedSearchStations: vi.fn(), cachedFacet: vi.fn() }));
+vi.mock("./cached", () => ({ cachedSearchStations: vi.fn(), cachedFacet: vi.fn(), cachedLookupStations: vi.fn() }));
 vi.mock("./queries", async (orig) => ({ ...(await orig<typeof import("./queries")>()), registerClick: vi.fn() }));
 
-const { cachedSearchStations, cachedFacet } = await import("./cached");
+const { cachedSearchStations, cachedFacet, cachedLookupStations } = await import("./cached");
+const lookupRoute = await import("@/app/api/radio/stations/lookup/route");
 const { registerClick } = await import("./queries");
 const stationsRoute = await import("@/app/api/radio/stations/route");
 const facetsRoute = await import("@/app/api/radio/facets/[kind]/route");
@@ -63,6 +64,24 @@ describe("GET /api/radio/facets/[kind]", () => {
     const res = await facetsRoute.GET(req("/api/radio/facets/stats"), ctx({ kind: "stats" }));
     expect(res.status).toBe(404);
     expect(cachedFacet).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/radio/stations/lookup", () => {
+  const OTHER = "00000000-0000-4000-8000-000000000001";
+
+  it("looks up de-duplicated, sorted ids with a private cache header", async () => {
+    vi.mocked(cachedLookupStations).mockResolvedValue([]);
+    const res = await lookupRoute.GET(req(`/api/radio/stations/lookup?ids=${ID},${OTHER},${ID}`));
+    expect(res.status).toBe(200);
+    expect(cachedLookupStations).toHaveBeenCalledWith([OTHER, ID]);
+    expect(res.headers.get("Cache-Control")).toContain("private");
+  });
+
+  it.each([["ids="], ["ids=abc"], [`ids=${Array(51).fill(ID).join(",")}`]])("rejects %s", async (qs) => {
+    const res = await lookupRoute.GET(req(`/api/radio/stations/lookup?${qs}`));
+    expect(res.status).toBe(400);
+    expect(cachedLookupStations).not.toHaveBeenCalled();
   });
 });
 
