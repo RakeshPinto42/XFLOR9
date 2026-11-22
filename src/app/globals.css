@@ -1,0 +1,426 @@
+@import "tailwindcss";
+
+/* ---------- XPLOR9 design tokens ----------
+   Beige electronics plastic + navy ink. Each module owns one colour.
+   Brand orange is shared with Music (cassette orange). */
+@theme {
+  --color-plastic: #ece1c8;
+  --color-panel: #f7f0df;
+  --color-ink: #16204a;
+  --color-ink-soft: #46507a;
+  --color-brand: #f2601d;
+  --color-radio: #e3a82b;
+  --color-tv: #2d6bff;
+  --color-music: #f2601d;
+  --color-games: #6b3fd1;
+  --color-reading: #8fcfb4;
+  --color-screen: #0f1733;
+  --color-phosphor: #c8ffe4;
+}
+
+@theme inline {
+  --font-display: var(--font-shrikhand);
+  --font-sans: var(--font-hanken);
+  --font-pixel: var(--font-silkscreen);
+}
+
+html {
+  background: var(--color-plastic);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-hanken), system-ui, sans-serif;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-tv);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Logo: navy letters with an offset orange shadow, like 90s TV idents. */
+.logo-mark {
+  font-family: var(--font-shrikhand), serif;
+  color: var(--color-ink);
+  text-shadow: 0.06em 0.06em 0 var(--color-brand);
+  letter-spacing: 0.01em;
+}
+.logo-mark--on-screen {
+  color: var(--color-panel);
+  text-shadow: 0.06em 0.06em 0 var(--color-brand), 0 0 0.6em rgb(200 255 228 / 0.35);
+}
+
+/* ---------- CRT screen surface (shared by hero set, intro, no-signal panels) ---------- */
+.crt-screen {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 45%, #22306a 0%, var(--color-screen) 70%);
+  border-radius: 14% / 18%;
+  box-shadow: inset 0 0 2.5rem rgb(0 0 0 / 0.65), inset 0 0 0 0.35rem rgb(0 0 0 / 0.35);
+}
+.crt-screen::after {
+  /* Scanlines + vignette: static, so it never distracts. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.05) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.45) 100%);
+}
+
+.static-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+/* ---------- Logo-led CRT intro ----------
+   Pure CSS timeline (~6s). It ends on its own even without JavaScript.
+   JS only handles Skip, Escape and remembering that it was seen. */
+.crt-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: #05070f;
+  animation: intro-out 0.5s ease-in 5.9s forwards;
+}
+/* Returning visitors: an inline script sets this attribute before paint. */
+html[data-intro-seen] .crt-intro:not(.is-replay) {
+  display: none;
+}
+.crt-intro__tube {
+  width: min(88vw, 880px);
+  aspect-ratio: 4 / 3;
+  transform: scale(0.004, 0.004);
+  animation: tube-on 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s forwards;
+}
+.crt-intro__static {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  animation:
+    static-jitter 0.18s steps(3) infinite,
+    fade-away 0.9s ease-out 1.6s forwards;
+}
+.crt-intro__content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 1.25rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+.crt-intro__logo {
+  font-size: clamp(3.5rem, 13vw, 8.5rem);
+  line-height: 1;
+  opacity: 0;
+  animation: logo-tune 0.9s steps(6) 1.9s forwards;
+}
+.crt-intro__line {
+  font-size: clamp(1.05rem, 2.6vw, 1.6rem);
+  color: var(--color-phosphor);
+  opacity: 0;
+  animation: fade-in 0.6s ease-out 3s forwards;
+}
+.crt-intro__bars {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  opacity: 0;
+  animation: fade-in 0.5s ease-out 3.9s forwards;
+}
+.crt-intro__bars span {
+  width: clamp(1.75rem, 6vw, 3.5rem);
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+@keyframes tube-on {
+  0% { transform: scale(0.004, 0.004); filter: brightness(6); }
+  45% { transform: scale(1, 0.006); filter: brightness(5); }
+  100% { transform: scale(1, 1); filter: brightness(1); }
+}
+@keyframes static-jitter {
+  0% { background-position: 0 0; }
+  33% { background-position: -60px 40px; }
+  66% { background-position: 50px -30px; }
+  100% { background-position: -20px 70px; }
+}
+@keyframes logo-tune {
+  0% { opacity: 0; transform: translateX(-6px) skewX(-8deg); }
+  40% { opacity: 0.7; transform: translateX(5px) skewX(6deg); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes fade-in { to { opacity: 1; } }
+@keyframes fade-away { to { opacity: 0; } }
+@keyframes intro-out { to { opacity: 0; visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Never auto-play motion. A replay shows a calm, fade-only version. */
+  .crt-intro:not(.is-replay) { display: none; }
+  .crt-intro,
+  .crt-intro__tube,
+  .crt-intro__static,
+  .crt-intro__logo,
+  .crt-intro__line,
+  .crt-intro__bars {
+    animation-timing-function: ease;
+  }
+  .crt-intro__tube { transform: none; animation: fade-in 0.4s forwards; opacity: 0; }
+  .crt-intro__static { display: none; }
+  .crt-intro__logo { animation: fade-in 0.6s 0.4s forwards; }
+}
+
+/* ---------- The shelf: five hand-drawn devices on one plank ---------- */
+.shelf {
+  --plank: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.25rem;
+  row-gap: 2.5rem;
+}
+@media (min-width: 768px) {
+  .shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .shelf { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+.shelf__stage {
+  position: relative;
+  height: 9.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: var(--plank);
+}
+.shelf__stage::after {
+  /* The plank runs under each device and bridges the gap to the next one. */
+  content: "";
+  position: absolute;
+  left: -0.7rem;
+  right: -0.7rem;
+  bottom: 0;
+  height: var(--plank);
+  background: linear-gradient(to bottom, #2a3566, var(--color-ink));
+  border-radius: 2px;
+}
+.shelf__item:hover .device,
+.shelf__item:focus-visible .device {
+  transform: translateY(-6px) rotate(-1deg);
+}
+.device {
+  position: relative;
+  transition: transform 0.2s ease;
+  box-shadow: 0 6px 0 rgb(22 32 74 / 0.22);
+}
+@media (prefers-reduced-motion: reduce) {
+  .device { transition: none; }
+  .shelf__item:hover .device,
+  .shelf__item:focus-visible .device { transform: none; }
+}
+
+/* Radio: mustard set, speaker grille + dial window */
+.device--radio {
+  width: 9.5rem;
+  height: 6rem;
+  background: var(--color-radio);
+  border-radius: 1rem 1rem 0.5rem 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 0.5rem;
+  padding: 0.7rem;
+}
+.device--radio::before {
+  /* carry handle */
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: -0.85rem;
+  height: 1rem;
+  border: 0.3rem solid var(--color-ink);
+  border-bottom: 0;
+  border-radius: 0.6rem 0.6rem 0 0;
+}
+.device--radio .grille {
+  border-radius: 0.5rem;
+  background: radial-gradient(circle, var(--color-ink) 1.4px, transparent 1.6px) 0 0 / 7px 7px,
+    #c98f1d;
+}
+.device--radio .dial {
+  position: relative;
+  border-radius: 0.35rem;
+  background: repeating-linear-gradient(to right, var(--color-ink) 0 1px, transparent 1px 7px)
+      center / 100% 35% no-repeat,
+    var(--color-panel);
+}
+.device--radio .dial::after {
+  content: "";
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: 62%;
+  width: 2px;
+  background: var(--color-brand);
+}
+
+/* TV: blue box set with screen, knobs and rabbit-ear antenna */
+.device--tv {
+  width: 8.5rem;
+  height: 6.8rem;
+  background: var(--color-tv);
+  border-radius: 0.9rem;
+  padding: 0.6rem;
+  display: grid;
+  grid-template-columns: 1fr 1.4rem;
+  gap: 0.5rem;
+}
+.device--tv::before,
+.device--tv::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 3px;
+  height: 2.2rem;
+  background: var(--color-ink);
+  transform-origin: bottom center;
+}
+.device--tv::before { transform: rotate(-28deg); }
+.device--tv::after { transform: rotate(24deg); }
+.device--tv .crt-screen { border-radius: 18% / 22%; }
+.device--tv .knobs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.3rem;
+}
+.device--tv .knobs span {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--color-panel);
+  box-shadow: inset 0 -3px 0 rgb(22 32 74 / 0.35);
+}
+
+/* Music: orange cassette with two reels */
+.device--music {
+  width: 9.5rem;
+  height: 6rem;
+  background: var(--color-music);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.7rem;
+}
+.device--music .label {
+  height: 1rem;
+  border-radius: 0.2rem;
+  background: var(--color-panel);
+  background-image: repeating-linear-gradient(to bottom, transparent 0 4px, rgb(22 32 74 / 0.25) 4px 5px);
+}
+.device--music .window {
+  margin: 0.5rem auto 0;
+  width: 78%;
+  height: 2.6rem;
+  border-radius: 1.3rem;
+  background: #3a2414;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.45rem;
+}
+.device--music .reel {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--color-panel) 0 15deg, transparent 15deg 60deg, var(--color-panel) 60deg 75deg, transparent 75deg 120deg, var(--color-panel) 120deg 135deg, transparent 135deg 180deg, var(--color-panel) 180deg 195deg, transparent 195deg 240deg, var(--color-panel) 240deg 255deg, transparent 255deg 300deg, var(--color-panel) 300deg 315deg, transparent 315deg),
+    var(--color-ink);
+  border: 0.3rem solid var(--color-panel);
+}
+
+/* Games: purple handheld with LCD, d-pad and buttons */
+.device--games {
+  width: 5.6rem;
+  height: 8rem;
+  background: var(--color-games);
+  border-radius: 0.6rem 0.6rem 1.6rem 0.6rem;
+  padding: 0.55rem;
+}
+.device--games .lcd {
+  height: 3rem;
+  border-radius: 0.3rem;
+  box-shadow: inset 0 0 0 3px #43326f;
+  background:
+    linear-gradient(#2f4a2c, #2f4a2c) 30% 60% / 22% 14% no-repeat,
+    linear-gradient(#2f4a2c, #2f4a2c) 52% 60% / 14% 14% no-repeat,
+    linear-gradient(#2f4a2c, #2f4a2c) 70% 30% / 10% 14% no-repeat,
+    #a9c3a0;
+}
+.device--games .controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.9rem;
+  padding: 0 0.1rem;
+}
+.device--games .dpad {
+  width: 1.7rem;
+  height: 1.7rem;
+  background:
+    linear-gradient(var(--color-ink), var(--color-ink)) center / 100% 34% no-repeat,
+    linear-gradient(var(--color-ink), var(--color-ink)) center / 34% 100% no-repeat;
+}
+.device--games .ab {
+  display: flex;
+  gap: 0.25rem;
+  transform: rotate(-25deg);
+}
+.device--games .ab span {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--color-brand);
+}
+
+/* Reading Room: a row of mint book spines */
+.device--reading {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2rem;
+  box-shadow: none;
+}
+.device--reading span {
+  width: 1.35rem;
+  border-radius: 0.2rem 0.2rem 0 0;
+  background: var(--spine);
+  background-image: linear-gradient(to bottom, transparent 18%, rgb(22 32 74 / 0.28) 18% 22%, transparent 22% 76%, rgb(22 32 74 / 0.28) 76% 80%, transparent 80%);
+  box-shadow: 0 6px 0 rgb(22 32 74 / 0.22);
+}
+.device--reading span:last-child {
+  transform: rotate(14deg);
+  transform-origin: bottom left;
+}
+
+.status-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-silkscreen), monospace;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.3rem;
+  border: 2px solid currentColor;
+}
+.status-sticker[data-status="live"]::before,
+.status-sticker[data-status="building"]::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--color-brand);
+}
