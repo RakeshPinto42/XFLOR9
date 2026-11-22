@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Hanken_Grotesk, Shrikhand, Silkscreen } from "next/font/google";
+import { MiniPlayer } from "@/components/MiniPlayer";
 import { SiteHeader } from "@/components/SiteHeader";
 import { STORAGE_KEYS } from "@/lib/storage/local";
 import "./globals.css";
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Everything XPLOR9 remembers, like favourites and progress, stays in this browser.
           </div>
         </footer>
+        <MiniPlayer />
       </body>
     </html>
   );

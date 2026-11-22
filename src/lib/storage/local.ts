@@ -8,6 +8,7 @@ const PREFIX = "xplor9.";
 
 export const STORAGE_KEYS = {
   introSeen: `${PREFIX}introSeen`,
+  playbackPrefs: `${PREFIX}playbackPrefs`,
 } as const;
 
 export function readJson<T>(key: string, fallback: T): T {
