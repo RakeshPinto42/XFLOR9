@@ -79,7 +79,7 @@ export const MODULES: readonly XploreModule[] = [
       "Adjustable text size, light and dark reading modes",
       "Bookmarks and reading progress that wait for you",
     ],
-    status: "planned",
+    status: "building",
   },
 ] as const;
 

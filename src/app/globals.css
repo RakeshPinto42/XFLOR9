@@ -544,3 +544,80 @@ html[data-intro-seen] .crt-intro:not(.is-replay) {
 @media (prefers-reduced-motion: reduce) {
   .tuner__needle, .tuner__knob-cap, .tuner__btn { transition: none; }
 }
+
+/* ---------- Reading Room: cloth-bound covers on a shelf ----------
+   Covers are original typographic designs (no third-party artwork):
+   coloured book cloth, a gilt double frame, title and author. */
+.book-cover {
+  --cloth: var(--color-reading);
+  --ink-on: var(--color-ink);
+  --gilt: rgb(22 32 74 / 0.55);
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: 0.25rem 0.6rem 0.6rem 0.25rem;
+  background:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 4px),
+    var(--cloth);
+  color: var(--ink-on);
+  box-shadow: inset 7px 0 0 rgb(0 0 0 / 0.14), inset 9px 0 0 rgb(255 255 255 / 0.12), 0 6px 0 rgb(22 32 74 / 0.22);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 12% 11% 10% 15%;
+  overflow: hidden;
+  container-type: inline-size;
+}
+.book-cover::before {
+  content: "";
+  position: absolute;
+  inset: 5% 6% 5% 10%;
+  border: 2px solid var(--gilt);
+  outline: 1px solid var(--gilt);
+  outline-offset: 3px;
+  border-radius: 0.2rem;
+  pointer-events: none;
+}
+.book-cover__title {
+  font-family: var(--font-shrikhand), serif;
+  font-size: clamp(0.9rem, 15cqi, 2.6rem);
+  line-height: 1.05;
+  align-self: center;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.book-cover__author {
+  font-size: clamp(0.6rem, 8cqi, 1.05rem);
+  font-weight: 600;
+  text-align: center;
+  opacity: 0.85;
+}
+.book-cover[data-tone="navy"] { --cloth: var(--color-ink); --ink-on: var(--color-panel); --gilt: rgb(227 168 43 / 0.75); }
+.book-cover[data-tone="mint"] { --cloth: var(--color-reading); }
+.book-cover[data-tone="mustard"] { --cloth: var(--color-radio); }
+.book-cover[data-tone="orange"] { --cloth: var(--color-music); }
+.book-cover[data-tone="purple"] { --cloth: var(--color-games); --ink-on: var(--color-panel); --gilt: rgb(247 240 223 / 0.6); }
+.book-cover[data-tone="blue"] { --cloth: var(--color-tv); --ink-on: var(--color-panel); --gilt: rgb(247 240 223 / 0.6); }
+
+.book-slot {
+  position: relative;
+  padding-bottom: 0.8rem;
+}
+.book-slot::after {
+  /* shelf plank under each book, bridging the grid gap */
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  right: -0.75rem;
+  bottom: 0;
+  height: 0.8rem;
+  background: linear-gradient(to bottom, #2a3566, var(--color-ink));
+  border-radius: 2px;
+}
+.book-link:hover .book-cover,
+.book-link:focus-visible .book-cover {
+  transform: translateY(-5px) rotate(-1.5deg);
+}
+.book-cover { transition: transform 0.2s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .book-cover { transition: none; }
+  .book-link:hover .book-cover, .book-link:focus-visible .book-cover { transform: none; }
+}

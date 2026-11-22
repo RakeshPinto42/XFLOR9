@@ -1,0 +1,378 @@
+{
+  "version": 1,
+  "books": [
+    {
+      "id": "treasure-island",
+      "title": "Treasure Island",
+      "authors": [
+        "Robert Louis Stevenson"
+      ],
+      "language": "en",
+      "genres": [
+        "adventure",
+        "children"
+      ],
+      "firstPublished": {
+        "year": 1883,
+        "detail": "First published as a book in 1883."
+      },
+      "description": "Young Jim Hawkins finds a pirate's map in a dead sailor's sea-chest and sails off to find buried treasure, only to discover that the ship's friendly cook, Long John Silver, has plans of his own.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/treasure-island.epub",
+        "format": "epub",
+        "bytes": 214103,
+        "sha256": "dc827ea0a24b1df45aef985e3bdef1980f6dc7d2dc036f15034fb60b49307e40"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Stevenson died in 1894, so the text entered the public domain in 1955. The credited illustrator, Louis Rhead (died 1926), is public domain from 1987, and no illustrations are included in this file."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1883, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Robert Louis Stevenson",
+            "role": "author",
+            "born": 1850,
+            "died": 1894,
+            "inFile": true
+          },
+          {
+            "name": "Louis Rhead",
+            "role": "illustrator",
+            "born": 1857,
+            "died": 1926,
+            "inFile": false,
+            "note": "Credited on the title page of the source edition; this text-only file contains none of his illustrations."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #120, text-only EPUB. Gutenberg transcribed it from the Louis Rhead-illustrated edition (best-dated to 1915, Harper & Brothers); the illustrations and the scanned cover are not included.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 120,
+          "url": "https://www.gutenberg.org/ebooks/120",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/120/pg120.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "6d6781328ac1f559053b88e46a0881d69bf228d08e5d0b0e81ca39bd89b94edd"
+        },
+        "modifications": [
+          "Removed the embedded scanned cover image and cover page, because the cover artwork's printing and artist could not be confirmed. Book text and the Project Gutenberg licence are unchanged (verified line by line)."
+        ],
+        "evidence": [
+          {
+            "claim": "Stevenson 1850–1894; Rhead 1857–1926",
+            "source": "https://gutenberg.pglaf.org/cache/epub/120/pg120.rdf"
+          },
+          {
+            "claim": "Stevenson 1850–1894; book published 1883",
+            "source": "https://en.wikipedia.org/wiki/Robert_Louis_Stevenson"
+          },
+          {
+            "claim": "Treasure Island published as a book in 1883",
+            "source": "https://en.wikipedia.org/wiki/Treasure_Island"
+          },
+          {
+            "claim": "Rhead-illustrated Harper & Brothers edition dated [1915]",
+            "source": "https://libcat.library.tamu.edu/Record/in00000711521"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "adventures-of-sherlock-holmes",
+      "title": "The Adventures of Sherlock Holmes",
+      "authors": [
+        "Arthur Conan Doyle"
+      ],
+      "language": "en",
+      "genres": [
+        "mystery"
+      ],
+      "firstPublished": {
+        "year": 1892,
+        "detail": "First published as a collection on 14 October 1892; the stories first appeared in a magazine in 1891–92."
+      },
+      "description": "Twelve cases for the world's most famous consulting detective and his friend Dr Watson, from a blackmailing photograph to a speckled band and a red-headed league.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/adventures-of-sherlock-holmes.epub",
+        "format": "epub",
+        "bytes": 261590,
+        "sha256": "554414cb5f4b5cebc0ebc8c7e8ef4b9129e36388f18b420853fef2ac55230ed6"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Doyle died in 1930, so the text entered the public domain in 1991."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1892, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Arthur Conan Doyle",
+            "role": "author",
+            "born": 1859,
+            "died": 1930,
+            "inFile": true
+          }
+        ],
+        "edition": "Project Gutenberg eBook #1661, text-only EPUB. Gutenberg does not state the print edition it was transcribed from.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 1661,
+          "url": "https://www.gutenberg.org/ebooks/1661",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/1661/pg1661.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "4297c84d55d638fd50ed99bb33b1221eac354c56460d9b612bbd033f498ecf77"
+        },
+        "modifications": [
+          "Removed the embedded scanned cover image and cover page, because the cover designer is not documented. Book text and the Project Gutenberg licence are unchanged (verified line by line)."
+        ],
+        "evidence": [
+          {
+            "claim": "Doyle 1859–1930",
+            "source": "https://gutenberg.pglaf.org/cache/epub/1661/pg1661.rdf"
+          },
+          {
+            "claim": "Doyle 1859–1930",
+            "source": "https://en.wikipedia.org/wiki/Arthur_Conan_Doyle"
+          },
+          {
+            "claim": "Collection first published 14 October 1892",
+            "source": "https://en.wikipedia.org/wiki/The_Adventures_of_Sherlock_Holmes"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "the-jungle-book",
+      "title": "The Jungle Book",
+      "authors": [
+        "Rudyard Kipling"
+      ],
+      "language": "en",
+      "genres": [
+        "children",
+        "adventure"
+      ],
+      "firstPublished": {
+        "year": 1894,
+        "detail": "First published in 1894."
+      },
+      "description": "Mowgli, a boy raised by wolves in the Seeonee hills, learns the Law of the Jungle from Baloo and Bagheera and faces the tiger Shere Khan. Also includes Rikki-Tikki-Tavi, the brave mongoose, and Toomai of the Elephants.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/the-jungle-book.epub",
+        "format": "epub",
+        "bytes": 137280,
+        "sha256": "003890058249d6fbd22098ded3b3581e8d4d950e125519552da331de08fe5511"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Kipling died in 1936, so the text entered the public domain in 1997."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1894, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Rudyard Kipling",
+            "role": "author",
+            "born": 1865,
+            "died": 1936,
+            "inFile": true
+          }
+        ],
+        "edition": "Project Gutenberg eBook #236, text-only EPUB. Illustration captions from the source edition remain as text; no illustrations are included. Gutenberg does not state the print edition.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 236,
+          "url": "https://www.gutenberg.org/ebooks/236",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/236/pg236.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "51f0c5d2bfeb0a86e22d2f8a93a1d7978699d17bf95edad2bdf8168863f3d6f9"
+        },
+        "modifications": [
+          "Removed the embedded scanned cover image and cover page, because the cover designer is not documented. Book text and the Project Gutenberg licence are unchanged (verified line by line)."
+        ],
+        "evidence": [
+          {
+            "claim": "Kipling 1865–1936",
+            "source": "https://gutenberg.pglaf.org/cache/epub/236/pg236.rdf"
+          },
+          {
+            "claim": "Kipling 1865–1936",
+            "source": "https://en.wikipedia.org/wiki/Rudyard_Kipling"
+          },
+          {
+            "claim": "Published 1894",
+            "source": "https://en.wikipedia.org/wiki/The_Jungle_Book"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "the-time-machine",
+      "title": "The Time Machine",
+      "authors": [
+        "H. G. Wells"
+      ],
+      "language": "en",
+      "genres": [
+        "science-fiction"
+      ],
+      "firstPublished": {
+        "year": 1895,
+        "detail": "First published as a book in 1895."
+      },
+      "description": "A Victorian inventor travels to the year 802,701 and finds humanity split into the gentle Eloi above ground and the Morlocks who live in the dark below. The story that made time travel a household idea.",
+      "contentNote": "Written in 1895. Contains outdated and offensive racial language.",
+      "file": {
+        "path": "/books/the-time-machine.epub",
+        "format": "epub",
+        "bytes": 105491,
+        "sha256": "55d493f556b1c43875ef41ce91565b70222d0ad335d9860c74175994596b6ac0"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Wells died in 1946, so the text entered the public domain in 2007."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1895, before 1931. Wells's later revised text (1924) is also before 1931."
+        },
+        "contributors": [
+          {
+            "name": "H. G. Wells",
+            "role": "author",
+            "born": 1866,
+            "died": 1946,
+            "inFile": true
+          }
+        ],
+        "edition": "Project Gutenberg eBook #35, text-only EPUB ('The Time Machine: An Invention'). Gutenberg does not state the print edition.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 35,
+          "url": "https://www.gutenberg.org/ebooks/35",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/35/pg35.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "9b453c2a14fe9490b866105dd9ef8a1e475911c4e83218cbe62ec648c9ef82de"
+        },
+        "modifications": [
+          "Removed the embedded scanned first-edition cover and cover page: the cover artist (reported as Ben Hardy) has no confirmed dates, so its Indian copyright status could not be verified. Book text and the Project Gutenberg licence are unchanged (verified line by line)."
+        ],
+        "evidence": [
+          {
+            "claim": "Wells 1866–1946",
+            "source": "https://gutenberg.pglaf.org/cache/epub/35/pg35.rdf"
+          },
+          {
+            "claim": "Wells 1866–1946",
+            "source": "https://en.wikipedia.org/wiki/H._G._Wells"
+          },
+          {
+            "claim": "Novella published 1895",
+            "source": "https://en.wikipedia.org/wiki/The_Time_Machine"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "vikram-and-the-vampire",
+      "title": "Vikram and the Vampire",
+      "authors": [
+        "Richard Francis Burton"
+      ],
+      "language": "en",
+      "genres": [
+        "folklore",
+        "fantasy"
+      ],
+      "firstPublished": {
+        "year": 1870,
+        "detail": "Burton's English version first appeared in 1870; this is the 1893 memorial edition edited by Isabel Burton. The tales come from the ancient Sanskrit Vetala Panchavimshati (Baital Pachisi)."
+      },
+      "description": "King Vikram must carry a riddling Baital down from a tree, and every time the spirit tells a tale and asks a question, the king's answer sends it flying back. The classic Vikram–Betaal stories in a Victorian English retelling.",
+      "contentNote": "A Victorian English retelling first published in 1870. It reflects colonial attitudes of its time and contains outdated views and language.",
+      "file": {
+        "path": "/books/vikram-and-the-vampire.epub",
+        "format": "epub",
+        "bytes": 227982,
+        "sha256": "7bb47be597b4f6ab3aecebeb4bb1a5708122a338a823f4e48629b4e1ba1792b6"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life plus 60 years from the following year. Richard Burton (adapter, died 1890) has been public domain since 1951 and Isabel Burton (editor, died 1896) since 1957. The underlying Sanskrit tales are ancient and not protected."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1870, with this edition in 1893, both before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Richard Francis Burton",
+            "role": "author",
+            "born": 1821,
+            "died": 1890,
+            "inFile": true,
+            "note": "English adaptation of the Sanskrit Vetala Panchavimshati."
+          },
+          {
+            "name": "Isabel Burton",
+            "role": "editor",
+            "born": 1831,
+            "died": 1896,
+            "inFile": true,
+            "note": "Her preface in this edition is dated 18 August 1893."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #2400, text-only EPUB, from the 1893 memorial edition (contains Isabel Burton's 1893 preface and the 1870 first-edition preface).",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 2400,
+          "url": "https://www.gutenberg.org/ebooks/2400",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/2400/pg2400.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "86b1326da8ac29504e312d65348d5d8de45a1b4bf7f2353a0708cf90fd1414cf"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged (verified line by line)."
+        ],
+        "evidence": [
+          {
+            "claim": "R. F. Burton 1821–1890; editor Isabel Burton 1831–1896",
+            "source": "https://gutenberg.pglaf.org/cache/epub/2400/pg2400.rdf"
+          },
+          {
+            "claim": "Richard Francis Burton 1821–1890",
+            "source": "https://en.wikipedia.org/wiki/Richard_Francis_Burton"
+          },
+          {
+            "claim": "Isabel Burton 1831–1896",
+            "source": "https://en.wikipedia.org/wiki/Isabel_Burton"
+          },
+          {
+            "claim": "1893 preface date and 1870 first edition",
+            "source": "Front matter of the EPUB itself (preface signed 'August 18th, 1893'; 'Preface to the first (1870) edition')"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    }
+  ]
+}
