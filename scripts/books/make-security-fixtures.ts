@@ -9,9 +9,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { strToU8, zipSync, type Zippable } from "fflate";
 
 const OUT = "test-fixtures/security";
+// Marks the page that hosts the book (window.parent) and tries to reach XPLOR9 itself
+// (window.top: in the isolated reader that is a different origin and must be unreachable).
 const payload = (name: string) =>
   `try{var w=window.parent;(w.__xplor9_attack=w.__xplor9_attack||[]).push('${name}');` +
-  `w.indexedDB.databases().then(function(d){w.__xplor9_dbs=d.map(function(x){return x.name})})}catch(e){}`;
+  `w.indexedDB.databases().then(function(d){w.__xplor9_dbs=d.map(function(x){return x.name})})}catch(e){}` +
+  `try{window.top.__xplor9_attack=['${name}-reached-top'];window.top.localStorage.setItem('xplor9.pwned','${name}')}catch(e){}`;
 
 const container = `<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>`;
 
@@ -120,6 +123,35 @@ const bomb = "<p>" + "a".repeat(150 * 1024 * 1024) + "</p>";
 writeFileSync(
   `${OUT}/zip-bomb-150mb.epub`,
   epub("bomb", [{ id: "c1", href: "c1.xhtml", type: "application/xhtml+xml", spine: true, body: xhtml("Bomb", bomb) }]),
+);
+
+// 5b. Zip bomb whose local headers LIE: they claim 10 bytes, the data expands to ~150 MB
+{
+  const z = epub("lying-bomb", [{ id: "c1", href: "c1.xhtml", type: "application/xhtml+xml", spine: true, body: xhtml("Lying bomb", bomb) }]);
+  const view = new DataView(z.buffer, z.byteOffset, z.byteLength);
+  for (let i = 0; i + 30 < z.length; i++) if (view.getUint32(i, true) === 0x04034b50) view.setUint32(i + 22, 10, true);
+  writeFileSync(`${OUT}/lying-bomb-150mb.epub`, z);
+}
+
+// 5c. Path traversal entry name
+{
+  const files: Zippable = {
+    mimetype: [strToU8("application/epub+zip"), { level: 0 }],
+    "META-INF/container.xml": strToU8(container),
+    "../../evil.xhtml": strToU8("<p>escaped the archive</p>"),
+  };
+  writeFileSync(`${OUT}/path-traversal.epub`, zipSync(files));
+}
+
+// 5d. A hostile standalone SVG page in the reading order
+writeFileSync(
+  `${OUT}/svg-document.epub`,
+  epub("svg", [
+    {
+      id: "s1", href: "page.svg", type: "image/svg+xml", spine: true,
+      body: `<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="200" onload="${payload("svg-onload")}"><script>${payload("svg-script")}</script><a xlink:href="javascript:${payload("svg-link")}"><text x="10" y="40">SVG page</text></a><foreignObject width="300" height="50"><div xmlns="http://www.w3.org/1999/xhtml"><img src="x" onerror="${payload("svg-foreign-img")}"/></div></foreignObject></svg>`,
+    },
+  ]),
 );
 
 // 6. A clean book with no navigation document (robustness, not an attack)

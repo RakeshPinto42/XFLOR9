@@ -15,6 +15,19 @@ declare module "foliate-js/view.js" {
   export function makeBook(file: File | Blob | string): Promise<FoliateBook>;
 }
 
+declare module "foliate-js/epub.js" {
+  import type { FoliateBook } from "foliate-js/view.js";
+  /** foliate's EPUB parser. The loader supplies already-extracted files (no unzip here). */
+  export class EPUB {
+    constructor(loader: {
+      loadText: (name: string) => Promise<string | null> | string | null;
+      loadBlob: (name: string, type?: string) => Promise<Blob | null> | Blob | null;
+      getSize: (name: string) => number;
+    });
+    init(): Promise<FoliateBook>;
+  }
+}
+
 declare module "foliate-js/epubcfi.js" {
   /** Reduce a range CFI to its start (or end) point. */
   export function collapse(cfi: string, toEnd?: boolean): string;

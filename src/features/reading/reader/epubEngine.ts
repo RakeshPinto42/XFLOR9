@@ -1,6 +1,7 @@
 "use client";
 
 import type { FoliateBook, FoliateTocItem } from "foliate-js/view.js";
+export type { FoliateBook };
 import { isMarkupType, sanitizeBookMarkup } from "./sanitize";
 
 /**
@@ -71,28 +72,40 @@ interface FoliateView extends HTMLElement {
   renderer: HTMLElement & { setStyles(css: string): void };
 }
 
-export async function openEpub(
-  container: HTMLElement,
-  file: Blob,
-  opts: {
-    lastCfi: string | null;
-    styles: string;
-    onRelocate: (loc: ReaderLocation) => void;
-    /** Called when a saved position couldn't be used and the book opened at the start instead. */
-    onRecovered?: () => void;
-  },
-): Promise<EpubController> {
+export interface OpenOptions {
+  lastCfi: string | null;
+  styles: string;
+  onRelocate: (loc: ReaderLocation) => void;
+  /** Called when a saved position couldn't be used and the book opened at the start instead. */
+  onRecovered?: () => void;
+  /**
+   * Extra sanitiser that runs BEFORE the standard one (used for imported books: DOMPurify
+   * allow-list). The standard deny-list sanitiser and the page CSP always run afterwards.
+   */
+  preSanitize?: (markup: string, type: string) => string;
+}
+
+/** Catalogue path (unchanged behaviour): build the book from a verified file with foliate, then render. */
+export async function openEpub(container: HTMLElement, file: Blob, opts: OpenOptions): Promise<EpubController> {
   const { makeBook } = await import("foliate-js/view.js"); // also registers <foliate-view>
-  const CFI = await import("foliate-js/epubcfi.js");
   const book = await makeBook(new File([file], "book.epub", { type: "application/epub+zip" }));
+  return openEpubBook(container, book, opts);
+}
+
+/** Renders an already-built book (catalogue via openEpub; imports via a worker-extracted loader). */
+export async function openEpubBook(container: HTMLElement, book: FoliateBook, opts: OpenOptions): Promise<EpubController> {
+  await import("foliate-js/view.js"); // registers <foliate-view>
+  const CFI = await import("foliate-js/epubcfi.js");
 
   // Clean every (X)HTML/SVG page before it becomes a blob URL inside the reader frame.
+  const clean = (markup: string, type: string) =>
+    sanitizeBookMarkup(opts.preSanitize ? opts.preSanitize(markup, type) : markup, type);
   book.transformTarget?.addEventListener("data", (event) => {
     const detail = (event as CustomEvent<{ data: unknown; type: string }>).detail;
     if (!isMarkupType(detail.type)) return;
     detail.data = Promise.resolve(detail.data).then(async (d) => {
-      if (typeof d === "string") return sanitizeBookMarkup(d, detail.type);
-      if (d instanceof Blob) return sanitizeBookMarkup(await d.text(), detail.type);
+      if (typeof d === "string") return clean(d, detail.type);
+      if (d instanceof Blob) return clean(await d.text(), detail.type);
       return d;
     });
   });

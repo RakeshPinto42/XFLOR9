@@ -108,6 +108,9 @@ messages for malformed files need plain-language wording.
 
 ## 8. Test plan for R4 (must pass before release)
 
+> Status (2026-11-23): the security foundation is implemented and tested in Chromium, Firefox and
+> WebKit. Current state and the release conditions are in [import-isolation.md](import-isolation.md).
+
 Corpus: `test-fixtures/security/*.epub` (+ PDF corpus to add: JavaScript action, launch action,
 `javascript:` link annotation, malformed xref, huge page count, font-matrix payload as in CVE-2024-4367).
 For each file, in Chromium, Firefox and WebKit:

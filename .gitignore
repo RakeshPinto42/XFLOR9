@@ -46,3 +46,8 @@ next-env.d.ts
 # Generated malicious/malformed EPUBs for security tests (regenerate: node scripts/books/make-security-fixtures.ts).
 # Not committed: includes a zip bomb and a 5 MB file, and the repo is public.
 /test-fixtures/security/
+
+# Playwright security suite output
+/test-results/
+/playwright-report/
+/.next-security/
