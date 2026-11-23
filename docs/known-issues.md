@@ -1,7 +1,7 @@
-# Known issues (for the product-wide audit)
+# Known issues and technical debt (for the product-wide audit)
 
 Recorded as found, so the final audit has one list. Severity is a first estimate.
-Last updated: 2026-11-23 (R5).
+Last updated: 2026-11-23 (F1 increment 1).
 
 ## Reading Room
 
@@ -26,3 +26,13 @@ Last updated: 2026-11-23 (R5).
 | PL-1 | Radio Browser SRV discovery fails on some networks (`querySrv ECONNREFUSED`); the client falls back to `/json/servers` as designed, but logs a warning each start. | Low | M2 | |
 | PL-2 | Mixed line endings appeared after `git stash`; scripted text edits then silently failed to match. Consider a `.gitattributes` with `* text=auto eol=lf`. | Low | R4 | Developer hygiene. |
 | PL-3 | Wikimedia sites block unidentified automated clients (bot challenge / UA policy); Project Gutenberg's main site has maintenance windows (the PGLAF mirror works but is slow). | Info | R5 | Affects future catalogue work only. |
+
+## 3D stage (F1)
+
+| # | Issue | Severity | Found | Notes |
+|---|---|---|---|---|
+| ST-1 | React Three Fiber 9.8.2 logs "THREE.Clock: This module has been deprecated" (three r187). Harmless; comes from R3F internals. | Info | F1.1 | Re-check on the next R3F update. |
+| ST-2 | drei 10.7.9 depends on stats-gl, which brings a second copy of three (0.170) into node_modules. Not bundled unless drei's `StatsGl` is used, so it is not used. | Low | F1.1 | Technical debt: watch bundle analysis. |
+| ST-3 | Scene pages give the site header/footer a backdrop through a global CSS rule keyed on `html[data-stage-active]`. Works, but a layout-level slot for scene pages would be cleaner once more scenes exist. | Low | F1.1 | Technical debt. |
+| ST-4 | Headless browsers render WebGL in software: stage tests prove correctness only, never frame rates. Performance is measured on the reference laptop. | Info | F1.1 | |
+| ST-5 | During development, Turbopack missed a CSS change appended from the shell until the file was edited again. | Info | F1.1 | Development only. |

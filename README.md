@@ -18,4 +18,6 @@ npm run lint
 - `src/components/`: shared shell (header, CRT intro, module devices, placeholder pages).
 - `src/app/`: routes for `/`, `/radio`, `/tv`, `/music`, `/games`, `/reading`.
 
+Planning: [docs/roadmap.md](docs/roadmap.md) (master roadmap), [docs/creative-direction.md](docs/creative-direction.md) (creative standard), [docs/known-issues.md](docs/known-issues.md).
+
 Content rules: only public-domain, properly licensed or officially embeddable content. Radio streams are played directly from the broadcaster (HTTPS only, never proxied).

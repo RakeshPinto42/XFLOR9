@@ -3,6 +3,7 @@ import { Hanken_Grotesk, Shrikhand, Silkscreen } from "next/font/google";
 import { MiniPlayer } from "@/components/MiniPlayer";
 import { SiteHeader } from "@/components/SiteHeader";
 import { STORAGE_KEYS } from "@/lib/storage/local";
+import { StageRoot } from "@/stage/StageRoot";
 import "./globals.css";
 
 // next/font self-hosts these at build time: no runtime requests to Google.
@@ -32,6 +33,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: introSeenScript }} />
       </head>
       <body className="flex min-h-dvh flex-col">
+        {/* The one shared 3D stage: renders nothing on pages without a scene. */}
+        <StageRoot />
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <footer className="border-t-2 border-ink/15">
