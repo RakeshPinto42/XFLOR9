@@ -37,8 +37,22 @@ export function stripCover(files: Map<string, Uint8Array>): StripReport {
   if (metaId) coverIds.add(metaId);
   for (const m of opf.matchAll(/<item\b[^>]*\bid="([^"]+)"[^>]*\bproperties="[^"]*cover-image[^"]*"[^>]*\/>/g)) coverIds.add(m[1]);
 
-  // Cover page: the guide's type="cover" target.
+  // Cover page: the guide's type="cover" target, or (EPUB 3 builds without a guide entry) a
+  // content document whose only content is the cover image: no text of its own.
   const coverPageHref = opf.match(/<reference\b[^>]*type="cover"[^>]*href="([^"#]+)[^"]*"[^>]*\/>/)?.[1];
+  const coverImageHrefs = new Set<string>();
+  for (const m of opf.matchAll(/<item\b[^>]*\/>/g)) {
+    const id = m[0].match(/\bid="([^"]+)"/)?.[1];
+    const href = m[0].match(/\bhref="([^"]+)"/)?.[1];
+    if (id && href && coverIds.has(id)) coverImageHrefs.add(href);
+  }
+  const isImageOnlyCoverPage = (href: string) => {
+    if (!/\.x?html?$/i.test(href) || !files.has(base + href)) return false;
+    const page = strFromU8(files.get(base + href)!);
+    const body = page.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] ?? "";
+    const ownText = body.replace(/<[^>]+>/g, "").replace(/&[a-z#0-9]+;/gi, "").trim();
+    return ownText.length === 0 && [...coverImageHrefs].some((img) => page.includes(img));
+  };
 
   const removeHrefs = new Set<string>();
   const removeIds = new Set<string>(coverIds);
@@ -46,7 +60,7 @@ export function stripCover(files: Map<string, Uint8Array>): StripReport {
     const id = m[0].match(/\bid="([^"]+)"/)?.[1];
     const href = m[0].match(/\bhref="([^"]+)"/)?.[1];
     if (!id || !href) continue;
-    if (coverIds.has(id) || href === coverPageHref) {
+    if (coverIds.has(id) || href === coverPageHref || isImageOnlyCoverPage(href)) {
       removeIds.add(id);
       removeHrefs.add(href);
     }

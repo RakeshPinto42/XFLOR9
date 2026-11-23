@@ -99,7 +99,7 @@ export async function openEpubBook(container: HTMLElement, book: FoliateBook, op
 
   // Clean every (X)HTML/SVG page before it becomes a blob URL inside the reader frame.
   const clean = (markup: string, type: string) =>
-    sanitizeBookMarkup(opts.preSanitize ? opts.preSanitize(markup, type) : markup, type);
+    sanitizeBookMarkup(opts.preSanitize ? opts.preSanitize(markup, type) : markup, type, window.location.origin);
   book.transformTarget?.addEventListener("data", (event) => {
     const detail = (event as CustomEvent<{ data: unknown; type: string }>).detail;
     if (!isMarkupType(detail.type)) return;

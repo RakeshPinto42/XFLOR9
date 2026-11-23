@@ -99,16 +99,24 @@ describe("filterBooks", () => {
 
   it("searches title and author, ignoring case and accents", () => {
     expect(filterBooks(books, { ...none, q: "SHERLOCK" }).map((b) => b.id)).toEqual(["adventures-of-sherlock-holmes"]);
-    expect(filterBooks(books, { ...none, q: "kipling" }).map((b) => b.id)).toEqual(["the-jungle-book"]);
+    expect(filterBooks(books, { ...none, q: "kipling" }).map((b) => b.id).sort()).toEqual([
+      "just-so-stories",
+      "kim",
+      "the-jungle-book",
+      "the-second-jungle-book",
+    ]);
     expect(filterBooks(books, { ...none, q: "  wélls " }).map((b) => b.id)).toEqual(["the-time-machine"]);
+    expect(filterBooks(books, { ...none, q: "tagore" }).map((b) => b.id).sort()).toEqual(["gitanjali", "the-crescent-moon"]);
   });
 
   it("combines search with language and genre", () => {
-    expect(filterBooks(books, { ...none, genre: "adventure" }).map((b) => b.id).sort()).toEqual([
-      "the-jungle-book",
-      "treasure-island",
+    expect(filterBooks(books, { ...none, genre: "poetry" }).map((b) => b.id).sort()).toEqual([
+      "ancient-ballads-and-legends-of-hindustan",
+      "gitanjali",
+      "the-crescent-moon",
+      "the-golden-threshold",
     ]);
+    expect(filterBooks(books, { q: "steel", language: "en", genre: "folklore" }).map((b) => b.id)).toEqual(["tales-of-the-punjab"]);
     expect(filterBooks(books, { q: "island", language: "en", genre: "mystery" })).toEqual([]);
-    expect(filterBooks(books, { ...none, language: "kn" })).toEqual([]);
   });
 });

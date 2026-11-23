@@ -49,21 +49,39 @@ export function isUnsafeUrl(value: string): boolean {
  * even if the sanitiser misses something, the page can't run script, can't load anything from
  * the internet (no tracking pixels, remote fonts or autoplay media), can't submit forms and
  * can't embed other documents. Book images are blob: URLs; reader fonts come from our origin.
+ *
+ * `fontOrigin` names our origin explicitly for fonts: book pages are blob: documents, and
+ * Firefox doesn't treat 'self' as matching the site's http(s) origin there, so it blocked every
+ * reader font (found in R5 cross-browser testing). Only an exact http(s) origin is accepted.
  */
-export const BOOK_PAGE_CSP = [
-  "default-src 'none'",
-  "script-src 'none'",
-  "object-src 'none'",
-  "frame-src 'none'",
-  "child-src 'none'",
-  "connect-src 'none'",
-  "form-action 'none'",
-  "base-uri 'none'",
-  "img-src blob: data: 'self'",
-  "media-src blob: 'self'",
-  "style-src 'unsafe-inline' blob: 'self'",
-  "font-src blob: data: 'self'",
-].join("; ");
+export function bookPageCsp(fontOrigin?: string): string {
+  const origin = fontOrigin && isExactOrigin(fontOrigin) ? ` ${fontOrigin}` : "";
+  return [
+    "default-src 'none'",
+    "script-src 'none'",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "child-src 'none'",
+    "connect-src 'none'",
+    "form-action 'none'",
+    "base-uri 'none'",
+    "img-src blob: data: 'self'",
+    "media-src blob: 'self'",
+    "style-src 'unsafe-inline' blob: 'self'",
+    `font-src blob: data: 'self'${origin}`,
+  ].join("; ");
+}
+
+export const BOOK_PAGE_CSP = bookPageCsp();
+
+function isExactOrigin(value: string): boolean {
+  try {
+    const u = new URL(value);
+    return (u.protocol === "http:" || u.protocol === "https:") && u.origin === value;
+  } catch {
+    return false;
+  }
+}
 
 export function isMarkupType(type: string): boolean {
   return MARKUP_TYPES.has(type);
@@ -72,7 +90,7 @@ export function isMarkupType(type: string): boolean {
 const XHTML_NS = "http://www.w3.org/1999/xhtml";
 
 /** Inserts the CSP <meta> as the very first element of <head> (it only applies to what follows it). */
-function injectCsp(doc: Document) {
+function injectCsp(doc: Document, fontOrigin?: string) {
   const root = doc.documentElement;
   if (!root || root.localName !== "html") return; // standalone SVG pages: covered by sanitising only
   // In XHTML documents <head> is a generic Element, not HTMLHeadElement.
@@ -83,11 +101,12 @@ function injectCsp(doc: Document) {
   }
   const meta = doc.createElementNS(root.namespaceURI ?? XHTML_NS, "meta");
   meta.setAttribute("http-equiv", "Content-Security-Policy");
-  meta.setAttribute("content", BOOK_PAGE_CSP);
+  meta.setAttribute("content", bookPageCsp(fontOrigin));
   head.insertBefore(meta, head.firstChild);
 }
 
-export function sanitizeBookMarkup(markup: string, type: string): string {
+/** `fontOrigin`: the site's exact origin, so reader fonts may load in every browser (see bookPageCsp). */
+export function sanitizeBookMarkup(markup: string, type: string, fontOrigin?: string): string {
   if (!isMarkupType(type)) return markup;
   const parser = new DOMParser();
   let doc = parser.parseFromString(markup, type as DOMParserSupportedType);
@@ -110,7 +129,7 @@ export function sanitizeBookMarkup(markup: string, type: string): string {
     }
   }
 
-  injectCsp(doc); // after removing book-supplied <meta http-equiv>, so ours is the only one
+  injectCsp(doc, fontOrigin); // after removing book-supplied <meta http-equiv>, so ours is the only one
 
   return asHtml
     ? `<!DOCTYPE html>${doc.documentElement.outerHTML}`

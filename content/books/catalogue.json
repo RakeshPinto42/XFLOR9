@@ -14,20 +14,20 @@
       ],
       "firstPublished": {
         "year": 1883,
-        "detail": "First published as a book in 1883."
+        "detail": "Serialised in Young Folks in 1881–82; first published as a book by Cassell & Co. in 1883."
       },
       "description": "Young Jim Hawkins finds a pirate's map in a dead sailor's sea-chest and sails off to find buried treasure, only to discover that the ship's friendly cook, Long John Silver, has plans of his own.",
       "contentNote": null,
       "file": {
         "path": "/books/treasure-island.epub",
         "format": "epub",
-        "bytes": 214103,
-        "sha256": "dc827ea0a24b1df45aef985e3bdef1980f6dc7d2dc036f15034fb60b49307e40"
+        "bytes": 323065,
+        "sha256": "fb9ea04aa2fe5db9ee5ced4e2c22b7b7e93ae331511a9d604502f4c55e0ab329"
       },
       "rights": {
         "india": {
           "status": "public-domain",
-          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Stevenson died in 1894, so the text entered the public domain in 1955. The credited illustrator, Louis Rhead (died 1926), is public domain from 1987, and no illustrations are included in this file."
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Stevenson died in 1894, so the text entered the public domain in 1955. The Standard Ebooks cover painting (N. C. Wyeth, died 1945) has been removed from this file."
         },
         "us": {
           "status": "public-domain",
@@ -40,44 +40,35 @@
             "born": 1850,
             "died": 1894,
             "inFile": true
-          },
-          {
-            "name": "Louis Rhead",
-            "role": "illustrator",
-            "born": 1857,
-            "died": 1926,
-            "inFile": false,
-            "note": "Credited on the title page of the source edition; this text-only file contains none of his illustrations."
           }
         ],
-        "edition": "Project Gutenberg eBook #120, text-only EPUB. Gutenberg transcribed it from the Louis Rhead-illustrated edition (best-dated to 1915, Harper & Brothers); the illustrations and the scanned cover are not included.",
+        "edition": "Standard Ebooks edition (release of 15 November 2026), produced from the Distributed Proofreaders / Project Gutenberg transcription and checked against Internet Archive page scans. Replaces Project Gutenberg #120, whose chapter-opening letters were missing and which contained stray image markers.",
         "source": {
-          "name": "Project Gutenberg",
-          "ebookNumber": 120,
-          "url": "https://www.gutenberg.org/ebooks/120",
-          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/120/pg120.epub",
+          "name": "Standard Ebooks",
+          "url": "https://standardebooks.org/ebooks/robert-louis-stevenson/treasure-island",
+          "retrievedFrom": "https://standardebooks.org/ebooks/robert-louis-stevenson/treasure-island/downloads/robert-louis-stevenson_treasure-island.epub",
           "retrievedAt": "2026-11-23",
-          "originalSha256": "6d6781328ac1f559053b88e46a0881d69bf228d08e5d0b0e81ca39bd89b94edd"
+          "originalSha256": "c50f763b0619c545f2aff871a5a386e90b7d83f3a5722a1dbb5441213cd79026"
         },
         "modifications": [
-          "Removed the embedded scanned cover image and cover page, because the cover artwork's printing and artist could not be confirmed. Book text and the Project Gutenberg licence are unchanged (verified line by line)."
+          "Removed the cover image (N. C. Wyeth's 1911 painting \"One More Step, Mr. Hands\") for consistency with the rest of the catalogue. Text, Standard Ebooks title page, colophon and Uncopyright page are unchanged."
         ],
         "evidence": [
           {
-            "claim": "Stevenson 1850–1894; Rhead 1857–1926",
-            "source": "https://gutenberg.pglaf.org/cache/epub/120/pg120.rdf"
-          },
-          {
-            "claim": "Stevenson 1850–1894; book published 1883",
-            "source": "https://en.wikipedia.org/wiki/Robert_Louis_Stevenson"
-          },
-          {
-            "claim": "Treasure Island published as a book in 1883",
+            "claim": "First published as a book on 14 November 1883 by Cassell & Co.",
             "source": "https://en.wikipedia.org/wiki/Treasure_Island"
           },
           {
-            "claim": "Rhead-illustrated Harper & Brothers edition dated [1915]",
-            "source": "https://libcat.library.tamu.edu/Record/in00000711521"
+            "claim": "Standard Ebooks dedicates its own work to the public domain; ebooks free of U.S. copyright restrictions",
+            "source": "https://standardebooks.org/about"
+          },
+          {
+            "claim": "Edition sources: Project Gutenberg transcription and Internet Archive page scans",
+            "source": "https://standardebooks.org/ebooks/robert-louis-stevenson/treasure-island"
+          },
+          {
+            "claim": "N. C. Wyeth 1882–1945 (removed cover artist)",
+            "source": "https://en.wikipedia.org/wiki/N._C._Wyeth"
           }
         ],
         "verifiedAt": "2026-11-23"
@@ -369,6 +360,940 @@
           {
             "claim": "1893 preface date and 1870 first edition",
             "source": "Front matter of the EPUB itself (preface signed 'August 18th, 1893'; 'Preface to the first (1870) edition')"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "indian-fairy-tales",
+      "title": "Indian Fairy Tales",
+      "authors": [
+        "Joseph Jacobs"
+      ],
+      "language": "en",
+      "genres": [
+        "folklore",
+        "children",
+        "fantasy"
+      ],
+      "firstPublished": {
+        "year": 1892,
+        "detail": "Compiled by Joseph Jacobs and first published in 1892 (some copies are catalogued as 1893 from their title pages)."
+      },
+      "description": "Twenty-nine tales from across India, from the clever jackal who outwits a tiger to Princess Labam and the Prince who won her, retold for children with John D. Batten's original illustrations and decorated initials.",
+      "contentNote": "Collected and retold by a British writer during colonial rule. Some framing, words and attitudes reflect that time.",
+      "file": {
+        "path": "/books/indian-fairy-tales.epub",
+        "format": "epub",
+        "bytes": 3341448,
+        "sha256": "6d7e1ec4cf07b582e24fdc0ae0144efeff78eb1eb0fab5ab004ed024d193d1ba"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Joseph Jacobs (compiler, died 1916) has been public domain since 1977 and John D. Batten (illustrator, died 1932) since 1993. The tales themselves are traditional."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1892, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Joseph Jacobs",
+            "role": "author",
+            "born": 1854,
+            "died": 1916,
+            "inFile": true,
+            "note": "Compiler and reteller."
+          },
+          {
+            "name": "John Dickson Batten",
+            "role": "illustrator",
+            "born": 1860,
+            "died": 1932,
+            "inFile": true,
+            "note": "His illustrations and decorated initials are included; each initial has its letter as alternative text."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #7128, illustrated EPUB, transcribed by Distributed Proofreaders from Internet Archive page images (archive.org/details/indiantales00jacorich).",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 7128,
+          "url": "https://www.gutenberg.org/ebooks/7128",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/7128/pg7128-images-3.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "368667ad10cc4d11dee9b9cf4cde3f5807548c83c3091b6ec36ddc4b218321eb"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Jacobs 1854–1916; Batten 1860–1932",
+            "source": "https://gutenberg.pglaf.org/cache/epub/7128/pg7128.rdf"
+          },
+          {
+            "claim": "Indian Fairy Tales, 1892, illustrated by John D. Batten",
+            "source": "https://en.wikipedia.org/wiki/Joseph_Jacobs"
+          },
+          {
+            "claim": "Batten died 5 August 1932",
+            "source": "https://en.wikipedia.org/wiki/John_D._Batten"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "tales-of-the-punjab",
+      "title": "Tales of the Punjab",
+      "authors": [
+        "Flora Annie Steel"
+      ],
+      "language": "en",
+      "genres": [
+        "folklore",
+        "children"
+      ],
+      "firstPublished": {
+        "year": 1894,
+        "detail": "First published in 1894, with notes by R. C. Temple."
+      },
+      "description": "Folk tales told to Flora Annie Steel in Punjabi villages: Sir Buzz, the Rat's Wedding, Bopolûchî, Princess Aubergine, the Tiger, the Brahman and the Jackal, and many more, with Richard Temple's notes on where each was collected.",
+      "contentNote": "Collected and retold by a British writer during colonial rule. Some framing, words and attitudes reflect that time.",
+      "file": {
+        "path": "/books/tales-of-the-punjab.epub",
+        "format": "epub",
+        "bytes": 210326,
+        "sha256": "7e476bdfd9f46578bd5ab6f2fa37c5568411a593b0b4981c05e52829c68fc2c9"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Flora Annie Steel (died 1929) has been public domain since 1990 and Sir Richard Carnac Temple (notes, died 1931) since 1992. John Lockwood Kipling's illustrations are not included in this file."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1894, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Flora Annie Steel",
+            "role": "author",
+            "born": 1847,
+            "died": 1929,
+            "inFile": true
+          },
+          {
+            "name": "Richard Carnac Temple",
+            "role": "editor",
+            "born": 1850,
+            "died": 1931,
+            "inFile": true,
+            "note": "Notes and commentary (credited by Project Gutenberg as commentator)."
+          },
+          {
+            "name": "John Lockwood Kipling",
+            "role": "illustrator",
+            "born": 1837,
+            "died": 1911,
+            "inFile": false,
+            "note": "Illustrated the first edition; this text-only file contains none of his illustrations."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #6145, text-only EPUB, produced by Curtis A. Weyant, Charles Franks and Distributed Proofreaders.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 6145,
+          "url": "https://www.gutenberg.org/ebooks/6145",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/6145/pg6145.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "f05be3b55e39d0c416113e2aef5e542c6c1f91c067ac301b01bfcd3ee9635ea0"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Steel 1847–1929; Temple 1850–1931 (commentator)",
+            "source": "https://gutenberg.pglaf.org/cache/epub/6145/pg6145.rdf"
+          },
+          {
+            "claim": "Tales of the Punjab (1894), illustrated by John Lockwood Kipling; Steel died 12 April 1929",
+            "source": "https://en.wikipedia.org/wiki/Flora_Annie_Steel"
+          },
+          {
+            "claim": "Temple died 3 March 1931",
+            "source": "https://en.wikipedia.org/wiki/Richard_Carnac_Temple"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "old-deccan-days",
+      "title": "Old Deccan Days",
+      "authors": [
+        "Mary Frere"
+      ],
+      "language": "en",
+      "genres": [
+        "folklore",
+        "children"
+      ],
+      "firstPublished": {
+        "year": 1868,
+        "detail": "First published in 1868; this is the 1870 Lippincott (Philadelphia) edition."
+      },
+      "description": "The first English book of Indian fairy tales collected from oral tradition: stories told to Mary Frere by her ayah, Anna Liberata de Souza, including Punchkin, the Wanderings of Vicram Maharajah and the Jackal, the Barber and the Brahman.",
+      "contentNote": "Collected and retold by a British writer during colonial rule. Some framing, words and attitudes reflect that time.",
+      "file": {
+        "path": "/books/old-deccan-days.epub",
+        "format": "epub",
+        "bytes": 262839,
+        "sha256": "9d470c425162bdca9569289365cc311ff2da5327304624b1ab4fa827b75f3406"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Mary Frere (died 1911) has been public domain since 1972 and Sir Bartle Frere (introduction and notes, died 1884) since 1945."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1868 (this edition 1870), before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Mary Frere",
+            "role": "author",
+            "born": 1845,
+            "died": 1911,
+            "inFile": true,
+            "note": "Collector; the tales were narrated by Anna Liberata de Souza."
+          },
+          {
+            "name": "Bartle Frere",
+            "role": "editor",
+            "born": 1815,
+            "died": 1884,
+            "inFile": true,
+            "note": "Introduction and notes."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #36696, text-only EPUB, from the 1870 J. B. Lippincott & Co. edition (title page dated 1870). The edition's illustrations are not included.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 36696,
+          "url": "https://www.gutenberg.org/ebooks/36696",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/36696/pg36696.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "333962f1285d12c5ce9fe450f9509be9ccec2b0c44b2706c72fcb650c5be7552"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Mary Frere 1845–1911; Bartle Frere 1815–1884",
+            "source": "https://gutenberg.pglaf.org/cache/epub/36696/pg36696.rdf"
+          },
+          {
+            "claim": "In 1868, Frere published ... Old Deccan Days; she died in 1911",
+            "source": "https://en.wikipedia.org/wiki/Mary_Frere"
+          },
+          {
+            "claim": "Henry Bartle Frere died 29 May 1884",
+            "source": "https://en.wikipedia.org/wiki/Henry_Bartle_Frere"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "the-adventures-of-akbar",
+      "title": "The Adventures of Akbar",
+      "authors": [
+        "Flora Annie Steel"
+      ],
+      "language": "en",
+      "genres": [
+        "adventure",
+        "children"
+      ],
+      "firstPublished": {
+        "year": 1913,
+        "detail": "First published in 1913, illustrated by Byam Shaw."
+      },
+      "description": "The child who would become the Mughal emperor Akbar is carried across mountains and deserts by loyal friends who keep him safe from his scheming uncle, in a story told for young readers with Byam Shaw's colour illustrations.",
+      "contentNote": "Collected and retold by a British writer during colonial rule. Some framing, words and attitudes reflect that time.",
+      "file": {
+        "path": "/books/the-adventures-of-akbar.epub",
+        "format": "epub",
+        "bytes": 1243825,
+        "sha256": "13a673d5b55f9c709896438eec95c942f2176cdf40581d716a846459e03605fc"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Flora Annie Steel (died 1929) has been public domain since 1990 and Byam Shaw (illustrator, died 1919) since 1980."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1913, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Flora Annie Steel",
+            "role": "author",
+            "born": 1847,
+            "died": 1929,
+            "inFile": true
+          },
+          {
+            "name": "Byam Shaw",
+            "role": "illustrator",
+            "born": 1872,
+            "died": 1919,
+            "inFile": true,
+            "note": "His illustrations are included."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #18307, illustrated EPUB, including the original publisher's front-matter list of titles.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 18307,
+          "url": "https://www.gutenberg.org/ebooks/18307",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/18307/pg18307-images-3.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "5ed5757a9300c51fac1d41476b85e0451eaa48e0336b3fa8134029ec75028345"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Steel 1847–1929; Byam Shaw 1872–1919 (illustrator)",
+            "source": "https://gutenberg.pglaf.org/cache/epub/18307/pg18307.rdf"
+          },
+          {
+            "claim": "The Adventures of Akbar (1913)",
+            "source": "https://en.wikipedia.org/wiki/Flora_Annie_Steel"
+          },
+          {
+            "claim": "Byam Shaw 13 November 1872 – 26 January 1919",
+            "source": "https://en.wikipedia.org/wiki/Byam_Shaw"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "the-crescent-moon",
+      "title": "The Crescent Moon",
+      "authors": [
+        "Rabindranath Tagore"
+      ],
+      "language": "en",
+      "genres": [
+        "poetry",
+        "children",
+        "classics"
+      ],
+      "firstPublished": {
+        "year": 1913,
+        "detail": "Translated by Tagore from his own Bengali poems; published by Macmillan, London and New York, 1913."
+      },
+      "description": "Forty prose poems about childhood: a baby's world, a child's games on the seashore, a mother's love and a small boy's dreams of being a sailor, a merchant or a hero, translated from Bengali by Tagore himself.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/the-crescent-moon.epub",
+        "format": "epub",
+        "bytes": 33515,
+        "sha256": "4c92eb853fd96ea6795e1519d886a2b937a33c1240b2eb9f1781ebe8ae12fb0d"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Tagore (author and translator, died 1941) has been public domain since 2002. The 1913 edition's colour illustrations, one of them by Nandalal Bose (died 1966, still protected in India until 2027), are deliberately NOT included: this is the text-only file."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1913, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Rabindranath Tagore",
+            "role": "author",
+            "born": 1861,
+            "died": 1941,
+            "inFile": true,
+            "note": "Also the translator."
+          },
+          {
+            "name": "Nandalal Bose",
+            "role": "illustrator",
+            "born": 1882,
+            "died": 1966,
+            "inFile": false,
+            "note": "Illustrated the 1913 edition; excluded because his work is protected in India until 1 January 2027."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #6520, text-only EPUB, from the 1913 Macmillan edition (title page: London and New York, Macmillan and Company, 1913). No illustrations.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 6520,
+          "url": "https://www.gutenberg.org/ebooks/6520",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/6520/pg6520.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "ab08387295c20baa712dfdc002f1647c2a65d1a0c64eb14c49a743a879023277"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Tagore 1861–1941",
+            "source": "https://gutenberg.pglaf.org/cache/epub/6520/pg6520.rdf"
+          },
+          {
+            "claim": "The Crescent Moon (40 poems translated by Tagore), 1913",
+            "source": "https://en.wikipedia.org/wiki/List_of_works_by_Rabindranath_Tagore"
+          },
+          {
+            "claim": "Nandalal Bose 3 December 1882 – 16 April 1966",
+            "source": "https://en.wikipedia.org/wiki/Nandalal_Bose"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "gitanjali",
+      "title": "Gitanjali",
+      "authors": [
+        "Rabindranath Tagore"
+      ],
+      "language": "en",
+      "genres": [
+        "poetry",
+        "classics"
+      ],
+      "firstPublished": {
+        "year": 1912,
+        "detail": "Tagore's English prose translations of his Bengali songs, published by the India Society, London, in November 1912, with an introduction by W. B. Yeats."
+      },
+      "description": "Song Offerings: 103 prose poems of devotion and wonder, translated by Tagore from his Bengali songs. The English Gitanjali led to his 1913 Nobel Prize in Literature, the first awarded to a non-European writer.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/gitanjali.epub",
+        "format": "epub",
+        "bytes": 46241,
+        "sha256": "cd5ae73345d018bc1818d94f16cfa3a97ba8dc6437ae2bc0f046ac6a52c4ee72"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Tagore (died 1941) has been public domain since 2002 and W. B. Yeats (introduction, died 1939) since 2000."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1912, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Rabindranath Tagore",
+            "role": "author",
+            "born": 1861,
+            "died": 1941,
+            "inFile": true,
+            "note": "Also the translator."
+          },
+          {
+            "name": "William Butler Yeats",
+            "role": "editor",
+            "born": 1865,
+            "died": 1939,
+            "inFile": true,
+            "note": "Introduction."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #7164, text-only EPUB, with W. B. Yeats's introduction.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 7164,
+          "url": "https://www.gutenberg.org/ebooks/7164",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/7164/pg7164.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "0f33fc733495afe17bd0a41f145a9bdd1532bedcd08e5bff9acaabce454f3c4a"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Tagore 1861–1941; Yeats 1865–1939 (introduction)",
+            "source": "https://gutenberg.pglaf.org/cache/epub/7164/pg7164.rdf"
+          },
+          {
+            "claim": "Published in November 1912 by the India Society of London",
+            "source": "https://en.wikipedia.org/wiki/Gitanjali"
+          },
+          {
+            "claim": "Yeats 13 June 1865 – 28 January 1939",
+            "source": "https://en.wikipedia.org/wiki/W._B._Yeats"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "the-golden-threshold",
+      "title": "The Golden Threshold",
+      "authors": [
+        "Sarojini Naidu"
+      ],
+      "language": "en",
+      "genres": [
+        "poetry",
+        "classics"
+      ],
+      "firstPublished": {
+        "year": 1905,
+        "detail": "Naidu's first collection of poems, published in 1905 with an introduction by Arthur Symons."
+      },
+      "description": "Poems of Indian life by the 'Nightingale of India': palanquin-bearers, wandering singers, weavers, fishermen, snake-charmers and corn-grinders, followed by songs of love, death and the seasons.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/the-golden-threshold.epub",
+        "format": "epub",
+        "bytes": 36355,
+        "sha256": "110bfc3304074147dcf7ee9eedc990af77ba8be4ea6eba2d0c5cdfb6d6413b28"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Sarojini Naidu (died 1949) has been public domain since 2010 and Arthur Symons (introduction, died 1945) since 2006."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1905, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Sarojini Naidu",
+            "role": "author",
+            "born": 1879,
+            "died": 1949,
+            "inFile": true
+          },
+          {
+            "name": "Arthur Symons",
+            "role": "editor",
+            "born": 1865,
+            "died": 1945,
+            "inFile": true,
+            "note": "Introduction."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #680, text-only EPUB, produced by Judith Boss, with Arthur Symons's introduction.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 680,
+          "url": "https://www.gutenberg.org/ebooks/680",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/680/pg680.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "f2176e8bf032015256e45229fd0eb46abdd3b41bf091b0373125183aa579c56c"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Naidu 1879–1949; Symons 1865–1945",
+            "source": "https://gutenberg.pglaf.org/cache/epub/680/pg680.rdf"
+          },
+          {
+            "claim": "The text was published in 1905",
+            "source": "https://en.wikipedia.org/wiki/The_Golden_Threshold"
+          },
+          {
+            "claim": "Arthur Symons ... The Golden Threshold (1905); Symons died 22 January 1945",
+            "source": "https://en.wikipedia.org/wiki/Arthur_Symons"
+          },
+          {
+            "claim": "Sarojini Naidu 13 February 1879 – 2 March 1949",
+            "source": "https://en.wikipedia.org/wiki/Sarojini_Naidu"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "ancient-ballads-and-legends-of-hindustan",
+      "title": "Ancient Ballads and Legends of Hindustan",
+      "authors": [
+        "Toru Dutt"
+      ],
+      "language": "en",
+      "genres": [
+        "poetry",
+        "folklore",
+        "classics"
+      ],
+      "firstPublished": {
+        "year": 1882,
+        "detail": "Published posthumously in 1882; this is the 1885 Kegan Paul, Trench & Co. edition with Edmund Gosse's memoir."
+      },
+      "description": "Savitri, Lakshman, Prahlad, Sindhu and other stories from the Indian epics and Puranas retold in English verse by Toru Dutt, the Bengali poet who died at 21, with Edmund Gosse's memoir of her life.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/ancient-ballads-and-legends-of-hindustan.epub",
+        "format": "epub",
+        "bytes": 83961,
+        "sha256": "80b46002485ba5659e370ee0bf250d45d0657af4d3b8c5d223bf48859b7508ea"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Toru Dutt (died 1877) has been public domain since 1938 and Edmund Gosse (memoir, died 1928) since 1989."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1882 (this edition 1885), before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Toru Dutt",
+            "role": "author",
+            "born": 1856,
+            "died": 1877,
+            "inFile": true
+          },
+          {
+            "name": "Edmund Gosse",
+            "role": "editor",
+            "born": 1849,
+            "died": 1928,
+            "inFile": true,
+            "note": "Introductory memoir."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #23245, text-only EPUB, from the 1885 edition (title page: London, Kegan Paul, Trench & Co., MDCCCLXXXV).",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 23245,
+          "url": "https://www.gutenberg.org/ebooks/23245",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/23245/pg23245.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "39cbdf5352450e7e49913a8483dff0a1bed5999866f71b7777aede09fae78a27"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Toru Dutt 1856–1877; Gosse 1849–1928",
+            "source": "https://gutenberg.pglaf.org/cache/epub/23245/pg23245.rdf"
+          },
+          {
+            "claim": "Ancient Ballads and Legends of Hindustan (1882); Gosse wrote an introduction; Dutt died 30 August 1877",
+            "source": "https://en.wikipedia.org/wiki/Toru_Dutt"
+          },
+          {
+            "claim": "Gosse 21 September 1849 – 16 May 1928",
+            "source": "https://en.wikipedia.org/wiki/Edmund_Gosse"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "the-second-jungle-book",
+      "title": "The Second Jungle Book",
+      "authors": [
+        "Rudyard Kipling"
+      ],
+      "language": "en",
+      "genres": [
+        "adventure",
+        "children",
+        "classics"
+      ],
+      "firstPublished": {
+        "year": 1895,
+        "detail": "First published by Macmillan in November 1895."
+      },
+      "description": "More stories of Mowgli and his friends in the Seeonee jungle: how fear came, the king's ankus, the terrible Red Dog, and Mowgli's last spring running, along with the tale of Purun Bhagat and other jungle songs.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/the-second-jungle-book.epub",
+        "format": "epub",
+        "bytes": 167737,
+        "sha256": "ca0a5267d1cdeb982e9cd354336eb98d8e1376b8d4b9c9a02eb7a46deb09eb15"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Kipling died in 1936, so his works entered the public domain in 1997. John Lockwood Kipling's illustrations are not included in this file."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1895, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Rudyard Kipling",
+            "role": "author",
+            "born": 1865,
+            "died": 1936,
+            "inFile": true
+          }
+        ],
+        "edition": "Project Gutenberg eBook #1937, text-only EPUB.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 1937,
+          "url": "https://www.gutenberg.org/ebooks/1937",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/1937/pg1937.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "52ba4f1232807f11215aff695344ce6325f18db5118c78004a079695f4e5bbf6"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Kipling 1865–1936",
+            "source": "https://gutenberg.pglaf.org/cache/epub/1937/pg1937.rdf"
+          },
+          {
+            "claim": "First published in 1895",
+            "source": "https://en.wikipedia.org/wiki/The_Second_Jungle_Book"
+          },
+          {
+            "claim": "Kipling 30 December 1865 – 18 January 1936",
+            "source": "https://en.wikipedia.org/wiki/Rudyard_Kipling"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "kim",
+      "title": "Kim",
+      "authors": [
+        "Rudyard Kipling"
+      ],
+      "language": "en",
+      "genres": [
+        "adventure",
+        "classics"
+      ],
+      "firstPublished": {
+        "year": 1901,
+        "detail": "First published in book form by Macmillan & Co. in October 1901."
+      },
+      "description": "Kimball O'Hara, an orphan who lives by his wits on the streets of Lahore, becomes the disciple of a Tibetan lama searching for a sacred river, and is drawn into the spy game between empires on the Grand Trunk Road.",
+      "contentNote": "Written during British rule in India; it reflects colonial attitudes of its time and contains outdated views and language.",
+      "file": {
+        "path": "/books/kim.epub",
+        "format": "epub",
+        "bytes": 286311,
+        "sha256": "d0bdc8411d39cd797344a4eb97d804d2ed49c45dbf2dd8a675e66b56f5d447f1"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Kipling died in 1936, so his works entered the public domain in 1997."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1901, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Rudyard Kipling",
+            "role": "author",
+            "born": 1865,
+            "died": 1936,
+            "inFile": true
+          }
+        ],
+        "edition": "Project Gutenberg eBook #2226, text-only EPUB.",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 2226,
+          "url": "https://www.gutenberg.org/ebooks/2226",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/2226/pg2226.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "ffb1185ad66d792a47160f40d897bbf4d85b0dac1cdf5035a7cfa23ed6e68495"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Kipling 1865–1936",
+            "source": "https://gutenberg.pglaf.org/cache/epub/2226/pg2226.rdf"
+          },
+          {
+            "claim": "First published in book form by Macmillan & Co. Ltd in October 1901",
+            "source": "https://en.wikipedia.org/wiki/Kim_(novel)"
+          },
+          {
+            "claim": "Kipling 30 December 1865 – 18 January 1936",
+            "source": "https://en.wikipedia.org/wiki/Rudyard_Kipling"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "just-so-stories",
+      "title": "Just So Stories",
+      "authors": [
+        "Rudyard Kipling"
+      ],
+      "language": "en",
+      "genres": [
+        "children",
+        "fantasy",
+        "classics"
+      ],
+      "firstPublished": {
+        "year": 1902,
+        "detail": "First published in 1902."
+      },
+      "description": "How the Camel got his Hump, how the Leopard got his Spots, the Elephant's Child and his 'satiable curtiosity, and the Cat that Walked by Himself: Kipling's playful origin stories, first told to his own children, O Best Beloved.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/just-so-stories.epub",
+        "format": "epub",
+        "bytes": 75851,
+        "sha256": "eecb3c1a951fa5fc4319098558967d31a51ba2b3269db42a341831bb165801e4"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. Kipling died in 1936, so his works (including his own illustrations, which are not in this file) entered the public domain in 1997."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1902, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "Rudyard Kipling",
+            "role": "author",
+            "born": 1865,
+            "died": 1936,
+            "inFile": true
+          }
+        ],
+        "edition": "Project Gutenberg eBook #2781, text-only EPUB (Kipling's own illustrations are not included).",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 2781,
+          "url": "https://www.gutenberg.org/ebooks/2781",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/2781/pg2781.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "c1cfbfdec5451c29369e75d363e0523669254254b1d6b5ee2ed8afe944ff1586"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Kipling 1865–1936",
+            "source": "https://gutenberg.pglaf.org/cache/epub/2781/pg2781.rdf"
+          },
+          {
+            "claim": "The stories, first published in 1902; Kipling illustrated the stories himself",
+            "source": "https://en.wikipedia.org/wiki/Just_So_Stories"
+          },
+          {
+            "claim": "Kipling 30 December 1865 – 18 January 1936",
+            "source": "https://en.wikipedia.org/wiki/Rudyard_Kipling"
+          }
+        ],
+        "verifiedAt": "2026-11-23"
+      }
+    },
+    {
+      "id": "the-giant-crab",
+      "title": "The Giant Crab, and Other Tales from Old India",
+      "authors": [
+        "W. H. D. Rouse"
+      ],
+      "language": "en",
+      "genres": [
+        "folklore",
+        "children"
+      ],
+      "firstPublished": {
+        "year": 1897,
+        "detail": "Published by David Nutt, London, 1897, with illustrations by W. Heath Robinson."
+      },
+      "description": "Short, funny Jataka tales retold for children: the pious wolf, the giant crab, the talkative tortoise and many more clever and foolish animals, with W. Heath Robinson's early illustrations.",
+      "contentNote": null,
+      "file": {
+        "path": "/books/the-giant-crab.epub",
+        "format": "epub",
+        "bytes": 1623557,
+        "sha256": "9c7df0bca31683c7ec2b85654318f97c40f1aa45acff87b84082e730e0ad3570"
+      },
+      "rights": {
+        "india": {
+          "status": "public-domain",
+          "basis": "Copyright Act 1957, s.22: life of the author plus 60 years from the following year. W. H. D. Rouse (died 1950) has been public domain since 2011 and W. Heath Robinson (illustrator, died 1944) since 2005. The underlying Jataka tales are ancient."
+        },
+        "us": {
+          "status": "public-domain",
+          "basis": "Published in 1897, before 1931."
+        },
+        "contributors": [
+          {
+            "name": "W. H. D. Rouse",
+            "role": "author",
+            "born": 1863,
+            "died": 1950,
+            "inFile": true,
+            "note": "Reteller, from the Pali Jataka collection."
+          },
+          {
+            "name": "W. Heath Robinson",
+            "role": "illustrator",
+            "born": 1872,
+            "died": 1944,
+            "inFile": true,
+            "note": "His illustrations are included."
+          }
+        ],
+        "edition": "Project Gutenberg eBook #36039, illustrated EPUB, from the 1897 David Nutt edition (title page: London, David Nutt, 1897).",
+        "source": {
+          "name": "Project Gutenberg",
+          "ebookNumber": 36039,
+          "url": "https://www.gutenberg.org/ebooks/36039",
+          "retrievedFrom": "https://gutenberg.pglaf.org/cache/epub/36039/pg36039-images-3.epub",
+          "retrievedAt": "2026-11-23",
+          "originalSha256": "e93f8e64c83fd1909fd290f9ca9059d7acb7c54571e4a0be723a9934ab1b1a1f"
+        },
+        "modifications": [
+          "Removed the cover image (generated by Project Gutenberg's software) and cover page, for consistency with the rest of the catalogue. Book text and the Project Gutenberg licence are unchanged."
+        ],
+        "evidence": [
+          {
+            "claim": "Rouse 1863–1950; W. Heath Robinson 1872–1944 (illustrator)",
+            "source": "https://gutenberg.pglaf.org/cache/epub/36039/pg36039.rdf"
+          },
+          {
+            "claim": "The Giant Crab, and Other Tales from Old India. W. H. D. Rouse, 1897; Rouse died 10 February 1950",
+            "source": "https://en.wikipedia.org/wiki/W._H._D._Rouse"
+          },
+          {
+            "claim": "W. Heath Robinson 31 May 1872 – 13 September 1944",
+            "source": "https://en.wikipedia.org/wiki/W._Heath_Robinson"
           }
         ],
         "verifiedAt": "2026-11-23"

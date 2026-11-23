@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BOOK_PAGE_CSP, isUnsafeUrl } from "./sanitize";
+import { BOOK_PAGE_CSP, bookPageCsp, isUnsafeUrl } from "./sanitize";
 
 describe("isUnsafeUrl", () => {
   it.each([
@@ -44,4 +44,16 @@ describe("BOOK_PAGE_CSP", () => {
     expect(BOOK_PAGE_CSP).not.toMatch(/https?:/);
     expect(BOOK_PAGE_CSP).not.toContain("*");
   });
+
+  it("names our exact origin for fonts only (Firefox doesn't match 'self' in blob: pages)", () => {
+    const csp = bookPageCsp("https://xplor9.example");
+    expect(csp).toContain("font-src blob: data: 'self' https://xplor9.example");
+    expect(csp.match(/https:\/\/xplor9\.example/g)).toHaveLength(1); // fonts only
+    expect(bookPageCsp("http://127.0.0.1:3009")).toContain("font-src blob: data: 'self' http://127.0.0.1:3009");
+  });
+
+  it.each(["*", "https://xplor9.example/fonts", "https://a.example; script-src *", "javascript:alert(1)", "https:"])(
+    "ignores anything that isn't an exact origin: %s",
+    (bad) => expect(bookPageCsp(bad)).toBe(BOOK_PAGE_CSP),
+  );
 });

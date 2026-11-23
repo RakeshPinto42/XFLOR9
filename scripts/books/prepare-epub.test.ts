@@ -47,6 +47,19 @@ describe("stripCover", () => {
     expect(ch).toContain("Chapter text.");
   });
 
+  it("finds an image-only cover page when there is no guide entry (EPUB 3 builds), and keeps pages with text", () => {
+    const files = sampleEpub();
+    const opf = strFromU8(files.get("OEBPS/content.opf")!).replace(/<guide>[\s\S]*<\/guide>/, "");
+    files.set("OEBPS/content.opf", strToU8(opf.replace('<item href="ch1.html"', '<item href="frontis.html" id="f" media-type="application/xhtml+xml"/>\n    <item href="ch1.html"')));
+    // A page that shows the cover image AND has its own text must stay.
+    files.set("OEBPS/frontis.html", strToU8('<html><body><img src="c_cover.jpg"/><p>Frontispiece caption</p></body></html>'));
+    expect(() => stripCover(files)).toThrow(/frontis.html still references removed file c_cover.jpg/);
+    const fresh = sampleEpub();
+    fresh.set("OEBPS/content.opf", strToU8(opf));
+    const report = stripCover(fresh);
+    expect(report.removedFiles.sort()).toEqual(["OEBPS/c_cover.jpg", "OEBPS/wrap0000.html"]);
+  });
+
   it("refuses to guess when there is no declared cover", () => {
     const files = sampleEpub();
     files.set("OEBPS/content.opf", strToU8("<package><manifest/><spine/></package>"));

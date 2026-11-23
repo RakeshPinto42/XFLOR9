@@ -20,6 +20,7 @@ export const GENRES = {
   fantasy: "Fantasy",
   folklore: "Folklore",
   children: "Children's",
+  poetry: "Poetry",
   classics: "Classics",
 } as const;
 export type Genre = keyof typeof GENRES;
