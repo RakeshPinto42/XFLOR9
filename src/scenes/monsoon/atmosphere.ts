@@ -39,17 +39,23 @@ export function seeded(seed: number) {
   };
 }
 
+export interface LightningTiming {
+  firstSeconds: number;
+  minSeconds: number;
+  maxSeconds: number;
+}
+
 /**
  * Advances the clock and lightning. Strikes are distant and soft (a double flicker that fades),
- * 12–30 s apart: atmosphere, not horror.
+ * at the interval the scene file sets (null = no lightning): atmosphere, not horror.
  */
-export function tickAtmosphere(delta: number, random: () => number) {
+export function tickAtmosphere(delta: number, random: () => number, lightning: LightningTiming | null) {
   const u = atmosphere.uniforms;
   u.uTime.value += delta;
   u.uWind.value = 0.85 + Math.sin(u.uTime.value * 0.23) * 0.25 + Math.sin(u.uTime.value * 0.71) * 0.1;
-  atmosphere.nextStrike -= delta;
-  if (atmosphere.nextStrike <= 0) {
-    atmosphere.nextStrike = 12 + random() * 18;
+  if (lightning) atmosphere.nextStrike -= delta;
+  if (lightning && atmosphere.nextStrike <= 0) {
+    atmosphere.nextStrike = lightning.minSeconds + random() * (lightning.maxSeconds - lightning.minSeconds);
     atmosphere.flash = 1;
     atmosphere.strikeBearing = random() * 2 - 1;
     u.uBearing.value = atmosphere.strikeBearing;

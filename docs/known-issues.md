@@ -43,4 +43,8 @@ Last updated: 2026-11-23 (F1 increment 1).
 | ST-11 | Monsoon scene: houses are generated procedurally from plastered and tiled boxes; they read as village houses but lack fine detail (eaves trim, grilles, clutter). Upgrades come with the Studio (S1–S3) and the U1 phase. | Low | F1.3 | Planned. |
 | ST-12 | Monsoon scene: activity locations are empty until F4 characters exist; the street currently has no people. | Info | F1.3 | F4. |
 | ST-13 | Headless WebKit renders the monsoon scene slowly in software; in one full regression run the following WebKit test's page setup timed out once (passed on re-run). | Low | F1.3 | Watch for repeats. |
+| SF-1 | Scene format: `interactions` and `transitions` are placeholders (id, kind/trigger, target) until the phases that design them. | Info | F2 | F4, M, U2. |
+| SF-2 | Scene format: the upgrade chain is empty because only format 1 exists; the mechanism is unit-tested with test steps. | Info | F2 | First format change. |
+| SF-3 | An invalid scene file falls back to Lite through the existing scene error path; this is covered by unit tests of the validator, not by a browser test with a broken file. | Low | F2 | Add when the Studio can save files. |
+| SF-4 | The monsoon camera path's aiming rule (look down the lane, drawn to its centre) is still code; the file sets only the path, loop time and look-ahead. F3 generalises cameras. | Low | F2 | F3. |
 | ST-9 | The F1 scene uses a stand-in box for the TV cabinet until increment 3 builds the teak cabinet, sofa, centre table and three-blade fan. | Info | F1.2 | |

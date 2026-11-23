@@ -29,7 +29,7 @@ push. Comprehensive audits come at the end.
 | Phase | Scope | Depends on |
 |---|---|---|
 | **F1 Shared 3D foundation** *(in progress)* | One stage, lazy scenes, quality modes, adaptive quality, diagnostics, asset pipeline (Draco, WebP, manifest), living-room benchmark scene, desktop performance | – |
-| F2 Scene format | Versioned JSON shared by Studio and site: objects, materials, lights, environment and weather settings, cameras, keyframes, audio emitters, interactions, transitions; validation and upgrades | F1 |
+| F2 Scene format *(built; see `scene-format.md`)* | Versioned JSON shared by Studio and site: objects, materials, lights, environment and weather settings, cameras, keyframes, audio emitters, interactions, transitions; validation and upgrades | F1 |
 | A1 Shared audio system | Web Audio mixer with buses (ambience, music, sound effects, dialogue) and master mute; per-bus volumes remembered; autoplay unlock on first interaction; spatial sound; ambience and one-shot playback from scene files; audio asset records | F2 (scene emitters) |
 | F3 Cameras | Developer/free, isometric, top-down, first-person, third-person (playable), cinematic paths; shared settings and constraints | F2 |
 | E1 Environment systems | Rain, mist and fog, wind, water, vegetation motion, day and weather presets, quality-scaled | F1, F2 |

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { activitySpots, audioAnchors, type ActivityKind } from "./activities";
-import { GROUND } from "./ground";
+import scene from "../../../content/scenes/monsoon-neighbourhood.json";
 import type { HouseSpec } from "./house";
+
+// World bounds from the scene file's ground.
+const ground = scene.objects.find((o) => o.type === "lane-ground") as unknown as { size: [number, number]; lane: { width: number; from: number; to: number } };
+const GROUND = { width: ground.size[0], laneWidth: ground.lane.width, laneStart: ground.lane.from, laneEnd: ground.lane.to };
 
 /** A small street like the scene's layout (houses on both sides of the lane, facing it). */
 const houses: HouseSpec[] = [-1, 1].flatMap((side, s) =>

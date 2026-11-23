@@ -1,40 +1,13 @@
 /**
  * Where life will happen in the neighbourhood: activity locations for the F4 character system and
- * audio anchors for the A1 audio system. Derived from the actual house layout, so they always sit
- * in the right places. These are plain data (no rendering): F2 will move them into the shared
- * scene format. They are NOT the final experience: until F4, the locations are empty.
+ * audio anchors for the A1 audio system, derived from the house layout. Used when the monsoon
+ * scene file is generated (scripts/scenes/export-scenes.ts); the scene reads them from its file.
+ * They are NOT the final experience: until F4, the locations are empty.
  */
+import type { ActivitySpot, AudioAnchor } from "../../engine/scene/format";
 import type { HouseSpec } from "./house";
 
-export type ActivityKind = "cricket" | "football" | "marbles" | "reading" | "cycling" | "chatting";
-
-export interface ActivitySpot {
-  id: string;
-  kind: ActivityKind;
-  /** Centre on the ground (metres). */
-  position: [number, number, number];
-  /** Facing (radians around Y); for routes, the direction of travel at the start. */
-  facing: number;
-  /** Space the activity needs (metres). */
-  radius: number;
-  /** Number of children the spot is designed for. */
-  group: [number, number];
-  /** Under a veranda roof (sheltered from the rain). */
-  sheltered: boolean;
-  /** For routes (cycling): waypoints along the lane. */
-  route?: [number, number, number][];
-  note: string;
-}
-
-export type AudioAnchorKind = "rain-on-tiles" | "eave-drips" | "distant-radio" | "birds-and-frogs" | "neighbourhood";
-
-export interface AudioAnchor {
-  id: string;
-  kind: AudioAnchorKind;
-  position: [number, number, number];
-  /** Audible radius (metres) for spatial sound. */
-  radius: number;
-}
+export type { ActivityKind, ActivitySpot, AudioAnchor, AudioAnchorKind } from "../../engine/scene/format";
 
 /** A point in front of a house's veranda, in world space. */
 function verandaPoint(h: HouseSpec, localX: number, localZ: number): [number, number, number] {

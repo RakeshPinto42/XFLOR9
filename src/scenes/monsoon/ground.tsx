@@ -10,23 +10,22 @@ import { atmosphere } from "./atmosphere";
 export const fogUniforms = () => UniformsUtils.clone(UniformsLib.fog);
 
 /** Size of the neighbourhood ground and the lane running through it (metres). */
-export const GROUND = { width: 180, depth: 220, laneWidth: 4.6, laneStart: 30, laneEnd: -110 };
 
 /** Laterite ground, the muddy lane and grassy verges, all textured at real-world scale. */
-export function Ground() {
+export function Ground({ size: [width, depth], lane }: { size: [number, number]; lane: { width: number; from: number; to: number } }) {
   const soil = useTextureSet("laterite-soil");
   const mud = useTextureSet("muddy-tracks");
   const grass = useTextureSet("leafy-grass");
-  const laneLength = GROUND.laneStart - GROUND.laneEnd;
+  const laneLength = lane.from - lane.to;
   const geo = useMemo(
     () => ({
-      soil: worldPlane(GROUND.width, GROUND.depth, soil.tile),
-      lane: worldPlane(GROUND.laneWidth, laneLength, mud.tile),
+      soil: worldPlane(width, depth, soil.tile),
+      lane: worldPlane(lane.width, laneLength, mud.tile),
       verge: worldPlane(2.4, laneLength, grass.tile),
     }),
-    [soil.tile, mud.tile, grass.tile, laneLength],
+    [soil.tile, mud.tile, grass.tile, laneLength, width, depth, lane.width],
   );
-  const laneZ = (GROUND.laneStart + GROUND.laneEnd) / 2;
+  const laneZ = (lane.from + lane.to) / 2;
   return (
     <group>
       <mesh geometry={geo.soil} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, -40]} receiveShadow>
@@ -37,7 +36,7 @@ export function Ground() {
         <meshStandardMaterial {...mud.maps} color="#6e625a" roughness={0.6} />
       </mesh>
       {[-1, 1].map((side) => (
-        <mesh key={side} geometry={geo.verge} rotation={[-Math.PI / 2, 0, 0]} position={[side * (GROUND.laneWidth / 2 + 1.3), 0.005, laneZ]} receiveShadow>
+        <mesh key={side} geometry={geo.verge} rotation={[-Math.PI / 2, 0, 0]} position={[side * (lane.width / 2 + 1.3), 0.005, laneZ]} receiveShadow>
           <meshStandardMaterial {...grass.maps} color="#5f7552" roughness={0.9} />
         </mesh>
       ))}

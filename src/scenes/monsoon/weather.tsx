@@ -19,9 +19,9 @@ import { atmosphere, seeded } from "./atmosphere";
  * Continuous rain: thin streaks animated entirely on the GPU, in a box that follows the camera,
  * with a slight wind slant. `share` (0..1) comes from the adaptive quality level.
  */
-export function Rain({ share }: { share: number }) {
-  const MAX = 9000;
-  const count = Math.max(1200, Math.round(MAX * share));
+export function Rain({ share, maxDrops }: { share: number; maxDrops: number }) {
+  const MAX = maxDrops;
+  const count = Math.min(MAX, Math.max(1200, Math.round(MAX * share)));
   const camera = useThree((s) => s.camera);
 
   const geometry = useMemo(() => {
@@ -41,7 +41,7 @@ export function Rain({ share }: { share: number }) {
     g.setAttribute("aSeed", new InstancedBufferAttribute(seeds, 4));
     g.instanceCount = MAX;
     return g;
-  }, []);
+  }, [MAX]);
   useEffect(() => {
     geometry.instanceCount = count;
   }, [geometry, count]);

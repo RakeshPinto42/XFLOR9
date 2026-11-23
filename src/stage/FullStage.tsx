@@ -3,7 +3,8 @@
 import { OrbitControls, useProgress } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
-import { assetProgress } from "./assets";
+import { assetProgress, knownAssets } from "./assets";
+import { parseScene } from "@/engine/scene/format";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { AdaptiveQuality, QUALITY_LEVELS } from "@/engine/adaptive";
 import { stageStats } from "./diagnostics";
@@ -25,8 +26,21 @@ export function FullStage({
   const [levelIndex, setLevelIndex] = useState(0);
   const level = QUALITY_LEVELS[levelIndex];
   const [visible, setVisible] = useState(true);
-  // One lazy component per scene id (stable across renders).
-  const Scene = useMemo(() => lazy(scene.load) as ComponentType<SceneProps>, [scene]);
+  // One lazy component per scene id (stable across renders): loads the renderer and the scene
+  // file together, and validates the file first (an invalid file falls back to Lite with a reason).
+  const Scene = useMemo(
+    () =>
+      lazy(async () => {
+        const [renderer, file] = await Promise.all([scene.load(), scene.document()]);
+        const document = parseScene(file.default, knownAssets());
+        const Renderer = renderer.default;
+        function SceneFromFile(props: Omit<SceneProps, "document">) {
+          return <Renderer {...props} document={document} />;
+        }
+        return { default: SceneFromFile };
+      }) as ComponentType<Omit<SceneProps, "document">>,
+    [scene],
+  );
 
   useEffect(() => {
     const onVis = () => setVisible(document.visibilityState === "visible");

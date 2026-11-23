@@ -7,6 +7,7 @@ import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 import manifestJson from "../../content/assets/manifest.json";
 import { parseAssetManifest, type AssetRecord, type ModelRecord, type TextureRecord } from "@/engine/assets";
 import { GlbError, readGlbSummary, unsupportedRequired } from "@/engine/glb";
+import type { KnownAssets } from "@/engine/scene/format";
 import { ResourceTracker } from "@/engine/resources";
 
 /**
@@ -21,6 +22,12 @@ export function assetRecord(id: string): AssetRecord {
   const rec = MANIFEST.get(id);
   if (!rec) throw new Error(`Unknown asset "${id}" (not in content/assets/manifest.json)`);
   return rec;
+}
+
+/** Ids a scene file may reference: models and texture sets from the manifest. */
+export function knownAssets(): KnownAssets {
+  const ids = (kind: AssetRecord["kind"]) => new Set([...MANIFEST.values()].filter((a) => a.kind === kind).map((a) => a.id));
+  return { models: ids("model"), textures: ids("texture") };
 }
 
 export function modelRecord(id: string): ModelRecord {

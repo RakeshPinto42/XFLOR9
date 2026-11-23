@@ -2,255 +2,130 @@
 
 import { useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
-import { CatmullRomCurve3, Color, FogExp2, Vector3, type DirectionalLight, type HemisphereLight } from "three";
+import { CatmullRomCurve3, Vector3 } from "three";
+import type { HouseObject, PuddleObject, SceneCamera, TreeObject } from "@/engine/scene/format";
 import { StageEffects } from "@/stage/effects";
 import type { SceneProps } from "@/stage/registry";
-import { activitySpots, audioAnchors, type ActivitySpot } from "./activities";
+import { ActivityMarkers, SceneLights, SceneObjects, useSceneSettings, type ObjectKit } from "@/stage/scene-view";
 import { atmosphere, seeded, tickAtmosphere } from "./atmosphere";
-import { Channel, GROUND, Ground, Puddles } from "./ground";
+import { Channel, Ground, Puddles } from "./ground";
 import { Houses, type HouseSpec } from "./house";
 import { MonsoonSky } from "./sky";
 import { Vegetation, type Tree } from "./vegetation";
 import { Mist, Rain } from "./weather";
 
 /**
- * U1 benchmark (F1 increment 3): a dark, misty Indian monsoon neighbourhood at dusk.
- * Cool blue-grey daylight under an overcast sky, warm amber house lights, continuous rain,
- * drifting mist, distant lightning and a slow cinematic camera.
+ * U1 benchmark: a dark, misty Indian monsoon neighbourhood at dusk, drawn from its scene file
+ * (content/scenes/monsoon-neighbourhood.json). Cool blue-grey daylight, warm amber house lights,
+ * continuous rain, drifting mist, distant lightning and a slow cinematic camera.
  */
 
-const FOG = new Color("#5b6670");
+/** The monsoon object kits: each draws every object of its type at once (few draw calls). */
+const KITS: Partial<Record<string, ObjectKit>> = {
+  "lane-ground": (objects) =>
+    objects.map((o) =>
+      o.type === "lane-ground" ? (
+        <Suspense key={o.id} fallback={null}>
+          <Ground size={o.size} lane={o.lane} />
+        </Suspense>
+      ) : null,
+    ),
+  "water-channel": (objects) => objects.map((o) => (o.type === "water-channel" ? <Channel key={o.id} x={o.x} from={o.from} to={o.to} /> : null)),
+  house: (objects) => (
+    <Suspense fallback={null}>
+      <Houses specs={toHouses(objects as HouseObject[])} />
+    </Suspense>
+  ),
+  tree: (objects) => <Vegetation trees={toTrees(objects as TreeObject[])} />,
+  puddle: (objects) => <Puddles spots={toPuddles(objects as PuddleObject[])} />,
+};
 
-function useLayout() {
-  return useMemo(() => {
-    const rnd = seeded(2026);
-    const houses: HouseSpec[] = [];
-    const sides: [number, number[]][] = [
-      [-1, [4, -10, -24, -38, -54]],
-      [1, [-3, -17, -31, -46, -62]],
-    ];
-    let seed = 1;
-    for (const [side, zs] of sides) {
-      for (const z of zs) {
-        const width = 6 + rnd() * 2.4;
-        const pick = <T,>(list: T[]) => list[Math.floor(rnd() * list.length)];
-        houses.push({
-          position: [side * (8.2 + rnd() * 1.2), 0, z],
-          rotationY: side < 0 ? Math.PI / 2 : -Math.PI / 2,
-          width,
-          depth: 5 + rnd() * 1.2,
-          wall: rnd() < 0.6 ? "mossy-plaster" : "yellow-plaster",
-          tint: pick(["#e6e0d2", "#d9cdb2", "#cfd3c4", "#e3d3a8", "#c8c2b0", "#d6c3a0"]),
-          // Lower walls painted in the colours typical of village houses (or left plain).
-          band: rnd() < 0.55 ? pick(["#7a4a3a", "#4f6b5a", "#6b5b8a", "#8a6a3a", "#3f5f78"]) : null,
-          door: pick(["#8a6446", "#5d7a6a", "#6f4f36", "#4f6a86", "#8a5a3c"]),
-          roofPitch: 1.35 + rnd() * 0.5,
-          veranda: 1.7 + rnd() * 0.6,
-          windows: rnd() < 0.4 ? 3 : 2,
-          tulsi: rnd() < 0.4,
-          doorOpen: rnd() < 0.35,
-          // Real lights only near the camera's path (performance); others glow without casting light.
-          lamp: z > -40 && (seed % 2 === 1 || z > -12),
-          seed: seed++,
-        });
-      }
-    }
-
-    const trees: Tree[] = [];
-    let ts = 100;
-    // Palms and bananas between houses, close to the lane.
-    for (const h of houses) {
-      const [x, , z] = h.position;
-      const side = Math.sign(x);
-      trees.push({ kind: "palm", x: x + side * (4.5 + rnd() * 3), z: z + 5 + rnd() * 3, scale: 0.85 + rnd() * 0.35, seed: ts++ });
-      trees.push({ kind: "banana", x: x - side * 1.5 + (rnd() - 0.5), z: z + 6.2 + rnd(), scale: 0.9 + rnd() * 0.4, seed: ts++ });
-      if (rnd() < 0.7) trees.push({ kind: "banana", x: x + side * 1.2, z: z - 4.6 - rnd(), scale: 0.8 + rnd() * 0.3, seed: ts++ });
-    }
-    // Dense canopy trees behind the houses on both sides: the dark-green wall of the village.
-    for (let z = 14; z > -105; z -= 7 + rnd() * 4) {
-      for (const side of [-1, 1]) {
-        trees.push({ kind: "canopy", x: side * (17 + rnd() * 7), z: z + rnd() * 3, scale: 0.9 + rnd() * 0.5, seed: ts++ });
-        if (rnd() < 0.6) trees.push({ kind: "palm", x: side * (21 + rnd() * 9), z: z - 3, scale: 1 + rnd() * 0.3, seed: ts++ });
-      }
-    }
-    // Trees closing the near end (behind the camera's start) so no edge of the world shows.
-    for (let x = -26; x <= 26; x += 5 + rnd() * 3) trees.push({ kind: "canopy", x, z: 24 + rnd() * 8, scale: 1.1 + rnd() * 0.4, seed: ts++ });
-    for (let x = -18; x <= 18; x += 7) trees.push({ kind: "palm", x: x + rnd() * 3, z: 19 + rnd() * 3, scale: 1, seed: ts++ });
-    // Trees closing the far end of the lane, so fog reveals layered depth.
-    for (let x = -22; x <= 22; x += 6 + rnd() * 3) trees.push({ kind: "canopy", x, z: -82 - rnd() * 12, scale: 1.1 + rnd() * 0.5, seed: ts++ });
-    // Bushes along the verges.
-    for (let z = 10; z > -70; z -= 3 + rnd() * 4) {
-      const side = rnd() < 0.5 ? -1 : 1;
-      trees.push({ kind: "bush", x: side * (3.4 + rnd() * 1.4), z, scale: 0.7 + rnd() * 0.6, seed: ts++ });
-    }
-
-    const puddles: [number, number, number, number, number][] = [];
-    for (let z = 10; z > -75; z -= 4 + rnd() * 6) puddles.push([(rnd() - 0.5) * 3, z, 1.2 + rnd() * 2.2, 0.8 + rnd() * 1.4, rnd() * 3]);
-
-    const mist: [number, number, number][] = [];
-    for (let z = 12; z > -95; z -= 6 + rnd() * 5) mist.push([(rnd() - 0.5) * 18, 0.9 + rnd() * 2.2, z]);
-    for (let z = -20; z > -95; z -= 12) mist.push([(rnd() - 0.5) * 30, 5 + rnd() * 4, z]); // higher banks among the trees
-
-    return { houses, trees, puddles, mist, activities: activitySpots(houses), audio: audioAnchors(houses) };
-  }, []);
-}
-
-/** The camera's slow loop: down the lane at child height, up over the roofs, and back. */
-const PATH = new CatmullRomCurve3(
-  [
-    new Vector3(0.9, 1.55, 13),
-    new Vector3(-0.6, 1.5, 2),
-    new Vector3(0.7, 1.65, -10),
-    new Vector3(1.4, 2.4, -22),
-    new Vector3(-0.5, 5.2, -31),
-    new Vector3(-3.6, 4.4, -20),
-    new Vector3(-2.4, 2.4, -6),
-    new Vector3(-0.4, 1.7, 7),
-  ],
-  true,
-  "centripetal",
+// Kit inputs are memoised per object list (the document never changes while shown).
+const memo = <A extends object, R>(fn: (a: A) => R) => {
+  const cache = new WeakMap<A, R>();
+  return (a: A) => {
+    if (!cache.has(a)) cache.set(a, fn(a));
+    return cache.get(a)!;
+  };
+};
+const toHouses = memo((list: HouseObject[]): HouseSpec[] =>
+  list.map((h) => ({
+    position: h.position,
+    rotationY: h.rotation?.[1] ?? 0,
+    width: h.width,
+    depth: h.depth,
+    wall: h.wall,
+    tint: h.tint,
+    band: h.band,
+    door: h.door,
+    roofPitch: h.roofPitch,
+    veranda: h.veranda,
+    windows: h.windows,
+    doorOpen: h.doorOpen,
+    lamp: h.lamp,
+    tulsi: h.tulsi,
+    seed: h.seed,
+  })),
 );
-const LOOP_SECONDS = 95;
+const toTrees = memo((list: TreeObject[]): Tree[] => list.map((t) => ({ kind: t.kind, x: t.position[0], z: t.position[2], scale: t.scale ?? 1, seed: t.seed })));
+const toPuddles = memo((list: PuddleObject[]): [number, number, number, number, number][] =>
+  list.map((p) => [p.position[0], p.position[2], p.size[0], p.size[1], p.rotation?.[1] ?? 0]),
+);
 
-function CameraPath() {
+/** The camera's slow loop along the document's path, always looking into the village. */
+function CameraPath({ path }: { path: NonNullable<SceneCamera["path"]> }) {
   const camera = useThree((s) => s.camera);
+  const curve = useMemo(() => new CatmullRomCurve3(path.points.map((p) => new Vector3(...p)), path.closed, "centripetal"), [path]);
   const look = useRef(new Vector3());
   const ahead = useMemo(() => new Vector3(), []);
   useFrame((_, delta) => {
-    const t = (atmosphere.uniforms.uTime.value / LOOP_SECONDS) % 1;
-    camera.position.copy(PATH.getPointAt(t));
-    // Always look into the village: down the lane, a little ahead of the camera, drawn towards
-    // the lane's centre. The return leg becomes a slow pull-back rather than a turn to the edge.
+    const t = (atmosphere.uniforms.uTime.value / path.loopSeconds) % 1;
+    camera.position.copy(curve.getPointAt(t));
+    // Down the lane, a little ahead of the camera, drawn towards the lane's centre: the return
+    // leg becomes a slow pull-back rather than a turn towards the edge of the world.
     const p = camera.position;
-    ahead.set(p.x * 0.35, Math.max(1.0, p.y * 0.45), p.z - 15);
+    ahead.set(p.x * 0.35, Math.max(1.0, p.y * 0.45), p.z - path.lookAhead);
     look.current.lerp(ahead, Math.min(1, delta * 1.5));
     camera.lookAt(look.current);
   });
   return null;
 }
 
-function Lights({ shadows }: { shadows: boolean }) {
-  const hemi = useRef<HemisphereLight>(null);
-  const key = useRef<DirectionalLight>(null);
-  useFrame(() => {
-    const flash = atmosphere.uniforms.uFlash.value;
-    if (hemi.current) hemi.current.intensity = 1.25 + flash * 2.4;
-    if (key.current) key.current.intensity = 0.75 + flash * 3.2;
-  });
-  return (
-    <>
-      {/* Cool, sunless overcast light from the whole sky. */}
-      <hemisphereLight ref={hemi} args={["#8a9aa9", "#3a3a2e", 1.25]} />
-      <directionalLight
-        ref={key}
-        position={[-18, 30, 10]}
-        color="#9fb2c4"
-        intensity={0.75}
-        castShadow={shadows}
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-30}
-        shadow-camera-right={30}
-        shadow-camera-top={30}
-        shadow-camera-bottom={-30}
-        shadow-camera-far={90}
-        shadow-bias={-0.0004}
-      />
-    </>
-  );
-}
+const flash = () => atmosphere.uniforms.uFlash.value;
 
-export default function MonsoonNeighbourhood({ level, debug }: SceneProps) {
-  const layout = useLayout();
-  // ?mist=<0..1> scales the mist banks (a tuning aid for art direction; default 0.75).
+export default function MonsoonNeighbourhood({ level, debug, document: doc }: SceneProps) {
+  useSceneSettings(doc);
+  const { weather } = doc.environment;
+  const fx = doc.environment.effects;
+  // ?mist=<0..1> overrides the file's mist strength (a tuning aid for art direction).
   const mistStrength = useMemo(() => {
-    const v = Number(new URLSearchParams(typeof window === "undefined" ? "" : window.location.search).get("mist"));
-    return Number.isFinite(v) && v >= 0 && v <= 1 && new URLSearchParams(window.location.search).has("mist") ? v : 0.75;
-  }, []);
-  const scene = useThree((s) => s.scene);
+    const q = new URLSearchParams(window.location.search);
+    const v = Number(q.get("mist"));
+    return q.has("mist") && Number.isFinite(v) && v >= 0 && v <= 1 ? v : (weather.mist?.strength ?? 0);
+  }, [weather.mist]);
   const random = useMemo(() => seeded(77), []);
-  // An outdoor view distance (the sky dome sits at 220 m) and exposure; restored on exit.
-  const camera = useThree((st) => st.camera);
-  const gl = useThree((st) => st.gl);
   useEffect(() => {
-    const before = gl.toneMappingExposure;
-    gl.toneMappingExposure = 1.35;
-    return () => {
-      gl.toneMappingExposure = before;
-    };
-  }, [gl]);
-  useEffect(() => {
-    const cam = camera as import("three").PerspectiveCamera;
-    const before = { near: cam.near, far: cam.far, fov: cam.fov };
-    cam.near = 0.1;
-    cam.far = 400;
-    cam.fov = 42;
-    cam.updateProjectionMatrix();
-    return () => {
-      Object.assign(cam, before);
-      cam.updateProjectionMatrix();
-    };
-  }, [camera]);
-  // Fog belongs to this scene only: removed again when the visitor leaves.
-  useEffect(() => {
-    scene.fog = new FogExp2(FOG, 0.026);
-    return () => {
-      scene.fog = null;
-    };
-  }, [scene]);
+    if (weather.lightning) atmosphere.nextStrike = weather.lightning.firstSeconds;
+  }, [weather.lightning]);
   // ?t=<seconds> starts the clock (camera path, weather) at a given moment: reproducible views.
   useEffect(() => {
     const t = Number(new URLSearchParams(window.location.search).get("t"));
     if (Number.isFinite(t) && t > 0) atmosphere.uniforms.uTime.value = t;
   }, []);
-  useFrame((_, delta) => tickAtmosphere(Math.min(delta, 0.1), random));
+  // ?stage-pause freezes the clock (with ?t=, a reproducible frame for comparisons and posters).
+  const paused = useMemo(() => new URLSearchParams(window.location.search).has("stage-pause"), []);
+  useFrame((_, delta) => tickAtmosphere(paused ? 0 : Math.min(delta, 0.1), random, weather.lightning));
 
   return (
     <>
-      <MonsoonSky />
-      <Lights shadows={level.shadows} />
-      {!debug && <CameraPath />}
-      <Suspense fallback={null}>
-        <Ground />
-        <Channel x={-GROUND.laneWidth / 2 - 0.1} from={GROUND.laneStart} to={-80} />
-        <Houses specs={layout.houses} />
-      </Suspense>
-      <Puddles spots={layout.puddles} />
-      <Vegetation trees={layout.trees} />
-      <Mist banks={layout.mist} strength={mistStrength} />
-      <Rain share={level.particles} />
-      {debug && <ActivityMarkers spots={layout.activities} />}
-      <StageEffects enabled={level.effects} bloom={1.05} bloomThreshold={0.6} vignette={0.5} grain={0.05} />
+      {doc.environment.sky === "monsoon-clouds" && <MonsoonSky />}
+      <SceneLights lights={doc.lights} shadows={level.shadows} flash={flash} />
+      {!debug && doc.camera.path && <CameraPath path={doc.camera.path} />}
+      <SceneObjects objects={doc.objects} kits={KITS} />
+      {weather.mist && <Mist banks={weather.mist.banks} strength={mistStrength} />}
+      {weather.rain && <Rain share={level.particles} maxDrops={weather.rain.maxDrops} />}
+      {debug && <ActivityMarkers spots={doc.activities} />}
+      {fx && <StageEffects enabled={level.effects} bloom={fx.bloom} bloomThreshold={fx.bloomThreshold} vignette={fx.vignette} grain={fx.grain} />}
     </>
-  );
-}
-
-const MARKER_COLOURS: Record<ActivitySpot["kind"], string> = {
-  cricket: "#e8c547",
-  football: "#5fb3e8",
-  marbles: "#c77de8",
-  reading: "#7de8a1",
-  cycling: "#e87d5f",
-  chatting: "#e8e8e8",
-};
-
-/** Developer view only: where F4's children will play, read and talk (never shown to visitors). */
-function ActivityMarkers({ spots }: { spots: ActivitySpot[] }) {
-  return (
-    <group>
-      {spots.map((s) => (
-        <group key={s.id}>
-          <mesh position={[s.position[0], s.position[1] + 0.03, s.position[2]]} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[s.radius * 0.92, s.radius, 40]} />
-            <meshBasicMaterial color={MARKER_COLOURS[s.kind]} transparent opacity={0.55} depthWrite={false} />
-          </mesh>
-          {s.route?.slice(1).map((p, i) => (
-            <mesh key={i} position={[p[0], 0.05, p[2]]}>
-              <sphereGeometry args={[0.18, 8, 6]} />
-              <meshBasicMaterial color={MARKER_COLOURS[s.kind]} />
-            </mesh>
-          ))}
-        </group>
-      ))}
-    </group>
   );
 }

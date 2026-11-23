@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { QualityLevel } from "@/engine/adaptive";
+import type { SceneDocument } from "@/engine/scene/format";
 
 /**
  * Which page shows which 3D scene. This file is part of every page's bundle, so it must stay
@@ -11,6 +12,8 @@ export interface SceneProps {
   level: QualityLevel;
   /** Developer mode: the free camera is active, so scenes must not drive the camera. */
   debug: boolean;
+  /** The scene file (content/scenes/<id>.json), already upgraded and validated. */
+  document: SceneDocument;
 }
 
 export interface SceneEntry {
@@ -22,7 +25,10 @@ export interface SceneEntry {
   description: string;
   /** Image rendered from the scene, used by Lite and Still (and while Full loads). */
   poster: string;
+  /** The renderer for this scene (its own chunk, with three.js). */
   load: () => Promise<{ default: ComponentType<SceneProps> }>;
+  /** The scene file it draws (its own chunk; validated before use). */
+  document: () => Promise<{ default: unknown }>;
 }
 
 export const SCENES: readonly SceneEntry[] = [
@@ -34,6 +40,7 @@ export const SCENES: readonly SceneEntry[] = [
       "A small Indian neighbourhood on a monsoon evening: tiled-roof houses with verandas and warm amber lights, a muddy lane with puddles, coconut palms, banana plants and dark green trees, continuous rain, drifting mist and distant lightning under a charcoal sky.",
     poster: "/stage/posters/monsoon-neighbourhood.webp",
     load: () => import("@/scenes/monsoon/MonsoonNeighbourhood"),
+    document: () => import("../../content/scenes/monsoon-neighbourhood.json"),
   },
   {
     id: "living-room",
@@ -43,6 +50,7 @@ export const SCENES: readonly SceneEntry[] = [
       "A warmly lit Indian living room in the 1990s on a rainy evening: a CRT television in a wooden cabinet, a sofa, a centre table, a turning ceiling fan, and rain falling past a grilled window.",
     poster: "/stage/posters/living-room.webp",
     load: () => import("@/scenes/living-room/LivingRoom"),
+    document: () => import("../../content/scenes/living-room.json"),
   },
 ];
 

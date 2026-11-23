@@ -13,6 +13,7 @@
     "assets:build": "node scripts/assets/build-asset.ts",
     "assets:build-texture": "node scripts/assets/build-texture.ts",
     "stage:measure": "node scripts/stage/measure.ts",
+    "scenes:export": "node scripts/scenes/export-scenes.ts",
     "assets:sync-draco": "node scripts/assets/sync-draco.ts",
     "stage:poster": "node scripts/stage/capture-poster.ts"
   },
