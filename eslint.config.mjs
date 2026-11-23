@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Security-suite build output and Playwright artefacts
     ".next-security/**",
     ".cache/**",
+    // Vendored, version-matched copy of three.js's Draco decoder (scripts/assets/sync-draco.ts)
+    "public/draco/**",
     "test-results/**",
     "playwright-report/**",
   ]),

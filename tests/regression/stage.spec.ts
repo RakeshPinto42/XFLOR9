@@ -104,7 +104,8 @@ test("leaving and returning: one renderer, no growth in GPU resources, header re
   await page.goto("/");
   test.skip(!(await hasWebGL(page)), `${browserName}: no WebGL in this headless browser`);
   await page.goto(`${LAB}?stage-debug`, { waitUntil: "networkidle" });
-  await expect.poll(async () => (await stats(page)).geometries, { timeout: 20_000 }).toBeGreaterThan(0);
+  // Wait until the models have loaded (their textures are on the GPU) before taking the baseline.
+  await expect.poll(async () => (await stats(page)).textures, { timeout: 30_000 }).toBeGreaterThanOrEqual(9);
   await page.waitForTimeout(1_500);
   const first = await stats(page);
   for (let i = 0; i < 3; i++) {
@@ -116,6 +117,9 @@ test("leaving and returning: one renderer, no growth in GPU resources, header re
     await expect(stage(page)).toHaveAttribute("data-mode", "full");
   }
   await expect(page.locator("canvas")).toHaveCount(1);
+  // Leaving freed the models, so they reload on return (slower in software-rendered WebKit).
+  // Once loaded, the counts must be exactly the baseline: nothing accumulated across visits.
+  await expect.poll(async () => (await stats(page)).textures, { timeout: 30_000 }).toBe(first.textures);
   await page.waitForTimeout(1_500);
   const last = await stats(page);
   expect(last.geometries).toBe(first.geometries);
@@ -159,4 +163,39 @@ test("if the GPU context is lost, the scene falls back to Lite", async ({ page, 
   });
   await expect(stage(page)).toHaveAttribute("data-mode", "lite");
   await expect(page.getByTestId("stage-reason")).toContainText("graphics card");
+});
+
+test("models load through our own Draco decoder (no third-party CDN) and appear in the scene", async ({ page, browserName }) => {
+  await page.goto("/");
+  test.skip(!(await hasWebGL(page)), `${browserName}: no WebGL in this headless browser`);
+  const requests: string[] = [];
+  page.on("request", (r) => requests.push(r.url()));
+  await page.goto(`${LAB}?stage-debug`);
+  // 3 models × 3 textures each, plus the room: texture count only reaches this once models decoded.
+  await expect.poll(async () => (await stats(page)).textures, { timeout: 30_000 }).toBeGreaterThanOrEqual(9);
+  expect(requests.some((u) => new URL(u).pathname === "/draco/draco_decoder.wasm")).toBe(true);
+  for (const id of ["television-01", "monobloc-chair-01", "brass-vase-03"]) expect(requests.some((u) => u.endsWith(`/assets/models/${id}.glb`))).toBe(true);
+  expect(requests.filter((u) => !u.startsWith("http://localhost") && !u.startsWith("data:") && !u.startsWith("blob:"))).toEqual([]);
+});
+
+test("a model needing an unsupported extension fails clearly and the scene falls back", async ({ page, browserName }) => {
+  await page.goto("/");
+  test.skip(!(await hasWebGL(page)), `${browserName}: no WebGL in this headless browser`);
+  // Serve a GLB that requires meshopt compression (not supported) in place of the vase.
+  const json = JSON.stringify({ asset: { version: "2.0" }, extensionsUsed: ["EXT_meshopt_compression"], extensionsRequired: ["EXT_meshopt_compression"] }).padEnd(120, " ");
+  const body = Buffer.alloc(20 + json.length);
+  body.writeUInt32LE(0x46546c67, 0);
+  body.writeUInt32LE(2, 4);
+  body.writeUInt32LE(body.length, 8);
+  body.writeUInt32LE(json.length, 12);
+  body.writeUInt32LE(0x4e4f534a, 16);
+  body.write(json, 20);
+  await page.route("**/assets/models/brass-vase-03.glb", (r) => r.fulfill({ status: 200, contentType: "model/gltf-binary", body }));
+  const consoleErrors: string[] = [];
+  page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
+  await page.goto(LAB);
+  await expect(stage(page)).toHaveAttribute("data-mode", "lite", { timeout: 30_000 });
+  await expect(page.getByTestId("stage-reason")).toContainText("couldn't load");
+  expect(consoleErrors.join("\n")).toContain("brass-vase-03 needs EXT_meshopt_compression");
+  errors.length = 0; // the thrown error is the expected outcome here
 });

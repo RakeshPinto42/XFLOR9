@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "assets": {
+    "television-01": {
+      "title": "CRT television in a wooden case",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "Television_01",
+        "url": "https://polyhaven.com/a/Television_01",
+        "api": "https://api.polyhaven.com/files/Television_01",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Gabriel Radić"
+      ],
+      "input": ".cache/assets/src/Television_01/Television_01_1k.gltf",
+      "texturePatches": [
+        {
+          "texture": "Television_01_diff_1k.jpg",
+          "why": "Remove the real brand name \"VTECH\" from the front panel (XPLOR9 shows no brands).",
+          "from": [
+            466,
+            712,
+            8,
+            15
+          ],
+          "to": [
+            382,
+            711,
+            82,
+            17
+          ]
+        },
+        {
+          "texture": "Television_01_diff_1k.jpg",
+          "why": "Remove the vertical \"VTECH\" brand name and its chevron logo on the side.",
+          "from": [
+            514,
+            742,
+            16,
+            20
+          ],
+          "to": [
+            512,
+            762,
+            20,
+            88
+          ]
+        },
+        {
+          "texture": "Television_01_diff_1k.jpg",
+          "why": "Remove the \"TRRA\" label text (could not confirm it is fictional; the blank label stays).",
+          "from": [
+            856,
+            52,
+            18,
+            8
+          ],
+          "to": [
+            854,
+            58,
+            26,
+            54
+          ]
+        }
+      ],
+      "maxTextureSize": 1024,
+      "draco": true
+    },
+    "monobloc-chair-01": {
+      "title": "White plastic monobloc chair",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "plastic_monobloc_chair_01",
+        "url": "https://polyhaven.com/a/plastic_monobloc_chair_01",
+        "api": "https://api.polyhaven.com/files/plastic_monobloc_chair_01",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Kuutti Siitonen"
+      ],
+      "input": ".cache/assets/src/plastic_monobloc_chair_01/plastic_monobloc_chair_01_1k.gltf",
+      "texturePatches": [],
+      "maxTextureSize": 1024,
+      "draco": true
+    },
+    "brass-vase-03": {
+      "title": "Engraved brass vase",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "brass_vase_03",
+        "url": "https://polyhaven.com/a/brass_vase_03",
+        "api": "https://api.polyhaven.com/files/brass_vase_03",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Rico Cilliers"
+      ],
+      "input": ".cache/assets/src/brass_vase_03/brass_vase_03_1k.gltf",
+      "texturePatches": [],
+      "maxTextureSize": 1024,
+      "draco": true
+    }
+  }
+}

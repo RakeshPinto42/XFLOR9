@@ -1,0 +1,5 @@
+# Vendored Draco decoder: must stay byte-identical to three.js (src/engine/assets.test.ts)
+public/draco/** -text
+# Binary 3D assets
+*.glb binary
+*.wasm binary

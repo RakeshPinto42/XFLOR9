@@ -113,7 +113,8 @@ class SceneErrorBoundary extends Component<{ children: ReactNode; onError: () =>
     return { failed: true };
   }
   componentDidCatch(error: unknown) {
-    console.error("[stage] scene failed", error);
+    // The message is logged as text too: some browsers print an Error object as just "Error".
+    console.error(`[stage] scene failed: ${error instanceof Error ? error.message : String(error)}`, error);
     this.props.onError();
   }
   render() {

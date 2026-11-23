@@ -1,9 +1,16 @@
 "use client";
 
-import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useFrame, type ThreeElements } from "@react-three/fiber";
+import { Suspense, useRef } from "react";
 import type { Group } from "three";
+import { useModel } from "@/stage/assets";
 import type { SceneProps } from "@/stage/registry";
+
+/** A model from the asset manifest, placed like any other object. */
+function Model({ id, ...props }: { id: string } & Omit<ThreeElements["primitive"], "object">) {
+  const object = useModel(id);
+  return <primitive object={object} {...props} />;
+}
 
 /**
  * F1 increment 1: blockout of the 1990s living room (room shell, warm and window light,
@@ -15,7 +22,8 @@ const H = 3.0; // height
 
 export default function LivingRoom({ level }: SceneProps) {
   return (
-    <group>
+    <>
+      {/* Background and fog must be direct children of the scene to attach to it. */}
       <color attach="background" args={["#1a1420"]} />
       <fog attach="fog" args={["#2a2030", 6, 14]} />
 
@@ -45,7 +53,20 @@ export default function LivingRoom({ level }: SceneProps) {
       </mesh>
 
       <CeilingFan />
-    </group>
+
+      {/* Models from the asset pipeline (increment 2). The cabinet is a stand-in until increment 3. */}
+      <Suspense fallback={null}>
+        <group position={[0, 0, -D / 2 + 0.45]}>
+          <mesh position={[0, 0.38, 0]} castShadow receiveShadow>
+            <boxGeometry args={[1.3, 0.76, 0.55]} />
+            <meshStandardMaterial color="#5a3a22" roughness={0.6} />
+          </mesh>
+          <Model id="television-01" position={[0, 0.76, 0]} />
+          <Model id="brass-vase-03" position={[0.5, 0.76, 0.05]} />
+        </group>
+        <Model id="monobloc-chair-01" position={[1.45, 0, -0.2]} rotation={[0, -0.9, 0]} />
+      </Suspense>
+    </>
   );
 }
 

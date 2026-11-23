@@ -2,7 +2,8 @@
 
 import { OrbitControls, useProgress } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, lazy, useEffect, useMemo, useRef, useState, type ComponentType } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
+import { assetProgress } from "./assets";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { AdaptiveQuality, QUALITY_LEVELS } from "@/engine/adaptive";
 import { stageStats } from "./diagnostics";
@@ -67,6 +68,8 @@ export function FullStage({
   );
 }
 
+const WARM_UP_SECONDS = 2;
+
 function Adaptive({ onLevel, onTooSlow }: { onLevel: (i: number) => void; onTooSlow: () => void }) {
   const adaptive = useRef(new AdaptiveQuality());
   // Test hook: ?stage-simulate-slow=<ms> adds that much to every measured frame.
@@ -75,7 +78,16 @@ function Adaptive({ onLevel, onTooSlow }: { onLevel: (i: number) => void; onTooS
     const v = Number(new URLSearchParams(window.location.search).get("stage-simulate-slow"));
     extra.current = Number.isFinite(v) && v > 0 ? Math.min(v, 200) : 0;
   }, []);
-  useFrame((_, delta) => {
+  // Frames while assets download/decode (and a short warm-up after, for shader compilation) say
+  // nothing about the device's steady-state speed, so they aren't judged.
+  const settledAt = useRef<number | null>(null);
+  useFrame((state, delta) => {
+    if (assetProgress.get().active) {
+      settledAt.current = null;
+      return;
+    }
+    settledAt.current ??= state.clock.elapsedTime;
+    if (state.clock.elapsedTime - settledAt.current < WARM_UP_SECONDS) return;
     const event = adaptive.current.frame(delta * 1000 + extra.current);
     if (!event) return;
     if (event.type === "suggest-lite") onTooSlow();
@@ -130,11 +142,15 @@ function CaptureHook() {
 
 /** Loading progress for scene assets, shown as ordinary page content (not inside the canvas). */
 function LoadingOverlay() {
-  const { active, progress } = useProgress();
-  if (!active) return null;
+  // Models from the asset manifest report byte progress; anything loaded through three's
+  // default loading manager (e.g. drei helpers) reports through useProgress.
+  const models = useSyncExternalStore(assetProgress.subscribe, assetProgress.get, assetProgress.server);
+  const other = useProgress();
+  if (!models.active && !other.active) return null;
+  const percent = models.active && models.total > 0 ? (models.loaded / models.total) * 100 : other.progress;
   return (
     <div className="absolute inset-x-0 bottom-24 grid place-items-center" role="status" data-testid="stage-loading">
-      <p className="rounded-full bg-ink/80 px-4 py-2 text-sm font-semibold text-panel">Loading the scene… {Math.round(progress)}%</p>
+      <p className="rounded-full bg-ink/80 px-4 py-2 text-sm font-semibold text-panel">Loading the scene… {Math.round(percent)}%</p>
     </div>
   );
 }

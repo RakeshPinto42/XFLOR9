@@ -1,0 +1,471 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "brass-vase-03",
+      "kind": "model",
+      "title": "Engraved brass vase",
+      "file": {
+        "path": "/assets/models/brass-vase-03.glb",
+        "bytes": 279708,
+        "sha256": "f2b4fd2b6d43463e2c3df306602106893bf5f230df7a8f816ebb8cc064d93f2d"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Rico Cilliers"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/brass_vase_03",
+        "retrievedFrom": "https://api.polyhaven.com/files/brass_vase_03",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "brass_vase_03.bin",
+            "bytes": 65136,
+            "md5": "be8d72f282ef5de9fdc735e45edf8a00"
+          },
+          {
+            "name": "brass_vase_03_1k.gltf",
+            "bytes": 2668,
+            "md5": "b1baf4963d22a4ddb28373055c379f8f"
+          },
+          {
+            "name": "textures/brass_vase_03_arm_1k.jpg",
+            "bytes": 482887,
+            "md5": "a8a5c16376688c4e0133a88a340fbd6c"
+          },
+          {
+            "name": "textures/brass_vase_03_diff_1k.jpg",
+            "bytes": 565652,
+            "md5": "1a1ce2f882a08973d8b21d84ce6f4693"
+          },
+          {
+            "name": "textures/brass_vase_03_nor_gl_1k.jpg",
+            "bytes": 465274,
+            "md5": "f79953ac3da8a7de9756057ff67882c5"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "gltf-transform 4.5.1 (dedup, prune, textureCompress webp, draco edgebreaker)",
+        "geometry": "draco",
+        "textures": "webp",
+        "maxTextureSize": 1024,
+        "animated": false,
+        "originalBytes": 1581617,
+        "optimisedBytes": 279708,
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 1
+        }
+      },
+      "inspection": {
+        "before": {
+          "bytes": 1581617,
+          "meshes": 1,
+          "primitives": 1,
+          "vertices": 1545,
+          "triangles": 2616,
+          "materials": 1,
+          "textures": [
+            {
+              "name": "brass_vase_03_nor_gl_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 465274
+            },
+            {
+              "name": "brass_vase_03_diff_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 565652
+            },
+            {
+              "name": "brass_vase_03_arm_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 482887
+            }
+          ],
+          "animations": 0,
+          "skins": 0,
+          "morphTargets": 0,
+          "extensionsUsed": []
+        },
+        "after": {
+          "bytes": 279708,
+          "meshes": 1,
+          "primitives": 1,
+          "vertices": 1545,
+          "triangles": 2616,
+          "materials": 1,
+          "textures": [
+            {
+              "name": "brass_vase_03_nor_gl",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 73332
+            },
+            {
+              "name": "brass_vase_03_diff",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 115472
+            },
+            {
+              "name": "brass_vase_03_arm",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 78414
+            }
+          ],
+          "animations": 0,
+          "skins": 0,
+          "morphTargets": 0,
+          "extensionsUsed": [
+            "EXT_texture_webp",
+            "KHR_draco_mesh_compression"
+          ]
+        }
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "monobloc-chair-01",
+      "kind": "model",
+      "title": "White plastic monobloc chair",
+      "file": {
+        "path": "/assets/models/monobloc-chair-01.glb",
+        "bytes": 374952,
+        "sha256": "13ce75e1eb505ff32751567220618ff11649f99653c0766970fb19537c6b3052"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Kuutti Siitonen"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/plastic_monobloc_chair_01",
+        "retrievedFrom": "https://api.polyhaven.com/files/plastic_monobloc_chair_01",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "plastic_monobloc_chair_01.bin",
+            "bytes": 124808,
+            "md5": "cff97136a9c4bb57c62937cbb7d33a79"
+          },
+          {
+            "name": "plastic_monobloc_chair_01_1k.gltf",
+            "bytes": 2892,
+            "md5": "b0ac94e52b406e1815af47d9d84eadb4"
+          },
+          {
+            "name": "textures/plastic_monobloc_chair_01_arm_1k.jpg",
+            "bytes": 634320,
+            "md5": "ce9271797fd8893a6c84f639f952d0b9"
+          },
+          {
+            "name": "textures/plastic_monobloc_chair_01_diff_1k.jpg",
+            "bytes": 560823,
+            "md5": "c36dfe0f38d6ca1632ba426c598e6764"
+          },
+          {
+            "name": "textures/plastic_monobloc_chair_01_nor_gl_1k.jpg",
+            "bytes": 630024,
+            "md5": "387f81f09c0754416298398277fb2a6d"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "gltf-transform 4.5.1 (dedup, prune, textureCompress webp, draco edgebreaker)",
+        "geometry": "draco",
+        "textures": "webp",
+        "maxTextureSize": 1024,
+        "animated": false,
+        "originalBytes": 1952867,
+        "optimisedBytes": 374952,
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 1
+        }
+      },
+      "inspection": {
+        "before": {
+          "bytes": 1952867,
+          "meshes": 1,
+          "primitives": 1,
+          "vertices": 3271,
+          "triangles": 3356,
+          "materials": 1,
+          "textures": [
+            {
+              "name": "plastic_monobloc_chair_01_nor_gl_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 630024
+            },
+            {
+              "name": "plastic_monobloc_chair_01_diff_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 560823
+            },
+            {
+              "name": "plastic_monobloc_chair_01_arm_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 634320
+            }
+          ],
+          "animations": 0,
+          "skins": 0,
+          "morphTargets": 0,
+          "extensionsUsed": []
+        },
+        "after": {
+          "bytes": 374952,
+          "meshes": 1,
+          "primitives": 1,
+          "vertices": 3271,
+          "triangles": 3356,
+          "materials": 1,
+          "textures": [
+            {
+              "name": "plastic_monobloc_chair_01_nor_gl",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 115788
+            },
+            {
+              "name": "plastic_monobloc_chair_01_diff",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 114564
+            },
+            {
+              "name": "plastic_monobloc_chair_01_metal-plastic_monobloc_chair_01_rough",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 123890
+            }
+          ],
+          "animations": 0,
+          "skins": 0,
+          "morphTargets": 0,
+          "extensionsUsed": [
+            "EXT_texture_webp",
+            "KHR_draco_mesh_compression"
+          ]
+        }
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "television-01",
+      "kind": "model",
+      "title": "CRT television in a wooden case",
+      "file": {
+        "path": "/assets/models/television-01.glb",
+        "bytes": 304364,
+        "sha256": "3ff7b578098c4e57ac6e6260e88483901295bf8ea1c5cf325307f3d24f72fdb0"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Gabriel Radić"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/Television_01",
+        "retrievedFrom": "https://api.polyhaven.com/files/Television_01",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "Television_01.bin",
+            "bytes": 90548,
+            "md5": "d28775c3746a6e7b0afa5fd217acbc44"
+          },
+          {
+            "name": "Television_01_1k.gltf",
+            "bytes": 2933,
+            "md5": "9456aa7effd3cb41a0e753d74293b1c3"
+          },
+          {
+            "name": "textures/Television_01_arm_1k.jpg",
+            "bytes": 190774,
+            "md5": "b83392294cc663520e448f698b86da56"
+          },
+          {
+            "name": "textures/Television_01_diff_1k.jpg",
+            "bytes": 102231,
+            "md5": "bf1b3d0563c279557acfed2402c421b1"
+          },
+          {
+            "name": "textures/Television_01_nor_gl_1k.jpg",
+            "bytes": 144808,
+            "md5": "3adb4f6549cc69edf82ccd8daa8e13cd"
+          }
+        ]
+      },
+      "modifications": [
+        "Remove the real brand name \"VTECH\" from the front panel (XPLOR9 shows no brands). (texture Television_01_diff_1k.jpg)",
+        "Remove the vertical \"VTECH\" brand name and its chevron logo on the side. (texture Television_01_diff_1k.jpg)",
+        "Remove the \"TRRA\" label text (could not confirm it is fictional; the blank label stays). (texture Television_01_diff_1k.jpg)"
+      ],
+      "optimisation": {
+        "tool": "gltf-transform 4.5.1 (dedup, prune, textureCompress webp, draco edgebreaker)",
+        "geometry": "draco",
+        "textures": "webp",
+        "maxTextureSize": 1024,
+        "animated": false,
+        "originalBytes": 531294,
+        "optimisedBytes": 304364,
+        "validator": {
+          "version": "2.0.0-dev.3.10",
+          "errors": 0,
+          "warnings": 1
+        }
+      },
+      "inspection": {
+        "before": {
+          "bytes": 531294,
+          "meshes": 1,
+          "primitives": 1,
+          "vertices": 1976,
+          "triangles": 1918,
+          "materials": 1,
+          "textures": [
+            {
+              "name": "Television_01_nor_gl_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 144808
+            },
+            {
+              "name": "Television_01_diff_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 102231
+            },
+            {
+              "name": "Television_01_arm_1k.jpg",
+              "mimeType": "image/jpeg",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 190774
+            }
+          ],
+          "animations": 0,
+          "skins": 0,
+          "morphTargets": 0,
+          "extensionsUsed": []
+        },
+        "after": {
+          "bytes": 304364,
+          "meshes": 1,
+          "primitives": 1,
+          "vertices": 1976,
+          "triangles": 1918,
+          "materials": 1,
+          "textures": [
+            {
+              "name": "Television_01_nor_gl",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 92810
+            },
+            {
+              "name": "Television_01_diff",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 57934
+            },
+            {
+              "name": "Television_01_metallic-Television_01_roughness",
+              "mimeType": "image/webp",
+              "size": [
+                1024,
+                1024
+              ],
+              "bytes": 141290
+            }
+          ],
+          "animations": 0,
+          "skins": 0,
+          "morphTargets": 0,
+          "extensionsUsed": [
+            "EXT_texture_webp",
+            "KHR_draco_mesh_compression"
+          ]
+        }
+      },
+      "verifiedAt": "2026-11-23"
+    }
+  ]
+}

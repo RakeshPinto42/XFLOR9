@@ -36,3 +36,7 @@ Last updated: 2026-11-23 (F1 increment 1).
 | ST-3 | Scene pages give the site header/footer a backdrop through a global CSS rule keyed on `html[data-stage-active]`. Works, but a layout-level slot for scene pages would be cleaner once more scenes exist. | Low | F1.1 | Technical debt. |
 | ST-4 | Headless browsers render WebGL in software: stage tests prove correctness only, never frame rates. Performance is measured on the reference laptop. | Info | F1.1 | |
 | ST-5 | During development, Turbopack missed a CSS change appended from the shell until the file was edited again. | Info | F1.1 | Development only. |
+| ST-6 | `npm audit` reports 4 moderate advisories (glob/minimatch DoS via crafted patterns) inside the development-only asset tools (@gltf-transform/cli). They only run locally on our own fixed paths and never ship to the site; not force-upgraded (breaking). | Low | F1.2 | Re-check when @gltf-transform updates. |
+| ST-7 | The Khronos validator can't inspect inside Draco-compressed geometry; the build compensates by decoding the result and comparing counts with the source. | Info | F1.2 | |
+| ST-8 | A model that fails to load stays failed for the visit (the scene shows Lite with a reason); reloading retries. Intentional: retrying inside React suspense looped forever. | Info | F1.2 | |
+| ST-9 | The F1 scene uses a stand-in box for the TV cabinet until increment 3 builds the teak cabinet, sofa, centre table and three-blade fan. | Info | F1.2 | |
