@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Playwright MCP screenshots/snapshots
 /.playwright-mcp/
+
+# Generated malicious/malformed EPUBs for security tests (regenerate: node scripts/books/make-security-fixtures.ts).
+# Not committed: includes a zip bomb and a 5 MB file, and the repo is public.
+/test-fixtures/security/

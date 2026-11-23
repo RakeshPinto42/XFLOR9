@@ -59,6 +59,8 @@ export interface EpubController {
 interface FoliateView extends HTMLElement {
   open(book: FoliateBook): Promise<void>;
   init(opts: { lastLocation?: string | null; showTextStart?: boolean }): Promise<void>;
+  goToTextStart(): Promise<unknown>;
+  lastLocation: unknown;
   next(): Promise<void>;
   prev(): Promise<void>;
   goTo(target: string): Promise<unknown>;
@@ -72,7 +74,13 @@ interface FoliateView extends HTMLElement {
 export async function openEpub(
   container: HTMLElement,
   file: Blob,
-  opts: { lastCfi: string | null; styles: string; onRelocate: (loc: ReaderLocation) => void },
+  opts: {
+    lastCfi: string | null;
+    styles: string;
+    onRelocate: (loc: ReaderLocation) => void;
+    /** Called when a saved position couldn't be used and the book opened at the start instead. */
+    onRecovered?: () => void;
+  },
 ): Promise<EpubController> {
   const { makeBook } = await import("foliate-js/view.js"); // also registers <foliate-view>
   const CFI = await import("foliate-js/epubcfi.js");
@@ -145,6 +153,12 @@ export async function openEpub(
   view.renderer.setAttribute("max-column-count", "2");
   view.renderer.setStyles(opts.styles);
   await view.init({ lastLocation: opts.lastCfi, showTextStart: !opts.lastCfi });
+  // A saved position that doesn't exist in this file (new edition, corrupted or mismatched
+  // progress) makes foliate render nothing without an error. Fall back to the start of the text.
+  if (!view.lastLocation && opts.lastCfi) {
+    await view.goToTextStart();
+    opts.onRecovered?.();
+  }
 
   return {
     toc: mapToc(book.toc ?? []),

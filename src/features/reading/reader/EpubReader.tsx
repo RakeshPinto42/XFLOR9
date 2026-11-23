@@ -104,6 +104,7 @@ export function EpubReader({ book }: { book: ReaderBook }) {
         const ctrl = await openEpub(el, blob, {
           lastCfi: saved?.cfi ?? null,
           styles: bookStylesheet(readerSettings.get(), window.location.origin),
+          onRecovered: () => setNotice("Your saved place couldn't be found, so the book opened at the start."),
           onRelocate: (loc) => {
             setLocation(loc);
             pendingSave.current = loc;

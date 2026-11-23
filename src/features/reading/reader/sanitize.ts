@@ -32,10 +32,59 @@ const BLOCKED_ELEMENTS = [
 ];
 
 const URL_ATTRIBUTES = ["href", "src", "action", "formaction", "data", "poster", "background", "xlink:href"];
-const UNSAFE_URL = /^\s*(javascript|vbscript|data\s*:\s*text\/html|data\s*:\s*image\/svg)/i;
+const UNSAFE_SCHEME = /^(javascript|vbscript|data:text\/html|data:image\/svg)/i;
+
+/**
+ * Normalises a URL the way browsers do before reading its scheme: they ignore ASCII tab and
+ * newline characters anywhere and leading control characters/spaces. Without this,
+ * "java<TAB>script:" passed the check (found in the pre-R4 security review).
+ */
+export function isUnsafeUrl(value: string): boolean {
+  const normalised = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+/, "").replace(/\s+/g, "");
+  return UNSAFE_SCHEME.test(normalised);
+}
+
+/**
+ * Content Security Policy placed inside every book page. A second, browser-enforced layer:
+ * even if the sanitiser misses something, the page can't run script, can't load anything from
+ * the internet (no tracking pixels, remote fonts or autoplay media), can't submit forms and
+ * can't embed other documents. Book images are blob: URLs; reader fonts come from our origin.
+ */
+export const BOOK_PAGE_CSP = [
+  "default-src 'none'",
+  "script-src 'none'",
+  "object-src 'none'",
+  "frame-src 'none'",
+  "child-src 'none'",
+  "connect-src 'none'",
+  "form-action 'none'",
+  "base-uri 'none'",
+  "img-src blob: data: 'self'",
+  "media-src blob: 'self'",
+  "style-src 'unsafe-inline' blob: 'self'",
+  "font-src blob: data: 'self'",
+].join("; ");
 
 export function isMarkupType(type: string): boolean {
   return MARKUP_TYPES.has(type);
+}
+
+const XHTML_NS = "http://www.w3.org/1999/xhtml";
+
+/** Inserts the CSP <meta> as the very first element of <head> (it only applies to what follows it). */
+function injectCsp(doc: Document) {
+  const root = doc.documentElement;
+  if (!root || root.localName !== "html") return; // standalone SVG pages: covered by sanitising only
+  // In XHTML documents <head> is a generic Element, not HTMLHeadElement.
+  let head: Element | null = doc.querySelector("head");
+  if (!head) {
+    head = doc.createElementNS(root.namespaceURI ?? XHTML_NS, "head");
+    root.insertBefore(head, root.firstChild);
+  }
+  const meta = doc.createElementNS(root.namespaceURI ?? XHTML_NS, "meta");
+  meta.setAttribute("http-equiv", "Content-Security-Policy");
+  meta.setAttribute("content", BOOK_PAGE_CSP);
+  head.insertBefore(meta, head.firstChild);
 }
 
 export function sanitizeBookMarkup(markup: string, type: string): string {
@@ -55,11 +104,13 @@ export function sanitizeBookMarkup(markup: string, type: string): string {
     for (const attr of [...el.attributes]) {
       const name = attr.name.toLowerCase();
       if (name.startsWith("on")) el.removeAttribute(attr.name);
-      else if ((URL_ATTRIBUTES.includes(name) || name.endsWith(":href")) && UNSAFE_URL.test(attr.value))
+      else if ((URL_ATTRIBUTES.includes(name) || name.endsWith(":href")) && isUnsafeUrl(attr.value))
         el.removeAttribute(attr.name);
       else if (name === "srcdoc") el.removeAttribute(attr.name);
     }
   }
+
+  injectCsp(doc); // after removing book-supplied <meta http-equiv>, so ours is the only one
 
   return asHtml
     ? `<!DOCTYPE html>${doc.documentElement.outerHTML}`
