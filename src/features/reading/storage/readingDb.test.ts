@@ -90,7 +90,7 @@ describe("recently opened", () => {
   it(`keeps only the newest ${MAX_RECENT_BOOKS}`, async () => {
     for (let i = 0; i <= MAX_RECENT_BOOKS; i++) {
       await recordOpened(`cat:book-${i}`);
-      await new Promise((r) => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 5)); // distinct timestamps: 1 ms gaps could collide
     }
     const recent = await listRecent();
     expect(recent).toHaveLength(MAX_RECENT_BOOKS);

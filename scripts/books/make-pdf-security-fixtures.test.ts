@@ -20,7 +20,7 @@ describe("PDF security corpus", () => {
     expect(new Set(names).size).toBe(names.length);
     for (const f of PDF_FIXTURES) {
       expect(f.threat.length).toBeGreaterThan(20);
-      expect(["render-inert", "refuse"]).toContain(f.expect);
+      expect(["render-inert", "refuse", "recover-or-refuse"]).toContain(f.expect);
     }
   });
 

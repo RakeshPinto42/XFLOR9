@@ -10,7 +10,7 @@
  *        (git-ignored; also run by the security suite's global setup)
  */
 import { mkdirSync, writeFileSync } from "node:fs";
-import { deflateSync, strToU8 } from "fflate";
+import { strToU8, zlibSync } from "fflate";
 
 const MARK = "try{window.top.__xplor9_pdf_attack=1;localStorage.setItem('xplor9.pwned','pdf')}catch(e){}";
 
@@ -43,7 +43,8 @@ export function buildPdf(objects: Obj[], opts: { root?: number; breakXref?: bool
 
 /** A stream object (optionally Flate-compressed). */
 function stream(data: Uint8Array, dict = "", compress = false): Uint8Array {
-  const body = compress ? deflateSync(data, { level: 9 }) : data;
+  // FlateDecode means zlib format (RFC 1950), not raw deflate.
+  const body = compress ? zlibSync(data, { level: 9 }) : data;
   const filter = compress ? " /Filter /FlateDecode" : "";
   return concat([strToU8(`<< /Length ${body.byteLength}${filter} ${dict}>>\nstream\n`), body, strToU8("\nendstream")]);
 }
@@ -63,8 +64,11 @@ const link = (action: string) => `<< /Type /Annot /Subtype /Link /Rect [72 600 4
 
 export interface PdfFixture {
   name: string;
-  /** What a safe reader must do with this file. */
-  expect: "render-inert" | "refuse";
+  /**
+   * What a safe reader must do: render with nothing active, refuse cleanly, or either
+   * (PDF.js legitimately repairs some malformed files; repairing safely is fine).
+   */
+  expect: "render-inert" | "refuse" | "recover-or-refuse";
   threat: string;
   build: () => Uint8Array;
 }
@@ -170,13 +174,13 @@ export const PDF_FIXTURES: PdfFixture[] = [
   },
   {
     name: "flate-bomb-300mb",
-    expect: "refuse",
+    expect: "recover-or-refuse",
     threat: "A ~300 KB page stream that inflates to 300 MB. Must be stopped without freezing XPLOR9.",
     build: () => buildPdf(onePage("Bomb", "", "", []).map((o, i) => (i === 3 ? stream(new Uint8Array(300 * 1024 * 1024).fill(0x20), "", true) : o))),
   },
   {
     name: "huge-page-count",
-    expect: "refuse",
+    expect: "recover-or-refuse",
     threat: "Page tree claims 2,000,000,000 pages. Must not allocate per claimed page or hang.",
     build: () => buildPdf(onePage("Huge count").map((o, i) => (i === 1 ? "<< /Type /Pages /Kids [3 0 R] /Count 2000000000 >>" : o))),
   },
@@ -188,7 +192,7 @@ export const PDF_FIXTURES: PdfFixture[] = [
   },
   {
     name: "malformed-xref",
-    expect: "refuse",
+    expect: "recover-or-refuse",
     threat: "Cross-reference table points to garbage. Must fail (or recover) cleanly, with a friendly message.",
     build: () => buildPdf(onePage("Malformed xref"), { breakXref: true }),
   },

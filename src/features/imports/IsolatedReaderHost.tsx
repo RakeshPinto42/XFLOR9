@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { EPUB_LIMITS, IMPORT_ERROR_MESSAGES, type ImportErrorCode } from "./limits";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import type { ReaderSettings } from "@/features/reading/reader/settings";
+import { EPUB_LIMITS, PDF_LIMITS, type ImportErrorCode } from "./limits";
 import { readerOriginFor } from "./origins";
-import { PROTOCOL, isFrom, newRequestId, parseReaderMessage } from "./protocol";
+import { PROTOCOL, isFrom, newRequestId, parseReaderMessage, type ImportFormat } from "./protocol";
 
-export interface HostState {
+export interface BridgeState {
   status: "disabled" | "loading" | "opening" | "ready" | "error";
   error: ImportErrorCode | null;
   title: string | null;
@@ -14,15 +15,31 @@ export interface HostState {
   position: string | null;
 }
 
+export interface ReaderBridge {
+  frameRef: RefObject<HTMLIFrameElement | null>;
+  readerOrigin: string | null;
+  state: BridgeState;
+  nav: (action: "next" | "prev") => void;
+}
+
 /**
  * Main-origin side of imported-file reading. Embeds the isolated reader (a different origin),
- * hands it the file's bytes once, and only ever receives validated position/status messages.
+ * hands it the file's bytes once, and only ever receives validated status/position messages.
  * The file never leaves this device, and the reader frame can't reach XPLOR9's storage.
  */
-export function IsolatedReaderHost({ file, onChange }: { file: File; onChange?: (s: HostState) => void }) {
-  const frame = useRef<HTMLIFrameElement>(null);
+export function useReaderBridge(opts: {
+  /** Loads the book's bytes when the reader is ready (a fresh buffer: it is transferred away). */
+  load: () => Promise<ArrayBuffer | null>;
+  name: string;
+  format: ImportFormat;
+  /** Saved position to open at (validated again inside the reader). */
+  position: string | null;
+  settings: ReaderSettings;
+}): ReaderBridge {
+  const { load, name, format, position, settings } = opts;
+  const frameRef = useRef<HTMLIFrameElement>(null);
   const [readerOrigin] = useState(() => (typeof window === "undefined" ? null : readerOriginFor(window.location)));
-  const [state, setState] = useState<HostState>({
+  const [state, setState] = useState<BridgeState>({
     status: readerOrigin ? "loading" : "disabled",
     error: null,
     title: null,
@@ -31,24 +48,32 @@ export function IsolatedReaderHost({ file, onChange }: { file: File; onChange?: 
     position: null,
   });
   const requestId = useRef<string | null>(null);
-
-  useEffect(() => onChange?.(state), [state, onChange]);
+  const sentSettings = useRef<string | null>(null);
+  // Latest values for the one-time "open" message without re-running the listener effect.
+  const latest = useRef({ position, settings });
+  useEffect(() => {
+    latest.current = { position, settings };
+  }, [position, settings]);
 
   useEffect(() => {
     if (!readerOrigin) return;
-    const update = (patch: Partial<HostState>) => setState((s) => ({ ...s, ...patch }));
+    const update = (patch: Partial<BridgeState>) => setState((s) => ({ ...s, ...patch }));
     const onMessage = async (event: MessageEvent) => {
-      if (!isFrom(event, readerOrigin, frame.current?.contentWindow)) return; // exact origin + our frame only
+      if (!isFrom(event, readerOrigin, frameRef.current?.contentWindow)) return; // exact origin + our frame only
       const msg = parseReaderMessage(event.data);
       if (!msg) return;
       if (msg.type === "ready") {
-        if (file.size === 0 || file.size > EPUB_LIMITS.maxFileBytes) return update({ status: "error", error: "too-large" });
         update({ status: "opening" });
-        const bytes = await file.arrayBuffer();
+        const bytes = await load();
+        if (!bytes || bytes.byteLength === 0) return update({ status: "error", error: "parse-failed" });
+        const limit = format === "pdf" ? PDF_LIMITS.maxFileBytes : EPUB_LIMITS.maxFileBytes;
+        if (bytes.byteLength > limit) return update({ status: "error", error: "too-large" });
         const id = newRequestId();
         requestId.current = id;
-        frame.current?.contentWindow?.postMessage(
-          { protocol: PROTOCOL, type: "open", requestId: id, format: "epub", name: file.name.slice(0, 200), bytes, position: null },
+        const { position: pos, settings: set } = latest.current;
+        sentSettings.current = `${set.theme}:${set.fontScale}`;
+        frameRef.current?.contentWindow?.postMessage(
+          { protocol: PROTOCOL, type: "open", requestId: id, format, name: name.slice(0, 200), bytes, position: pos, settings: set },
           readerOrigin, // never "*"
           [bytes], // transferred, not copied
         );
@@ -61,46 +86,52 @@ export function IsolatedReaderHost({ file, onChange }: { file: File; onChange?: 
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [file, readerOrigin]);
+  }, [load, name, format, readerOrigin]);
 
-  const nav = (action: "next" | "prev") =>
-    readerOrigin &&
-    requestId.current &&
-    frame.current?.contentWindow?.postMessage({ protocol: PROTOCOL, type: "nav", requestId: requestId.current, action }, readerOrigin);
+  // Theme / text size changes after opening. Only real changes are sent: re-applying the same
+  // styles makes the reader lay out again, which swallowed page turns (found in testing).
+  useEffect(() => {
+    if (!readerOrigin || state.status !== "ready" || !requestId.current) return;
+    const key = `${settings.theme}:${settings.fontScale}`;
+    if (key === sentSettings.current) return;
+    sentSettings.current = key;
+    frameRef.current?.contentWindow?.postMessage(
+      { protocol: PROTOCOL, type: "settings", requestId: requestId.current, settings: { theme: settings.theme, fontScale: settings.fontScale } },
+      readerOrigin,
+    );
+  }, [settings.theme, settings.fontScale, state.status, readerOrigin]);
 
-  if (!readerOrigin)
-    return <p role="alert">Reading your own files isn&apos;t available here, because the separate reader isn&apos;t configured.</p>;
+  const nav = useCallback(
+    (action: "next" | "prev") => {
+      if (!readerOrigin || !requestId.current) return;
+      frameRef.current?.contentWindow?.postMessage({ protocol: PROTOCOL, type: "nav", requestId: requestId.current, action }, readerOrigin);
+    },
+    [readerOrigin],
+  );
 
+  return { frameRef, readerOrigin, state, nav };
+}
+
+/** The isolated reader frame. Renders nothing when imports are disabled (no reader origin). */
+export function ReaderFrame({
+  frameRef,
+  readerOrigin,
+  title,
+  className = "",
+}: Pick<ReaderBridge, "frameRef" | "readerOrigin"> & { title: string; className?: string }) {
+  if (!readerOrigin) return null;
   return (
-    <div className="flex h-full flex-col gap-2">
-      <div className="flex items-center gap-3 text-sm" aria-live="polite" data-testid="host-status">
-        <span data-testid="host-state">{state.status}</span>
-        {state.status === "error" && state.error && (
-          <span role="alert" data-testid="host-error" data-code={state.error}>
-            {IMPORT_ERROR_MESSAGES[state.error]}
-          </span>
-        )}
-        {state.title && <span data-testid="host-title">{state.title}</span>}
-        {state.status === "ready" && <span data-testid="host-fraction">{Math.round(state.fraction * 100)}%</span>}
-        <button type="button" onClick={() => nav("prev")} disabled={state.status !== "ready"}>
-          Previous
-        </button>
-        <button type="button" onClick={() => nav("next")} disabled={state.status !== "ready"}>
-          Next
-        </button>
-      </div>
-      <iframe
-        ref={frame}
-        src={`${readerOrigin}/isolated/reader`}
-        title="Imported book"
-        // A different origin already blocks access to XPLOR9; the sandbox additionally removes
-        // top navigation, forms, downloads and modals. Popups are allowed only for http(s) links.
-        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-        referrerPolicy="no-referrer"
-        allow=""
-        className="min-h-0 w-full flex-1 rounded-xl border-2 border-ink/15"
-        data-testid="reader-frame"
-      />
-    </div>
+    <iframe
+      ref={frameRef}
+      src={`${readerOrigin}/isolated/reader`}
+      title={title}
+      // A different origin already blocks access to XPLOR9; the sandbox additionally removes
+      // top navigation, forms, downloads and modals. Popups are allowed only for http(s) links.
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      referrerPolicy="no-referrer"
+      allow=""
+      className={className}
+      data-testid="reader-frame"
+    />
   );
 }

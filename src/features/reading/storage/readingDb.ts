@@ -9,9 +9,9 @@ import { openDB, type DBSchema, type IDBPDatabase } from "idb";
  */
 
 export interface ProgressRecord {
-  /** "cat:<catalogue id>" for catalogue books ("local:<fingerprint>" for imports later). */
+  /** "cat:<catalogue id>" for catalogue books, "local:<import id>" for imported files. */
   bookKey: string;
-  /** Exact position in the book (EPUB CFI). */
+  /** Exact position: an EPUB CFI, or "pdf:page=<n>" for imported PDFs. */
   cfi: string;
   /** 0..1 through the whole book. */
   fraction: number;
@@ -41,7 +41,31 @@ export interface RecentRecord {
   openedAt: number;
 }
 
+/**
+ * A book file imported by the user. Stored only in this browser; never uploaded.
+ * The details (this record) and the bytes (ImportFileRecord) are stored separately, so listing
+ * books never loads their contents. Bytes are stored as an ArrayBuffer because some browsers
+ * (WebKit, e.g. Safari private browsing) can't store Blob/File objects in IndexedDB.
+ */
+export interface ImportRecord {
+  id: string;
+  format: "epub" | "pdf";
+  /** Original file name (shown until the reader reports the book's own title). */
+  name: string;
+  title: string;
+  size: number;
+  addedAt: number;
+  openedAt: number | null;
+}
+
+interface ImportFileRecord {
+  id: string;
+  data: ArrayBuffer;
+}
+
 interface ReadingDB extends DBSchema {
+  imports: { key: string; value: ImportRecord };
+  importFiles: { key: string; value: ImportFileRecord };
   progress: { key: string; value: ProgressRecord };
   bookmarks: { key: string; value: BookmarkRecord; indexes: { byBook: string } };
   favourites: { key: string; value: FavouriteRecord };
@@ -49,8 +73,8 @@ interface ReadingDB extends DBSchema {
 }
 
 const DB_NAME = "xplor9-reading";
-/** v1 (R2): progress. v2 (R3): bookmarks, favourites, recent. Upgrades never touch existing stores. */
-const DB_VERSION = 2;
+/** v1 (R2): progress. v2 (R3): bookmarks, favourites, recent. v3 (R4): imports. Upgrades never touch existing stores. */
+const DB_VERSION = 3;
 export const MAX_RECENT_BOOKS = 12;
 export const MAX_BOOKMARKS_PER_BOOK = 200;
 
@@ -71,6 +95,10 @@ function db() {
         database.createObjectStore("favourites", { keyPath: "bookKey" });
         database.createObjectStore("recent", { keyPath: "bookKey" });
       }
+      if (oldVersion < 3) {
+        database.createObjectStore("imports", { keyPath: "id" });
+        database.createObjectStore("importFiles", { keyPath: "id" });
+      }
     },
   }).catch((err) => {
     dbPromise = null; // allow a later retry
@@ -80,13 +108,16 @@ function db() {
 }
 
 export const catalogueKey = (id: string) => `cat:${id}`;
+export const importKey = (id: string) => `local:${id}`;
 
 /** Validates a stored record (the browser's storage is outside our control). */
 export function parseProgress(raw: unknown): ProgressRecord | null {
   if (typeof raw !== "object" || raw === null) return null;
   const r = raw as Record<string, unknown>;
   if (typeof r.bookKey !== "string" || !/^(cat|local):[\w-]{1,120}$/.test(r.bookKey)) return null;
-  if (typeof r.cfi !== "string" || !r.cfi.startsWith("epubcfi(") || r.cfi.length > 2000) return null;
+  if (typeof r.cfi !== "string" || r.cfi.length > 2000) return null;
+  const isPdfPage = /^pdf:page=[1-9]\d{0,5}$/.test(r.cfi);
+  if (!r.cfi.startsWith("epubcfi(") && !(isPdfPage && r.bookKey.startsWith("local:"))) return null;
   const fraction = typeof r.fraction === "number" && Number.isFinite(r.fraction) ? Math.min(1, Math.max(0, r.fraction)) : 0;
   return {
     bookKey: r.bookKey,
@@ -266,5 +297,117 @@ export async function listRecent(): Promise<RecentRecord[]> {
       .sort((a, b) => b.openedAt - a.openedAt);
   } catch {
     return [];
+  }
+}
+
+// ---------- imported files (R4) ----------
+
+const IMPORT_ID = /^[a-f0-9-]{36}$/;
+
+export function parseImport(raw: unknown): ImportRecord | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const r = raw as Record<string, unknown>;
+  if (typeof r.id !== "string" || !IMPORT_ID.test(r.id)) return null;
+  if (r.format !== "epub" && r.format !== "pdf") return null;
+  if (typeof r.size !== "number" || !Number.isInteger(r.size) || r.size <= 0) return null;
+  const text = (v: unknown, fallback: string) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 200) : fallback);
+  const name = text(r.name, "Untitled");
+  return {
+    id: r.id,
+    format: r.format,
+    name,
+    title: text(r.title, name),
+    size: r.size,
+    addedAt: finite(r.addedAt),
+    openedAt: typeof r.openedAt === "number" && Number.isFinite(r.openedAt) ? r.openedAt : null,
+  };
+}
+
+/** Imported books, most recently opened (or added) first. */
+export async function listImports(): Promise<ImportRecord[]> {
+  try {
+    const all = await (await db()).getAll("imports");
+    return all
+      .map(parseImport)
+      .filter((r): r is ImportRecord => r !== null)
+      .sort((a, b) => (b.openedAt ?? b.addedAt) - (a.openedAt ?? a.addedAt));
+  } catch {
+    return [];
+  }
+}
+
+export async function getImport(id: string): Promise<ImportRecord | null> {
+  if (!IMPORT_ID.test(id)) return null;
+  try {
+    return parseImport(await (await db()).get("imports", id));
+  } catch {
+    return null;
+  }
+}
+
+/** The book's bytes (a fresh copy on every call), or null if missing. */
+export async function getImportBytes(id: string): Promise<ArrayBuffer | null> {
+  if (!IMPORT_ID.test(id)) return null;
+  try {
+    const rec = await (await db()).get("importFiles", id);
+    return rec?.data instanceof ArrayBuffer && rec.data.byteLength > 0 ? rec.data : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Stores a file. Throws the browser's error (e.g. QuotaExceededError) so the caller can explain it. */
+export async function addImport(file: Blob, name: string, format: ImportRecord["format"]): Promise<ImportRecord> {
+  const data = await file.arrayBuffer();
+  const record: ImportRecord = {
+    id: crypto.randomUUID(),
+    format,
+    name: name.slice(0, 200) || "Untitled",
+    title: (name.replace(/\.(epub|pdf)$/i, "") || "Untitled").slice(0, 200),
+    size: data.byteLength,
+    addedAt: Date.now(),
+    openedAt: null,
+  };
+  const tx = (await db()).transaction(["imports", "importFiles"], "readwrite");
+  await Promise.all([tx.objectStore("importFiles").put({ id: record.id, data }), tx.objectStore("imports").put(record), tx.done]);
+  return record;
+}
+
+/** Updates title and/or opened time. Returns false if it couldn't be saved. */
+export async function updateImport(id: string, patch: { title?: string; openedAt?: number }): Promise<boolean> {
+  try {
+    const database = await db();
+    const tx = database.transaction("imports", "readwrite");
+    const current = parseImport(await tx.store.get(id));
+    if (!current) return false;
+    const title = patch.title?.trim().slice(0, 200);
+    await tx.store.put({ ...current, ...(title ? { title } : {}), ...(patch.openedAt ? { openedAt: patch.openedAt } : {}) });
+    await tx.done;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Deletes the file and everything saved about it (progress, bookmarks, favourite, recent) in one step. */
+export async function deleteImport(id: string): Promise<boolean> {
+  if (!IMPORT_ID.test(id)) return false;
+  const key = importKey(id);
+  try {
+    const database = await db();
+    const tx = database.transaction(["imports", "importFiles", "progress", "bookmarks", "favourites", "recent"], "readwrite");
+    const bookmarkIds = await tx.objectStore("bookmarks").index("byBook").getAllKeys(key);
+    await Promise.all([
+      tx.objectStore("imports").delete(id),
+      tx.objectStore("importFiles").delete(id),
+      tx.objectStore("progress").delete(key),
+      tx.objectStore("favourites").delete(key),
+      tx.objectStore("recent").delete(key),
+      ...bookmarkIds.map((b) => tx.objectStore("bookmarks").delete(b)),
+    ]);
+    await tx.done;
+    return true;
+  } catch {
+    return false;
   }
 }

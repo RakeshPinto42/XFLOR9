@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePlayback } from "@/lib/playback/browser";
-import { STORAGE_KEYS } from "@/lib/storage/local";
-import { createLocalStore, useLocalStore } from "@/lib/storage/store";
+import { readerSettings } from "./settingsStore";
+import { useLocalStore } from "@/lib/storage/store";
 import { Icon } from "@/components/Icon";
 import {
   addBookmark,
@@ -19,17 +19,11 @@ import {
 } from "../storage/readingDb";
 import { BookmarksList } from "./BookmarksList";
 import { SearchPanel } from "./SearchPanel";
+import { SettingsDialog } from "./SettingsDialog";
 import { openEpub, turnOnKey, type EpubController, type ReaderLocation, type TocItem } from "./epubEngine";
 import {
-  DEFAULT_SETTINGS,
-  FONT_SCALE_MAX,
-  FONT_SCALE_MIN,
-  FONT_SCALE_STEP,
   THEMES,
   bookStylesheet,
-  clampFontScale,
-  parseSettings,
-  type ReaderTheme,
 } from "./settings";
 
 export interface ReaderBook {
@@ -40,7 +34,6 @@ export interface ReaderBook {
   sha256: string;
 }
 
-const readerSettings = createLocalStore(STORAGE_KEYS.readerSettings, DEFAULT_SETTINGS, parseSettings);
 
 type Status = { kind: "loading" } | { kind: "ready" } | { kind: "error"; message: string };
 
@@ -185,8 +178,6 @@ export function EpubReader({ book }: { book: ReaderBook }) {
     };
   }, []);
 
-  const setTheme = (t: ReaderTheme) => readerSettings.set((s) => ({ ...s, theme: t }));
-  const setScale = (v: number) => readerSettings.set((s) => ({ ...s, fontScale: clampFontScale(v) }));
   const percent = location ? Math.round(location.fraction * 100) : 0;
   const playerVisible = !!player.source;
   const ctrl = engine;
@@ -463,65 +454,7 @@ export function EpubReader({ book }: { book: ReaderBook }) {
         </div>
       </dialog>
 
-      <dialog
-        ref={settingsRef}
-        aria-label="Text and theme settings"
-        className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-2xl p-5 backdrop:bg-black/30 sm:mb-auto sm:rounded-2xl"
-        style={{ background: theme.bg, color: theme.text }}
-        onClick={(e) => e.target === e.currentTarget && settingsRef.current?.close()}
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold">Text and theme</h2>
-          <button type="button" onClick={() => settingsRef.current?.close()} className="px-2 py-1 text-sm font-semibold">
-            Close
-          </button>
-        </div>
-        <div className="mt-4 flex items-center gap-3">
-          <span className="w-24 text-sm">Text size</span>
-          <button
-            type="button"
-            onClick={() => setScale(settings.fontScale - FONT_SCALE_STEP)}
-            disabled={settings.fontScale <= FONT_SCALE_MIN}
-            aria-label="Smaller text"
-            className="h-10 w-10 rounded-full border-2 text-sm font-bold disabled:opacity-40"
-            style={{ borderColor: theme.muted }}
-          >
-            A−
-          </button>
-          <output className="w-14 text-center tabular-nums" aria-live="polite">
-            {settings.fontScale}%
-          </output>
-          <button
-            type="button"
-            onClick={() => setScale(settings.fontScale + FONT_SCALE_STEP)}
-            disabled={settings.fontScale >= FONT_SCALE_MAX}
-            aria-label="Larger text"
-            className="h-10 w-10 rounded-full border-2 text-lg font-bold disabled:opacity-40"
-            style={{ borderColor: theme.muted }}
-          >
-            A+
-          </button>
-        </div>
-        <fieldset className="mt-5">
-          <legend className="mb-2 text-sm">Theme</legend>
-          <div className="grid grid-cols-3 gap-2">
-            {(Object.keys(THEMES) as ReaderTheme[]).map((t) => (
-              <label
-                key={t}
-                className="cursor-pointer rounded-xl border-2 px-2 py-3 text-center text-sm font-semibold has-[:checked]:ring-2 has-[:focus-visible]:outline has-[:focus-visible]:outline-2"
-                style={{
-                  background: THEMES[t].bg,
-                  color: THEMES[t].text,
-                  borderColor: settings.theme === t ? THEMES[t].link : `${THEMES[t].muted}55`,
-                }}
-              >
-                <input type="radio" name="reader-theme" checked={settings.theme === t} onChange={() => setTheme(t)} className="sr-only" />
-                {THEMES[t].label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      </dialog>
+      <SettingsDialog dialogRef={settingsRef} />
     </div>
   );
 }

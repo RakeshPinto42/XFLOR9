@@ -3,6 +3,7 @@ import { BOOKS } from "@/features/reading/books";
 import { Bookshelf } from "@/features/reading/Bookshelf";
 import { ContinueReading } from "@/features/reading/ContinueReading";
 import { MyLibrary } from "@/features/reading/MyLibrary";
+import { YourFiles } from "@/features/imports/YourFiles";
 
 export const metadata: Metadata = { title: "Reading Room" };
 
@@ -18,6 +19,7 @@ export default function ReadingPage() {
       </div>
       <ContinueReading books={BOOKS.map(({ id, title, authors }) => ({ id, title, authors }))} />
       <MyLibrary books={BOOKS.map(({ id, title, authors }) => ({ id, title, authors }))} />
+      <YourFiles />
       <Bookshelf books={[...BOOKS]} />
     </section>
   );

@@ -2,8 +2,8 @@
 
 Date: 2026-11-23. Follows the pre-R4 review in [epub-reader.md](epub-reader.md).
 Scope: the isolation, validation and test machinery for reading the user's own EPUB/PDF files.
-**Not in scope (not built yet):** the import UI, storing imported files, the PDF reader.
-**Personal imports are NOT declared safe.** See "Release conditions" below.
+R4 (2026-11-23) added the import UI ("Your files" in the Reading Room), local storage of imported
+files, saving the reading position, and the PDF reader. See "Release conditions" for what is still open.
 
 ## Architecture
 
@@ -71,7 +71,11 @@ Main origin shows XPLOR9's own messages, never text from the reader.
 | Compression ratio per file | ≤100× (files under 64 KB compressed exempt) |
 | Path names | relative only; no `..`, `.`, `\`, drive letters, control characters; ≤512 chars; no duplicates |
 | Worker / open time | 20 s each |
-| PDF file size (future) | 300 MB |
+| PDF file size | 300 MB |
+| PDF pages | 5,000 |
+| PDF open / page draw time | 20 s each |
+| PDF canvas / decoded image size | 16 M / 25 M pixels |
+| Free space kept when importing | 20 MB (otherwise "storage full") |
 
 ## Dependencies (pinned exactly)
 
@@ -82,7 +86,7 @@ Main origin shows XPLOR9's own messages, never text from the reader.
 | `@playwright/test` (dev) | 1.65.1 | Cross-browser security and regression suites |
 | Browsers tested | Chromium 159.0.8154.6, Firefox 159.0, WebKit 27.2 | Installed by `npx playwright install` |
 | `foliate-js` (existing) | 1.0.1 | Its `EPUB` class is now also used with a custom loader |
-| `pdfjs-dist` (future) | ≥ 6.2.108 required | Not installed yet. See epub-reader.md §7 |
+| `pdfjs-dist` | 6.5.438 | PDF reader inside the reader origin (≥ 6.2.108 required, CVE-2026-16633). PDF.js 6 has no eval code paths, so the old `isEvalSupported` option no longer exists |
 
 ## Tests
 
@@ -105,16 +109,27 @@ The test harness page (`/reading/isolation-harness`) exists only when built with
 | 1 | Separate-origin isolation, strict messaging, frame-ancestors | Done, tested in 3 browsers |
 | 2 | Real-byte ZIP limits in a Worker; malformed files fail cleanly | Done, tested in 3 browsers |
 | 3 | DOMPurify + sanitiser + CSP on imported pages | Done, tested in 3 browsers |
-| 4 | Import UI: local-only storage of files (main origin IndexedDB), storage usage, deletion, quota warnings | **Not built** |
-| 5 | Saving reading position from the reader (protocol exists; not wired to storage) | **Not built** |
-| 6 | Compatibility corpus of real third-party EPUBs (EPUB 2/3, Indic, images, fixed layout) | **Not done**: only catalogue books tested |
-| 7 | PDF reader: PDF.js ≥ 6.2.108 inside the reader origin; whole PDF corpus passes in 3 browsers | **Not built** (corpus ready) |
+| 4 | Import UI: local-only storage of files (main origin IndexedDB), storage usage, deletion, quota warnings | Done (R4), tested in 3 browsers |
+| 5 | Saving reading position from the reader | Done (R4), tested in 3 browsers |
+| 6 | Compatibility corpus of real third-party EPUBs (EPUB 2/3, Indic, images, fixed layout) | **Partly**: the 5 catalogue books (Gutenberg EPUB 3) only |
+| 7 | PDF reader: PDF.js ≥ 6.2.108 inside the reader origin; whole PDF corpus passes in 3 browsers | Done (R4) |
 | 8 | Production reader origin configured and verified on the real hosting | **Not done** |
 | 9 | Low-memory device check (300 MB decompressed limit held in memory) | **Not done** |
+
+## PDF reader (R4)
+
+- Parsing in PDF.js's own Web Worker; drawing in the reader frame (worker rendering not used).
+- No scripting sandbox, no XFA, no annotation layer: document JavaScript, Launch/URI/SubmitForm/GoToR
+  actions, form widgets and embedded files never become active. Links inside PDFs are not clickable.
+- One page at a time: canvas plus PDF.js's transparent text layer (selection, screen readers).
+  Theme: dark inverts the page, warm adds a paper tone; text size zooms the page.
+- Outcomes on the corpus are in the security suite. PDF.js safely **repairs** some malformed files
+  (fake page count, broken cross-reference table): those are allowed to open, as long as nothing runs.
 
 ## Known limitations
 
 - The reader page needs `script-src 'unsafe-inline'` because Next.js starts pages with inline scripts. Book pages have their own stricter CSP (`script-src 'none'`), and the reader origin holds no data.
 - Chapters that are bare SVG documents can't be laid out by foliate. Such books fail cleanly with "couldn't be read".
-- The PDF corpus is checked structurally only (no PDF parser installed). It will be validated against PDF.js when the PDF reader is built.
+- Imported books have no bookmarks or search yet (catalogue books have both). PDF links aren't clickable.
+- PDFs using JPEG 2000 / JBIG2 images may show blank areas (PDF.js decodes those with WebAssembly, which the reader's policy doesn't allow). CJK PDFs without embedded fonts may render poorly (no CMaps bundled).
 - The extracted book is held in memory, up to 300 MB.

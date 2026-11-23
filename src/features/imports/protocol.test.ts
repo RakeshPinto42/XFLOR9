@@ -11,12 +11,15 @@ const open = (over: Record<string, unknown> = {}) => ({
   name: "My book.epub",
   bytes: new ArrayBuffer(16),
   position: null,
+  settings: { theme: "light", fontScale: 100 },
   ...over,
 });
 
 describe("parseHostMessage", () => {
-  it("accepts a valid open and nav message", () => {
+  it("accepts valid open, nav and settings messages", () => {
     expect(parseHostMessage(open())).not.toBeNull();
+    expect(parseHostMessage(open({ format: "pdf", position: "pdf:page=12" }))).not.toBeNull();
+    expect(parseHostMessage({ protocol: PROTOCOL, type: "settings", requestId: id, settings: { theme: "dark", fontScale: 120 } })).not.toBeNull();
     expect(parseHostMessage({ protocol: PROTOCOL, type: "nav", requestId: id, action: "next" })).not.toBeNull();
   });
 
@@ -30,6 +33,15 @@ describe("parseHostMessage", () => {
     ["bad position", open({ position: "javascript:alert(1)" })],
     ["control characters in name", open({ name: "a\u0000b" })],
     ["bad request id", open({ requestId: "<x>" })],
+    ["unsupported format html", open({ format: "html" })],
+    ["PDF position for an EPUB", open({ position: "pdf:page=3" })],
+    ["CFI position for a PDF", open({ format: "pdf", position: "epubcfi(/6/4!/4)" })],
+    ["page beyond the limit", open({ format: "pdf", position: "pdf:page=999999" })],
+    ["missing settings", open({ settings: undefined })],
+    ["bad theme", open({ settings: { theme: "neon", fontScale: 100 } })],
+    ["text size out of range", open({ settings: { theme: "light", fontScale: 900 } })],
+    ["settings with extra fields", open({ settings: { theme: "light", fontScale: 100, css: "x" } })],
+    ["settings message with bad values", { protocol: PROTOCOL, type: "settings", requestId: id, settings: { theme: "dark", fontScale: 85.5 } }],
     ["bad nav action", { protocol: PROTOCOL, type: "nav", requestId: id, action: "eval" }],
     ["not an object", "open"],
   ])("rejects %s", (_, msg) => expect(parseHostMessage(msg)).toBeNull());
@@ -47,6 +59,7 @@ describe("parseReaderMessage", () => {
       parseReaderMessage({ protocol: PROTOCOL, type: "relocated", requestId: id, fraction: 0.4, position: "epubcfi(/6/4!/4/2/1:0)", chapter: null }),
     ).not.toBeNull();
     expect(parseReaderMessage({ protocol: PROTOCOL, type: "error", requestId: id, code: "entry-too-large" })).not.toBeNull();
+    expect(parseReaderMessage({ protocol: PROTOCOL, type: "relocated", requestId: id, fraction: 0.5, position: "pdf:page=4", chapter: null })).not.toBeNull();
   });
 
   it.each([

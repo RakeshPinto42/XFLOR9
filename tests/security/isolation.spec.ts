@@ -1,4 +1,5 @@
 import { expect, test, type Frame, type Page } from "@playwright/test";
+import { PDF_FIXTURES } from "../../scripts/books/make-pdf-security-fixtures";
 
 const PORT = 3010;
 const READER = `http://127.0.0.1:${PORT}`;
@@ -233,3 +234,52 @@ test("regression: catalogue books still open in the existing reader", async ({ p
     .poll(() => page.evaluate(() => !!(document.querySelector("foliate-view") as unknown as { lastLocation?: unknown })?.lastLocation), { timeout: 20_000 })
     .toBe(true);
 });
+
+// ---------- PDF corpus (pdfjs-dist 6.5.438 inside the isolated reader) ----------
+
+
+for (const f of PDF_FIXTURES) {
+  test(`PDF ${f.expect}: ${f.name}`, async ({ page }) => {
+    const trap = await trapExternal(page);
+    await page.goto("/reading/isolation-harness");
+    await page.evaluate(() => {
+      localStorage.setItem("xplor9.secret-marker", "keep-me");
+      localStorage.removeItem("xplor9.pwned");
+    });
+    await page.getByTestId("file-input").setInputFiles(`${FIX}/pdf/${f.name}.pdf`);
+    // The XPLOR9 page must stay responsive the whole time (each check is a round trip to it).
+    const started = Date.now();
+    let slowest = 0;
+    let state = "";
+    while (Date.now() - started < 30_000) {
+      const t = Date.now();
+      state = await page.getByTestId("host-state").innerText();
+      slowest = Math.max(slowest, Date.now() - t);
+      if (state === "ready" || state === "error") break;
+      await page.waitForTimeout(150);
+    }
+    expect(["ready", "error"]).toContain(state);
+    expect(slowest).toBeLessThan(1_000);
+    if (f.expect === "render-inert") expect(state).toBe("ready");
+    if (f.expect === "refuse") expect(state).toBe("error");
+
+    if (state === "ready") {
+      const reader = readerFrame(page)!;
+      // Click everything on the page (links/buttons from annotations would be here if rendered).
+      const box = await page.getByTestId("reader-frame").boundingBox();
+      if (box) for (const [x, y] of [[0.3, 0.2], [0.5, 0.25], [0.3, 0.3]]) await page.mouse.click(box.x + box.width * x, box.y + box.height * y);
+      await page.waitForTimeout(1_000);
+      // Nothing interactive inside the book area, and nothing focusable elsewhere on the reader page.
+      expect(await reader.evaluate(() => document.querySelectorAll('[aria-label="Imported book"] :is(a, button, input, iframe, embed, object, form)').length)).toBe(0);
+      expect(
+        await reader.evaluate(() =>
+          [...document.querySelectorAll("a[href], button, input, select, textarea, [tabindex]")].filter((el) => !el.closest("[inert]") && !(el as HTMLElement).matches('[aria-label="PDF page"]')).length,
+        ),
+      ).toBe(0);
+      expect(await reader.evaluate(() => (window as unknown as { __xplor9_pdf_attack?: unknown }).__xplor9_pdf_attack ?? null)).toBeNull();
+    }
+    expect(await page.evaluate(() => (window as unknown as { __xplor9_pdf_attack?: unknown }).__xplor9_pdf_attack ?? null)).toBeNull();
+    await assertNothingReached(page, trap);
+    expect(trap.popups).toEqual([]); // PDF links are not clickable in R4
+  });
+}

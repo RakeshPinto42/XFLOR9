@@ -21,6 +21,13 @@ export const EPUB_LIMITS = {
 
 export const PDF_LIMITS = {
   maxFileBytes: 300 * 1024 * 1024,
+  maxPages: 5_000,
+  /** Opening the document, or drawing one page, is abandoned after this long. */
+  timeoutMs: 20_000,
+  /** Largest canvas drawn for one page (pixels), whatever the zoom. */
+  maxCanvasPixels: 16_000_000,
+  /** Largest image PDF.js will decode (pixels). */
+  maxImageSize: 25_000_000,
 } as const;
 
 export type ImportErrorCode =
@@ -35,6 +42,9 @@ export type ImportErrorCode =
   | "not-epub"
   | "parse-failed"
   | "timeout"
+  | "too-many-pages"
+  | "password-protected"
+  | "storage-full"
   | "unsupported";
 
 export const IMPORT_ERROR_CODES: readonly ImportErrorCode[] = [
@@ -49,13 +59,16 @@ export const IMPORT_ERROR_CODES: readonly ImportErrorCode[] = [
   "not-epub",
   "parse-failed",
   "timeout",
+  "too-many-pages",
+  "password-protected",
+  "storage-full",
   "unsupported",
 ];
 
 /** Plain-language messages shown by XPLOR9 (never text supplied by the file or the reader frame). */
 export const IMPORT_ERROR_MESSAGES: Record<ImportErrorCode, string> = {
-  "too-large": "This file is too large to open (EPUB limit 100 MB).",
-  "not-zip": "This doesn't look like an EPUB file. It may be damaged or a different format.",
+  "too-large": "This file is too large to open (limits: EPUB 100 MB, PDF 300 MB).",
+  "not-zip": "This doesn't look like an EPUB or PDF file. It may be damaged or a different format.",
   "too-many-files": "This EPUB contains too many files to open safely.",
   "entry-too-large": "Part of this EPUB expands to an unsafe size, so it wasn't opened.",
   "total-too-large": "This EPUB expands to an unsafe total size, so it wasn't opened.",
@@ -63,8 +76,11 @@ export const IMPORT_ERROR_MESSAGES: Record<ImportErrorCode, string> = {
   "bad-path": "This EPUB contains files with unsafe names, so it wasn't opened.",
   "duplicate-path": "This EPUB contains duplicate files, so it wasn't opened.",
   "not-epub": "This file is missing parts every EPUB needs. It may be damaged.",
-  "parse-failed": "This EPUB couldn't be read. It may be damaged.",
+  "parse-failed": "This book couldn't be read. It may be damaged or use features XPLOR9 doesn't support.",
   timeout: "This file took too long to check, so it wasn't opened.",
+  "too-many-pages": "This PDF has too many pages to open safely (limit 5,000).",
+  "password-protected": "This PDF is password-protected. Remove the password and import it again.",
+  "storage-full": "There isn't enough storage space in this browser for this file. Delete some imported books and try again.",
   unsupported: "This file type isn't supported yet.",
 };
 
