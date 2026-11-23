@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BOOKS } from "@/features/reading/books";
 import { Bookshelf } from "@/features/reading/Bookshelf";
+import { ContinueReading } from "@/features/reading/ContinueReading";
 
 export const metadata: Metadata = { title: "Reading Room" };
 
@@ -14,6 +15,7 @@ export default function ReadingPage() {
           and the United States, and each one lists how we checked.
         </p>
       </div>
+      <ContinueReading books={BOOKS.map(({ id, title, authors }) => ({ id, title, authors }))} />
       <Bookshelf books={[...BOOKS]} />
     </section>
   );

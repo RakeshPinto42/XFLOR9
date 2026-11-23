@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BOOKS, getBook } from "@/features/reading/books";
 import { BookCover } from "@/features/reading/BookCover";
 import { GENRES, LANGUAGES, indiaPublicDomainFrom } from "@/features/reading/catalogue";
+import { ReadNowButton } from "@/features/reading/ReadNowButton";
 
 export function generateStaticParams() {
   return BOOKS.map((b) => ({ bookId: b.id }));
@@ -59,12 +60,7 @@ export default async function BookPage({ params }: PageProps<"/reading/[bookId]"
             </p>
           )}
 
-          <div className="mt-6 max-w-prose rounded-xl bg-ink px-5 py-4 text-panel">
-            <p className="font-semibold">The in-app reader is being built.</p>
-            <p className="mt-1 text-sm text-panel/80">
-              Reading the full book inside XPLOR9 arrives in the next update. The verified book file is already in place.
-            </p>
-          </div>
+          <ReadNowButton bookId={book.id} />
 
           <section aria-labelledby="rights" className="mt-10 max-w-prose">
             <h2 id="rights" className="font-display text-2xl">

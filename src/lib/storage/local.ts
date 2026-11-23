@@ -12,6 +12,7 @@ export const STORAGE_KEYS = {
   radioFavourites: `${PREFIX}radio.favourites`,
   radioRecents: `${PREFIX}radio.recents`,
   radioPrefs: `${PREFIX}radio.prefs`,
+  readerSettings: `${PREFIX}reader.settings`,
 } as const;
 
 export function readJson<T>(key: string, fallback: T): T {
