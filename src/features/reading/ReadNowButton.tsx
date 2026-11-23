@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FavouriteButton } from "./FavouriteButton";
 import { catalogueKey, getProgress, type ProgressRecord } from "./storage/readingDb";
 
 /** "Read now", or "Continue reading · 34%" when there is saved progress in this browser. */
-export function ReadNowButton({ bookId }: { bookId: string }) {
+export function ReadNowButton({ bookId, title }: { bookId: string; title: string }) {
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   useEffect(() => {
     let alive = true;
@@ -24,7 +25,8 @@ export function ReadNowButton({ bookId }: { bookId: string }) {
       >
         {started ? `Continue reading (${Math.round(progress.fraction * 100)}%)` : "Read now"}
       </Link>
-      {started && progress.chapter && <span className="text-sm text-ink-soft">Last read: {progress.chapter}</span>}
+      <FavouriteButton bookId={bookId} title={title} />
+      {started && progress.chapter && <span className="w-full text-sm text-ink-soft">Last read: {progress.chapter}</span>}
     </div>
   );
 }

@@ -60,7 +60,7 @@ export default async function BookPage({ params }: PageProps<"/reading/[bookId]"
             </p>
           )}
 
-          <ReadNowButton bookId={book.id} />
+          <ReadNowButton bookId={book.id} title={book.title} />
 
           <section aria-labelledby="rights" className="mt-10 max-w-prose">
             <h2 id="rights" className="font-display text-2xl">

@@ -19,11 +19,25 @@ export interface TocItem {
 }
 
 export interface ReaderLocation {
+  /** CFI of the visible range (start and end). */
   cfi: string;
   fraction: number;
   chapter: string | null;
   chapterHref: string | null;
+  /** First words visible on the page (for bookmark labels). */
+  text: string;
 }
+
+export interface SearchExcerpt {
+  pre: string;
+  match: string;
+  post: string;
+}
+
+export type SearchEvent =
+  | { kind: "progress"; fraction: number }
+  | { kind: "results"; chapter: string; hits: { cfi: string; excerpt: SearchExcerpt }[] }
+  | { kind: "done" };
 
 export interface EpubController {
   toc: TocItem[];
@@ -32,6 +46,13 @@ export interface EpubController {
   goTo(target: string): Promise<void>;
   goToFraction(fraction: number): Promise<void>;
   setStyles(css: string): void;
+  /** Searches the whole book; stop iterating to cancel. Matches are highlighted in the text. */
+  search(query: string): AsyncGenerator<SearchEvent>;
+  clearSearch(): void;
+  /** Single-point CFI at the start of the visible page. */
+  startOf(location: ReaderLocation): string;
+  /** Whether a point CFI falls within the visible page. */
+  isVisible(pointCfi: string, location: ReaderLocation): boolean;
   destroy(): void;
 }
 
@@ -42,6 +63,8 @@ interface FoliateView extends HTMLElement {
   prev(): Promise<void>;
   goTo(target: string): Promise<unknown>;
   goToFraction(fraction: number): Promise<void>;
+  search(opts: { query: string }): AsyncGenerator<unknown>;
+  clearSearch(): void;
   close(): void;
   renderer: HTMLElement & { setStyles(css: string): void };
 }
@@ -52,6 +75,7 @@ export async function openEpub(
   opts: { lastCfi: string | null; styles: string; onRelocate: (loc: ReaderLocation) => void },
 ): Promise<EpubController> {
   const { makeBook } = await import("foliate-js/view.js"); // also registers <foliate-view>
+  const CFI = await import("foliate-js/epubcfi.js");
   const book = await makeBook(new File([file], "book.epub", { type: "application/epub+zip" }));
 
   // Clean every (X)HTML/SVG page before it becomes a blob URL inside the reader frame.
@@ -72,12 +96,24 @@ export async function openEpub(
   container.append(view);
 
   view.addEventListener("relocate", (e) => {
-    const d = (e as CustomEvent).detail as { cfi: string; fraction: number; tocItem?: { label?: string; href?: string } };
+    const d = (e as CustomEvent).detail as {
+      cfi: string;
+      fraction: number;
+      tocItem?: { label?: string; href?: string };
+      range?: Range;
+    };
+    let text = "";
+    try {
+      text = d.range?.toString().replace(/\s+/g, " ").trim().slice(0, 300) ?? "";
+    } catch {
+      // range can be detached mid-turn; the label is optional
+    }
     opts.onRelocate({
       cfi: d.cfi,
       fraction: typeof d.fraction === "number" ? d.fraction : 0,
       chapter: d.tocItem?.label?.trim() || null,
       chapterHref: d.tocItem?.href ?? null,
+      text,
     });
   });
 
@@ -119,6 +155,34 @@ export async function openEpub(
     },
     goToFraction: (f) => view.goToFraction(Math.min(1, Math.max(0, f))),
     setStyles: (css) => view.renderer.setStyles(css),
+    search: async function* (query) {
+      const iter = view.search({ query });
+      try {
+        for await (const r of iter) {
+          if (r === "done") {
+            yield { kind: "done" };
+            return;
+          }
+          const item = r as { progress?: number; label?: string; subitems?: { cfi: string; excerpt: SearchExcerpt }[] };
+          if (item.subitems?.length) {
+            yield { kind: "results", chapter: (item.label ?? "").trim(), hits: item.subitems };
+          } else if (typeof item.progress === "number") {
+            yield { kind: "progress", fraction: item.progress };
+          }
+        }
+      } finally {
+        await iter.return?.(undefined); // stops scanning when the caller cancels
+      }
+    },
+    clearSearch: () => view.clearSearch(),
+    startOf: (loc) => CFI.collapse(loc.cfi),
+    isVisible: (point, loc) => {
+      try {
+        return CFI.compare(point, CFI.collapse(loc.cfi)) >= 0 && CFI.compare(point, CFI.collapse(loc.cfi, true)) <= 0;
+      } catch {
+        return false;
+      }
+    },
     destroy: () => {
       view.close();
       view.remove();

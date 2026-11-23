@@ -5,7 +5,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePlayback } from "@/lib/playback/browser";
 import { STORAGE_KEYS } from "@/lib/storage/local";
 import { createLocalStore, useLocalStore } from "@/lib/storage/store";
-import { catalogueKey, getProgress, saveProgress } from "../storage/readingDb";
+import { Icon } from "@/components/Icon";
+import {
+  addBookmark,
+  catalogueKey,
+  deleteBookmark,
+  getProgress,
+  listBookmarks,
+  recordOpened,
+  saveProgress,
+  tidyExcerpt,
+  type BookmarkRecord,
+} from "../storage/readingDb";
+import { BookmarksList } from "./BookmarksList";
+import { SearchPanel } from "./SearchPanel";
 import { openEpub, turnOnKey, type EpubController, type ReaderLocation, type TocItem } from "./epubEngine";
 import {
   DEFAULT_SETTINGS,
@@ -47,6 +60,13 @@ export function EpubReader({ book }: { book: ReaderBook }) {
   const [saveFailed, setSaveFailed] = useState(false);
   const contentsRef = useRef<HTMLDialogElement>(null);
   const settingsRef = useRef<HTMLDialogElement>(null);
+  const searchRef = useRef<HTMLDialogElement>(null);
+  const [panelTab, setPanelTab] = useState<"contents" | "bookmarks">("contents");
+  const [bookmarks, setBookmarks] = useState<BookmarkRecord[]>([]);
+  const [bookmarksStatus, setBookmarksStatus] = useState<"loading" | "ready">("loading");
+  const [notice, setNotice] = useState("");
+  /** The open book's engine, as state so the UI re-renders when it becomes available. */
+  const [engine, setEngine] = useState<EpubController | null>(null);
   const pendingSave = useRef<ReaderLocation | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const theme = THEMES[settings.theme];
@@ -96,8 +116,15 @@ export function EpubReader({ book }: { book: ReaderBook }) {
           return;
         }
         controller.current = ctrl;
+        setEngine(ctrl);
         setToc(ctrl.toc);
         setStatus({ kind: "ready" });
+        void recordOpened(catalogueKey(book.id));
+        const savedBookmarks = await listBookmarks(catalogueKey(book.id));
+        if (!cancelled) {
+          setBookmarks(savedBookmarks);
+          setBookmarksStatus("ready");
+        }
       } catch (err) {
         if (!cancelled)
           setStatus({ kind: "error", message: err instanceof Error ? err.message : "This book couldn't be opened." });
@@ -108,9 +135,17 @@ export function EpubReader({ book }: { book: ReaderBook }) {
       flushSave();
       controller.current?.destroy();
       controller.current = null;
+      setEngine(null);
       el.replaceChildren();
     };
   }, [book.id, book.path, book.sha256, attempt, flushSave]);
+
+  // Hide the bookmark confirmation after a moment.
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(""), 2500);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   // Save immediately if the tab is hidden or closed mid-read.
   useEffect(() => {
@@ -132,7 +167,7 @@ export function EpubReader({ book }: { book: ReaderBook }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
-      if (contentsRef.current?.open || settingsRef.current?.open) return;
+      if (contentsRef.current?.open || settingsRef.current?.open || searchRef.current?.open) return;
       if (t.closest("input, textarea, select, [contenteditable]")) return;
       if (controller.current) turnOnKey(e, controller.current);
     };
@@ -153,13 +188,58 @@ export function EpubReader({ book }: { book: ReaderBook }) {
   const setScale = (v: number) => readerSettings.set((s) => ({ ...s, fontScale: clampFontScale(v) }));
   const percent = location ? Math.round(location.fraction * 100) : 0;
   const playerVisible = !!player.source;
+  const ctrl = engine;
+  const bookmarkHere = location && ctrl ? bookmarks.find((b) => ctrl.isVisible(b.cfi, location)) : undefined;
+
+  async function toggleBookmark() {
+    if (!ctrl || !location) return;
+    if (bookmarkHere) {
+      if (await deleteBookmark(bookmarkHere.id)) {
+        setBookmarks((list) => list.filter((b) => b.id !== bookmarkHere.id));
+        setNotice("Bookmark removed");
+      } else setNotice("Couldn't remove the bookmark in this browser.");
+      return;
+    }
+    const saved = await addBookmark({
+      bookKey: catalogueKey(book.id),
+      cfi: ctrl.startOf(location),
+      chapter: location.chapter,
+      excerpt: tidyExcerpt(location.text),
+      fraction: location.fraction,
+    });
+    if (saved) {
+      setBookmarks((list) => [...list, saved].sort((a, b) => a.fraction - b.fraction));
+      setNotice("Bookmark added");
+    } else setNotice("Couldn't save the bookmark in this browser.");
+  }
+
+  function openPanel(tab: "contents" | "bookmarks") {
+    setPanelTab(tab);
+    contentsRef.current?.showModal();
+  }
 
   return (
     <div
       className="fixed inset-0 z-30 flex flex-col"
-      style={{ background: theme.bg, color: theme.text, paddingBottom: playerVisible ? "var(--player-h)" : 0 }}
+      style={
+        {
+          background: theme.bg,
+          color: theme.text,
+          paddingBottom: playerVisible ? "var(--player-h)" : 0,
+          "--reader-bg": theme.bg,
+        } as React.CSSProperties
+      }
     >
       <style>{`:root{--player-h:6rem}@media (min-width:640px){:root{--player-h:5rem}}`}</style>
+      {/* Short visible confirmation (and screen-reader announcement) for bookmark actions. */}
+      <p
+        role="status"
+        aria-live="polite"
+        className={`pointer-events-none absolute left-1/2 top-16 z-10 -translate-x-1/2 rounded-full px-4 py-2 text-sm font-semibold shadow-lg transition-opacity ${notice ? "opacity-100" : "opacity-0"}`}
+        style={{ background: theme.text, color: theme.bg }}
+      >
+        {notice}
+      </p>
 
       <header className="flex items-center gap-2 border-b px-3 py-2 sm:px-5" style={{ borderColor: `${theme.muted}40` }}>
         <Link
@@ -177,17 +257,41 @@ export function EpubReader({ book }: { book: ReaderBook }) {
         </div>
         <button
           type="button"
-          onClick={() => contentsRef.current?.showModal()}
-          disabled={toc.length === 0}
-          className="rounded-full px-3 py-2 text-sm font-semibold disabled:opacity-40"
+          onClick={() => openPanel("contents")}
+          disabled={status.kind !== "ready"}
+          aria-label="Contents and bookmarks"
+          title="Contents and bookmarks"
+          className="grid h-10 w-10 place-items-center rounded-full disabled:opacity-40"
         >
-          Contents
+          <Icon name="list" />
+        </button>
+        <button
+          type="button"
+          onClick={() => searchRef.current?.showModal()}
+          disabled={status.kind !== "ready"}
+          aria-label="Search this book"
+          title="Search this book"
+          className="grid h-10 w-10 place-items-center rounded-full disabled:opacity-40"
+        >
+          <Icon name="search" />
+        </button>
+        <button
+          type="button"
+          onClick={() => void toggleBookmark()}
+          disabled={status.kind !== "ready" || !location}
+          aria-pressed={!!bookmarkHere}
+          aria-label={bookmarkHere ? "Remove bookmark from this page" : "Bookmark this page"}
+          title={bookmarkHere ? "Remove bookmark" : "Bookmark this page"}
+          className="grid h-10 w-10 place-items-center rounded-full disabled:opacity-40"
+          style={bookmarkHere ? { color: theme.link } : undefined}
+        >
+          <Icon name={bookmarkHere ? "bookmark" : "bookmarkOutline"} />
         </button>
         <button
           type="button"
           onClick={() => settingsRef.current?.showModal()}
           aria-label="Text and theme settings"
-          className="rounded-full px-3 py-2 text-sm font-semibold"
+          className="h-10 min-w-10 rounded-full px-2 text-sm font-semibold"
         >
           Aa
         </button>
@@ -268,31 +372,94 @@ export function EpubReader({ book }: { book: ReaderBook }) {
         </p>
       )}
 
-      {/* Contents: a native modal dialog gives focus trapping and Escape-to-close. */}
+      {/* Contents and bookmarks: one side panel with two tabs (native modal dialog: focus trap, Escape). */}
       <dialog
         ref={contentsRef}
-        aria-label="Contents"
+        aria-label={panelTab === "contents" ? "Contents" : "Bookmarks"}
         className="m-0 h-full max-h-none w-full max-w-sm p-0 backdrop:bg-black/40 sm:h-dvh"
         style={{ background: theme.bg, color: theme.text }}
         onClick={(e) => e.target === e.currentTarget && contentsRef.current?.close()}
       >
-        <div className="flex items-center justify-between border-b px-5 py-3" style={{ borderColor: `${theme.muted}40` }}>
-          <h2 className="font-semibold">Contents</h2>
+        <div className="flex items-center justify-between border-b px-3 py-2" style={{ borderColor: `${theme.muted}40` }}>
+          <div role="tablist" aria-label="Panel" className="flex gap-1">
+            {(["contents", "bookmarks"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={panelTab === t}
+                onClick={() => setPanelTab(t)}
+                className="rounded-full px-3 py-1.5 text-sm font-semibold"
+                style={panelTab === t ? { background: theme.text, color: theme.bg } : undefined}
+              >
+                {t === "contents" ? "Contents" : `Bookmarks${bookmarks.length ? ` (${bookmarks.length})` : ""}`}
+              </button>
+            ))}
+          </div>
           <button type="button" onClick={() => contentsRef.current?.close()} className="px-2 py-1 text-sm font-semibold">
             Close
           </button>
         </div>
-        <nav aria-label="Chapters" className="overflow-y-auto px-2 py-2" style={{ maxHeight: "calc(100dvh - 4rem)" }}>
-          <TocList
-            items={toc}
-            current={location?.chapterHref ?? null}
-            linkColor={theme.link}
-            onPick={(href) => {
-              contentsRef.current?.close();
-              void controller.current?.goTo(href);
-            }}
-          />
-        </nav>
+        <div role="tabpanel" className="overflow-y-auto" style={{ maxHeight: "calc(100dvh - 4rem)" }}>
+          {panelTab === "contents" ? (
+            <nav aria-label="Chapters" className="px-2 py-2">
+              <TocList
+                items={toc}
+                current={location?.chapterHref ?? null}
+                linkColor={theme.link}
+                onPick={(href) => {
+                  contentsRef.current?.close();
+                  void controller.current?.goTo(href);
+                }}
+              />
+            </nav>
+          ) : (
+            <BookmarksList
+              bookmarks={bookmarks}
+              status={bookmarksStatus}
+              colors={theme}
+              onPick={(b) => {
+                contentsRef.current?.close();
+                void controller.current?.goTo(b.cfi);
+              }}
+              onDelete={async (b) => {
+                if (await deleteBookmark(b.id)) {
+                  setBookmarks((list) => list.filter((x) => x.id !== b.id));
+                  setNotice("Bookmark removed");
+                } else setNotice("Couldn't remove the bookmark in this browser.");
+              }}
+            />
+          )}
+        </div>
+      </dialog>
+
+      <dialog
+        ref={searchRef}
+        aria-label="Search this book"
+        className="m-0 ml-auto h-full max-h-none w-full max-w-md p-0 backdrop:bg-black/40 sm:h-dvh"
+        style={{ background: theme.bg, color: theme.text }}
+        onClick={(e) => e.target === e.currentTarget && searchRef.current?.close()}
+      >
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between border-b px-5 py-3" style={{ borderColor: `${theme.muted}40` }}>
+            <h2 className="font-semibold">Search this book</h2>
+            <button type="button" onClick={() => searchRef.current?.close()} className="px-2 py-1 text-sm font-semibold">
+              Close
+            </button>
+          </div>
+          <div className="min-h-0 flex-1">
+            {status.kind === "ready" && (
+              <SearchPanel
+                controller={engine}
+                colors={theme}
+                onPick={(cfi) => {
+                  searchRef.current?.close();
+                  void controller.current?.goTo(cfi);
+                }}
+              />
+            )}
+          </div>
+        </div>
       </dialog>
 
       <dialog

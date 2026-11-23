@@ -14,3 +14,10 @@ declare module "foliate-js/view.js" {
   }
   export function makeBook(file: File | Blob | string): Promise<FoliateBook>;
 }
+
+declare module "foliate-js/epubcfi.js" {
+  /** Reduce a range CFI to its start (or end) point. */
+  export function collapse(cfi: string, toEnd?: boolean): string;
+  /** Negative if a is before b, 0 if equal, positive if after. */
+  export function compare(a: string, b: string): number;
+}
