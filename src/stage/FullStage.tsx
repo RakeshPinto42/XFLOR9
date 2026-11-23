@@ -53,7 +53,7 @@ export function FullStage({
         }}
       >
         <Suspense fallback={null}>
-          <Scene level={level} />
+          <Scene level={level} debug={debug} />
         </Suspense>
         <Adaptive
           onLevel={setLevelIndex}
@@ -98,8 +98,22 @@ function Adaptive({ onLevel, onTooSlow }: { onLevel: (i: number) => void; onTooS
 
 function StatsProbe({ level }: { level: string }) {
   const { gl } = useThree();
+  const getState = useThree((s) => s.get);
   const acc = useRef({ frames: 0, time: 0 });
+  const frame = useRef({ calls: 0, triangles: 0 });
+  // Count every render pass of a frame (post-processing renders several): three's automatic
+  // reset would otherwise leave only the last full-screen pass (1 draw call) in the counters.
+  useEffect(() => {
+    const info = getState().gl.info;
+    info.autoReset = false;
+    return () => {
+      info.autoReset = true;
+    };
+  }, [getState]);
   useFrame((_, delta) => {
+    // useFrame runs before this frame renders: the counters now hold the whole previous frame.
+    frame.current = { calls: gl.info.render.calls, triangles: gl.info.render.triangles };
+    gl.info.reset();
     acc.current.frames += 1;
     acc.current.time += delta;
     if (acc.current.time < 0.5) return;
@@ -108,8 +122,8 @@ function StatsProbe({ level }: { level: string }) {
     stageStats.set({
       fps: Math.round(frames / time),
       frameMs: Math.round((time / frames) * 1000 * 10) / 10,
-      drawCalls: gl.info.render.calls,
-      triangles: gl.info.render.triangles,
+      drawCalls: frame.current.calls,
+      triangles: frame.current.triangles,
       geometries: gl.info.memory.geometries,
       textures: gl.info.memory.textures,
       dpr: gl.getPixelRatio(),

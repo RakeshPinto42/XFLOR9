@@ -20,6 +20,7 @@ const W = 5.2; // room width (m)
 const D = 4.6; // depth
 const H = 3.0; // height
 
+/** Future location inside the neighbourhood (the U1 benchmark is now the monsoon street). */
 export default function LivingRoom({ level }: SceneProps) {
   return (
     <>

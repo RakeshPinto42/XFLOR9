@@ -18,7 +18,7 @@ if (!base || !path || !out) {
 const browser = await chromium.launch({ args: ["--enable-gpu", "--ignore-gpu-blocklist", "--use-angle=default"] });
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 await page.addInitScript(() => localStorage.setItem("xplor9.stage.quality", JSON.stringify("full")));
-await page.goto(`${base}${path}?stage-capture`);
+await page.goto(`${base}${path}${path.includes("?") ? "&" : "?"}stage-capture`); // path may carry e.g. ?t=30
 await page.waitForFunction(() => typeof (window as unknown as { __xplor9CaptureScene?: unknown }).__xplor9CaptureScene === "function", null, { timeout: 60_000 });
 await page.waitForTimeout(Number(seconds) * 1000); // assets loaded, animation settled
 const dataUrl = await page.evaluate(() => (window as unknown as { __xplor9CaptureScene: (q?: number) => string }).__xplor9CaptureScene(0.86));

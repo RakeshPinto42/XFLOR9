@@ -3,15 +3,18 @@ import { readFileSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import raw from "../../content/assets/manifest.json";
 import { DRACO_FILES } from "../../scripts/assets/sync-draco";
-import { AssetManifestError, parseAssetManifest, type AssetRecord } from "./assets";
+import { AssetManifestError, parseAssetManifest, type ModelRecord, type TextureRecord } from "./assets";
 import { GlbError, readGlbSummary, unsupportedRequired } from "./glb";
 
 const assets = parseAssetManifest(raw);
+const models = assets.filter((a): a is ModelRecord => a.kind === "model");
+const textures = assets.filter((a): a is TextureRecord => a.kind === "texture");
 const sha = (b: Buffer) => createHash("sha256").update(b).digest("hex");
-const clone = () => JSON.parse(JSON.stringify(raw)) as { version: number; assets: AssetRecord[] };
-const problemsOf = (mutate: (a: AssetRecord) => void) => {
+const clone = () => JSON.parse(JSON.stringify(raw)) as { version: number; assets: (ModelRecord | TextureRecord)[] };
+/** Mutates the first model record and returns the validation problems. */
+const problemsOf = (mutate: (a: ModelRecord) => void) => {
   const c = clone();
-  mutate(c.assets[0]);
+  mutate(c.assets.find((a): a is ModelRecord => a.kind === "model")!);
   try {
     parseAssetManifest(c);
     return [];
@@ -37,10 +40,20 @@ function glb(json: object): ArrayBuffer {
 }
 
 describe("the real asset manifest", () => {
-  it("has the F1 assets", () => expect(assets.map((a) => a.id).sort()).toEqual(["brass-vase-03", "monobloc-chair-01", "television-01"]));
+  it("has the F1 models and texture sets", () => {
+    expect(models.map((a) => a.id).sort()).toEqual(["brass-vase-03", "monobloc-chair-01", "television-01"]);
+    expect(textures.length).toBeGreaterThanOrEqual(8);
+  });
 
-  it.each(assets.map((a) => [a.id, a]))("%s: the file matches its record and needs only supported extensions", (_, a) => {
-    const rec = a as AssetRecord;
+  it.each(textures.flatMap((t) => t.maps.map((m) => [`${t.id}/${m.map}`, m] as const)))("texture %s matches its record", (_, m) => {
+    const bytes = readFileSync(`public${m.path}`);
+    expect(bytes.length).toBe(m.bytes);
+    expect(sha(bytes)).toBe(m.sha256);
+    expect(bytes.subarray(8, 12).toString()).toBe("WEBP");
+  });
+
+  it.each(models.map((a) => [a.id, a]))("%s: the file matches its record and needs only supported extensions", (_, a) => {
+    const rec = a as ModelRecord;
     const bytes = readFileSync(`public${rec.file.path}`);
     expect(statSync(`public${rec.file.path}`).size).toBe(rec.file.bytes);
     expect(sha(bytes)).toBe(rec.file.sha256);
@@ -51,7 +64,7 @@ describe("the real asset manifest", () => {
   });
 
   it("brand removal is recorded on the television", () => {
-    const tv = assets.find((a) => a.id === "television-01")!;
+    const tv = models.find((a) => a.id === "television-01")!;
     expect(tv.modifications.join(" ")).toMatch(/VTECH/);
   });
 });

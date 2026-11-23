@@ -113,5 +113,247 @@
       "maxTextureSize": 1024,
       "draco": true
     }
+  },
+  "textures": {
+    "clay-roof-tiles": {
+      "title": "Clay roof tiles",
+      "use": "House roofs (Mangalore-style tiles)",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "clay_roof_tiles",
+        "url": "https://polyhaven.com/a/clay_roof_tiles",
+        "api": "https://api.polyhaven.com/files/clay_roof_tiles",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "realWorldMetres": 4,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 1024,
+        "arm": 512
+      }
+    },
+    "laterite-soil": {
+      "title": "Red laterite soil with stones",
+      "use": "Neighbourhood ground",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "red_laterite_soil_stones",
+        "url": "https://polyhaven.com/a/red_laterite_soil_stones",
+        "api": "https://api.polyhaven.com/files/red_laterite_soil_stones",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "realWorldMetres": 2,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 1024,
+        "arm": 512
+      }
+    },
+    "muddy-tracks": {
+      "title": "Muddy tracks",
+      "use": "The lane",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "muddy_tracks",
+        "url": "https://polyhaven.com/a/muddy_tracks",
+        "api": "https://api.polyhaven.com/files/muddy_tracks",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "realWorldMetres": 2.25,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 1024,
+        "arm": 512
+      }
+    },
+    "leafy-grass": {
+      "title": "Leafy grass",
+      "use": "Verges and yards",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "leafy_grass",
+        "url": "https://polyhaven.com/a/leafy_grass",
+        "api": "https://api.polyhaven.com/files/leafy_grass",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Charlotte Baglioni"
+      ],
+      "realWorldMetres": 2,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 1024,
+        "arm": 512
+      }
+    },
+    "mossy-plaster": {
+      "title": "Worn mossy plaster wall",
+      "use": "House walls (monsoon weathering)",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "worn_mossy_plasterwall",
+        "url": "https://polyhaven.com/a/worn_mossy_plasterwall",
+        "api": "https://api.polyhaven.com/files/worn_mossy_plasterwall",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "realWorldMetres": 1.8,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 1024,
+        "arm": 512
+      }
+    },
+    "yellow-plaster": {
+      "title": "Yellow plaster",
+      "use": "House walls (variety)",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "yellow_plaster",
+        "url": "https://polyhaven.com/a/yellow_plaster",
+        "api": "https://api.polyhaven.com/files/yellow_plaster",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "realWorldMetres": 2,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 512,
+        "arm": 512
+      }
+    },
+    "pine-door": {
+      "title": "Rough pine door",
+      "use": "Doors and window shutters",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "rough_pine_door",
+        "url": "https://polyhaven.com/a/rough_pine_door",
+        "api": "https://api.polyhaven.com/files/rough_pine_door",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "realWorldMetres": 2,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 512,
+        "arm": 512
+      }
+    },
+    "wood-planks": {
+      "title": "Wood planks",
+      "use": "Veranda posts, beams and benches",
+      "source": {
+        "name": "Poly Haven",
+        "asset": "wood_planks",
+        "url": "https://polyhaven.com/a/wood_planks",
+        "api": "https://api.polyhaven.com/files/wood_planks",
+        "resolution": "1k"
+      },
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "realWorldMetres": 1.5,
+      "maps": [
+        "diff",
+        "nor_gl",
+        "arm"
+      ],
+      "quality": 86,
+      "mapSizes": {
+        "diff": 1024,
+        "nor_gl": 512,
+        "arm": 512
+      }
+    }
   }
 }

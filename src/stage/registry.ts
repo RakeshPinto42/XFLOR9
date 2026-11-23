@@ -9,6 +9,8 @@ import type { QualityLevel } from "@/engine/adaptive";
 export interface SceneProps {
   /** Current adaptive quality level (pixel ratio, shadows, effects, particle share). */
   level: QualityLevel;
+  /** Developer mode: the free camera is active, so scenes must not drive the camera. */
+  debug: boolean;
 }
 
 export interface SceneEntry {
@@ -24,6 +26,15 @@ export interface SceneEntry {
 }
 
 export const SCENES: readonly SceneEntry[] = [
+  {
+    id: "monsoon-neighbourhood",
+    path: "/lab/monsoon",
+    title: "Monsoon neighbourhood",
+    description:
+      "A small Indian neighbourhood on a monsoon evening: tiled-roof houses with verandas and warm amber lights, a muddy lane with puddles, coconut palms, banana plants and dark green trees, continuous rain, drifting mist and distant lightning under a charcoal sky.",
+    poster: "/stage/posters/monsoon-neighbourhood.webp",
+    load: () => import("@/scenes/monsoon/MonsoonNeighbourhood"),
+  },
   {
     id: "living-room",
     path: "/lab/living-room",

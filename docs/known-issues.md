@@ -39,4 +39,8 @@ Last updated: 2026-11-23 (F1 increment 1).
 | ST-6 | `npm audit` reports 4 moderate advisories (glob/minimatch DoS via crafted patterns) inside the development-only asset tools (@gltf-transform/cli). They only run locally on our own fixed paths and never ship to the site; not force-upgraded (breaking). | Low | F1.2 | Re-check when @gltf-transform updates. |
 | ST-7 | The Khronos validator can't inspect inside Draco-compressed geometry; the build compensates by decoding the result and comparing counts with the source. | Info | F1.2 | |
 | ST-8 | A model that fails to load stays failed for the visit (the scene shows Lite with a reason); reloading retries. Intentional: retrying inside React suspense looped forever. | Info | F1.2 | |
+| ST-10 | Monsoon scene: the free (debug) camera can still look past the edge of the world; the cinematic camera never does. | Info | F1.3 | |
+| ST-11 | Monsoon scene: houses are generated procedurally from plastered and tiled boxes; they read as village houses but lack fine detail (eaves trim, grilles, clutter). Upgrades come with the Studio (S1–S3) and the U1 phase. | Low | F1.3 | Planned. |
+| ST-12 | Monsoon scene: activity locations are empty until F4 characters exist; the street currently has no people. | Info | F1.3 | F4. |
+| ST-13 | Headless WebKit renders the monsoon scene slowly in software; in one full regression run the following WebKit test's page setup timed out once (passed on re-run). | Low | F1.3 | Watch for repeats. |
 | ST-9 | The F1 scene uses a stand-in box for the TV cabinet until increment 3 builds the teak cabinet, sofa, centre table and three-blade fan. | Info | F1.2 | |

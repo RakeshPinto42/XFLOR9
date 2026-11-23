@@ -5,6 +5,13 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    // 3D scenes update three.js objects (materials, lights, instance buffers) every frame inside
+    // useFrame: React Three Fiber's documented pattern. These objects live outside React state
+    // on purpose, so the React Compiler's immutability rule doesn't apply to them.
+    files: ["src/scenes/**/*.{ts,tsx}"],
+    rules: { "react-hooks/immutability": "off" },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -29,6 +29,7 @@ manifest record with its source, licence, authors, modifications and before/afte
 
 - dedup and prune (removes duplicate and unused data);
 - textures to WebP, at most `maxTextureSize` (default 1024);
+- texture sets (`textures` in the recipes, `npm run assets:build-texture`): each map to WebP with its own size cap (`mapSizes`). AO/roughness/metal maps and the normal maps of small surfaces are 512 px, saving GPU memory (8 sets: ~84 MB on the GPU, was ~134 MB; 3.9 MB download);
 - Draco geometry compression **only for static models**. Models with animation, skins or morph
   targets keep uncompressed geometry unless the recipe sets `dracoVerified` after a visual and motion
   check;

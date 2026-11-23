@@ -156,6 +156,258 @@
       "verifiedAt": "2026-11-23"
     },
     {
+      "id": "clay-roof-tiles",
+      "kind": "texture",
+      "title": "Clay roof tiles",
+      "use": "House roofs (Mangalore-style tiles)",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/clay-roof-tiles/diff.webp",
+          "bytes": 225044,
+          "sha256": "1206a36d2e941617eb525f1aee9d09000198c64dd38417aac8bc03c738d45698",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/clay-roof-tiles/nor_gl.webp",
+          "bytes": 320290,
+          "sha256": "59aefff484532676711d6bc4be032c79de1f03c11c877f4939151e275d47f204",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/clay-roof-tiles/arm.webp",
+          "bytes": 36050,
+          "sha256": "98f6ad82b101566ab16604978ff6be9aca237c50459d6285c9f5cec1ddda2d65",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 4,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/clay_roof_tiles",
+        "retrievedFrom": "https://api.polyhaven.com/files/clay_roof_tiles",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "clay_roof_tiles_diff_1k.jpg",
+            "bytes": 878367,
+            "md5": "d862ac9932b09b0918b5971ddb77099c"
+          },
+          {
+            "name": "clay_roof_tiles_nor_gl_1k.jpg",
+            "bytes": 1101177,
+            "md5": "d861a708c94c824befc8aac668052776"
+          },
+          {
+            "name": "clay_roof_tiles_arm_1k.jpg",
+            "bytes": 644850,
+            "md5": "1c85df2500d6d9ae720cad193e3a4cec"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 1024,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 2624394,
+        "optimisedBytes": 581384
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "laterite-soil",
+      "kind": "texture",
+      "title": "Red laterite soil with stones",
+      "use": "Neighbourhood ground",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/laterite-soil/diff.webp",
+          "bytes": 248174,
+          "sha256": "4fc3d3695551ba8d7621e2261d221842a0f7ad10f88f3ce8c36275fa1136c999",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/laterite-soil/nor_gl.webp",
+          "bytes": 544442,
+          "sha256": "81e2fc4c7aaeb4436fff70b086f8399ffc0cff4b9568bc321105cb0249e19b27",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/laterite-soil/arm.webp",
+          "bytes": 76330,
+          "sha256": "37f273f82660349dbdfd585e176808b4891fff0a418d1f1a56c68805490e8687",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 2,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/red_laterite_soil_stones",
+        "retrievedFrom": "https://api.polyhaven.com/files/red_laterite_soil_stones",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "red_laterite_soil_stones_diff_1k.jpg",
+            "bytes": 906764,
+            "md5": "f5d483e42da0c704f320b8c159ebca5e"
+          },
+          {
+            "name": "red_laterite_soil_stones_nor_gl_1k.jpg",
+            "bytes": 1494933,
+            "md5": "08737e3b461efa2583c648fbb3472e84"
+          },
+          {
+            "name": "red_laterite_soil_stones_arm_1k.jpg",
+            "bytes": 1056919,
+            "md5": "8f1a8b5d546c87d57ec2718ea072d8b0"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 1024,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 3458616,
+        "optimisedBytes": 868946
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "leafy-grass",
+      "kind": "texture",
+      "title": "Leafy grass",
+      "use": "Verges and yards",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/leafy-grass/diff.webp",
+          "bytes": 410122,
+          "sha256": "1a18a8875db9af05b63e7a6af3b1f1bc1df0451ee1ab8fc39badfc22da740cab",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/leafy-grass/nor_gl.webp",
+          "bytes": 531776,
+          "sha256": "b901d86e294844b62c9310ca08ed79011bc410e845be79c2efa3f3207a9baa49",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/leafy-grass/arm.webp",
+          "bytes": 68174,
+          "sha256": "d36679761fda26adab1c062eb1adcf6348ac1c78f7338a993ab8f6f5c1c5f317",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 2,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Charlotte Baglioni"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/leafy_grass",
+        "retrievedFrom": "https://api.polyhaven.com/files/leafy_grass",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "leafy_grass_diff_1k.jpg",
+            "bytes": 1195394,
+            "md5": "0dbc071e91d6905edfcfbe8eb785a1ab"
+          },
+          {
+            "name": "leafy_grass_nor_gl_1k.jpg",
+            "bytes": 1466049,
+            "md5": "8279e096e204ea326d57a318869f99df"
+          },
+          {
+            "name": "leafy_grass_arm_1k.jpg",
+            "bytes": 1010081,
+            "md5": "44fb4e40ef0f3425a7d1a14bc328e4d8"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 1024,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 3671524,
+        "optimisedBytes": 1010072
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
       "id": "monobloc-chair-01",
       "kind": "model",
       "title": "White plastic monobloc chair",
@@ -306,6 +558,258 @@
             "KHR_draco_mesh_compression"
           ]
         }
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "mossy-plaster",
+      "kind": "texture",
+      "title": "Worn mossy plaster wall",
+      "use": "House walls (monsoon weathering)",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/mossy-plaster/diff.webp",
+          "bytes": 355962,
+          "sha256": "43cdc0ba68fae7ee4682cc530f81a5ae92b508c5b30672ded1ada6cc2af9bd3d",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/mossy-plaster/nor_gl.webp",
+          "bytes": 208124,
+          "sha256": "2d4fa89aac8a9d32023ca9bbd33087edc17bf617167d43724a46a4ac6534f24f",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/mossy-plaster/arm.webp",
+          "bytes": 23530,
+          "sha256": "4a3117bd10b1bb268abda6c2f40093e12701f4fdb08edd7f8c4c00d9dfc889c0",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 1.8,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/worn_mossy_plasterwall",
+        "retrievedFrom": "https://api.polyhaven.com/files/worn_mossy_plasterwall",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "worn_mossy_plasterwall_diff_1k.jpg",
+            "bytes": 964249,
+            "md5": "f396a70667b8b383a7ebc207a6344481"
+          },
+          {
+            "name": "worn_mossy_plasterwall_nor_gl_1k.jpg",
+            "bytes": 870753,
+            "md5": "d9c20e0db2c6ef279e4afb3010d8d999"
+          },
+          {
+            "name": "worn_mossy_plasterwall_arm_1k.jpg",
+            "bytes": 719996,
+            "md5": "bd06801ec064754bbb5d7db0bcc46b3e"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 1024,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 2554998,
+        "optimisedBytes": 587616
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "muddy-tracks",
+      "kind": "texture",
+      "title": "Muddy tracks",
+      "use": "The lane",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/muddy-tracks/diff.webp",
+          "bytes": 161834,
+          "sha256": "c5a40bcff7bcea16c9744148f3ee685cd3d29b8814a67ad7e71980cf19509a6b",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/muddy-tracks/nor_gl.webp",
+          "bytes": 435862,
+          "sha256": "8a761ba95ce8473312fc3e76db85772dbace636f211f8473c8045222e42b7f11",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/muddy-tracks/arm.webp",
+          "bytes": 69100,
+          "sha256": "2a2e2c6100e28306161ee222bc5552c7f41d3fe35ee32703950eaad07492d69d",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 2.25,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/muddy_tracks",
+        "retrievedFrom": "https://api.polyhaven.com/files/muddy_tracks",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "muddy_tracks_diff_1k.jpg",
+            "bytes": 717431,
+            "md5": "a0d904939720504810f60377c6463deb"
+          },
+          {
+            "name": "muddy_tracks_nor_gl_1k.jpg",
+            "bytes": 1311155,
+            "md5": "73598ec70cab540080a0521ac839435d"
+          },
+          {
+            "name": "muddy_tracks_arm_1k.jpg",
+            "bytes": 998069,
+            "md5": "013434bc7166a9bc9bb50693da9b3667"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 1024,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 3026655,
+        "optimisedBytes": 666796
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "pine-door",
+      "kind": "texture",
+      "title": "Rough pine door",
+      "use": "Doors and window shutters",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/pine-door/diff.webp",
+          "bytes": 129838,
+          "sha256": "4eaa7dcab8f1bbc494bfe582ff7f3c127b6f3793fbb9e0f2ff39c779f0431f9a",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/pine-door/nor_gl.webp",
+          "bytes": 14806,
+          "sha256": "12b44b748c481123653d4a6d47052efa7e39ce17b1fa297e86754e7fe35481a7",
+          "size": [
+            512,
+            512
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/pine-door/arm.webp",
+          "bytes": 2634,
+          "sha256": "4977bf407e29d0ee072283932798e401d0adafb17d8014a9784707368df9f11a",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 2,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/rough_pine_door",
+        "retrievedFrom": "https://api.polyhaven.com/files/rough_pine_door",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "rough_pine_door_diff_1k.jpg",
+            "bytes": 721865,
+            "md5": "8c1036e566fe8e925e98123458aae385"
+          },
+          {
+            "name": "rough_pine_door_nor_gl_1k.jpg",
+            "bytes": 717358,
+            "md5": "4ea81cbe11f012f8dd9490de124ed1fd"
+          },
+          {
+            "name": "rough_pine_door_arm_1k.jpg",
+            "bytes": 201659,
+            "md5": "f542d70fa482014e9533a896e917c161"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 512,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 1640882,
+        "optimisedBytes": 147278
       },
       "verifiedAt": "2026-11-23"
     },
@@ -464,6 +968,174 @@
             "KHR_draco_mesh_compression"
           ]
         }
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "wood-planks",
+      "kind": "texture",
+      "title": "Wood planks",
+      "use": "Veranda posts, beams and benches",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/wood-planks/diff.webp",
+          "bytes": 95032,
+          "sha256": "5a6687c69afc636f0657e38f9c9d2332ac4dc4db85f27448a1a31860698ecf80",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/wood-planks/nor_gl.webp",
+          "bytes": 15974,
+          "sha256": "54568dbfe5e2cd106ad433eefa9c2afd82141f18bc3a6ed1077f6ad89033b62e",
+          "size": [
+            512,
+            512
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/wood-planks/arm.webp",
+          "bytes": 8684,
+          "sha256": "427fc5c1e772a782cf7ebd658f2221c47195f153f4bd426d54f866ff2372eae3",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 1.5,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/wood_planks",
+        "retrievedFrom": "https://api.polyhaven.com/files/wood_planks",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "wood_planks_diff_1k.jpg",
+            "bytes": 609525,
+            "md5": "922505c35c2d0dc6a44da7ac77757134"
+          },
+          {
+            "name": "wood_planks_nor_gl_1k.jpg",
+            "bytes": 652441,
+            "md5": "98d2313130880f8ed7b87e843f6ba149"
+          },
+          {
+            "name": "wood_planks_arm_1k.jpg",
+            "bytes": 383696,
+            "md5": "7188148704e0784171fa57332514ce25"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 512,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 1645662,
+        "optimisedBytes": 119690
+      },
+      "verifiedAt": "2026-11-23"
+    },
+    {
+      "id": "yellow-plaster",
+      "kind": "texture",
+      "title": "Yellow plaster",
+      "use": "House walls (variety)",
+      "maps": [
+        {
+          "map": "diff",
+          "path": "/assets/textures/yellow-plaster/diff.webp",
+          "bytes": 110250,
+          "sha256": "0ccf33fee6a9f21a4ca94df6025f301fa9ee5e22d081003076cb8263b387213d",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        {
+          "map": "nor_gl",
+          "path": "/assets/textures/yellow-plaster/nor_gl.webp",
+          "bytes": 14308,
+          "sha256": "a79c24d1c2da36b3e0766d30b709dfb9234ccf52c658f5199d195b686f47e5a5",
+          "size": [
+            512,
+            512
+          ]
+        },
+        {
+          "map": "arm",
+          "path": "/assets/textures/yellow-plaster/arm.webp",
+          "bytes": 13270,
+          "sha256": "389075d5e546012864c0c786bdcd831bd4f372915d4f03f22c3360a65808c07f",
+          "size": [
+            512,
+            512
+          ]
+        }
+      ],
+      "realWorldMetres": 2,
+      "licence": {
+        "spdx": "CC0-1.0",
+        "url": "https://polyhaven.com/license"
+      },
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": {
+        "name": "Poly Haven",
+        "url": "https://polyhaven.com/a/yellow_plaster",
+        "retrievedFrom": "https://api.polyhaven.com/files/yellow_plaster",
+        "resolution": "1k",
+        "retrievedAt": "2026-11-23",
+        "files": [
+          {
+            "name": "yellow_plaster_diff_1k.jpg",
+            "bytes": 376961,
+            "md5": "8f2c93e6c9b4e81006cd0f3e3a80696e"
+          },
+          {
+            "name": "yellow_plaster_nor_gl_1k.jpg",
+            "bytes": 522586,
+            "md5": "f8f193b43abd6c25a4781a6340b74409"
+          },
+          {
+            "name": "yellow_plaster_arm_1k.jpg",
+            "bytes": 113469,
+            "md5": "d6586c8a472b2dd780aad5d781d00c75"
+          }
+        ]
+      },
+      "modifications": [],
+      "optimisation": {
+        "tool": "sharp (JPEG → WebP, per-map size caps)",
+        "mapSizes": {
+          "diff": 1024,
+          "nor_gl": 512,
+          "arm": 512
+        },
+        "textures": "webp",
+        "quality": 86,
+        "originalBytes": 1013016,
+        "optimisedBytes": 137828
       },
       "verifiedAt": "2026-11-23"
     }

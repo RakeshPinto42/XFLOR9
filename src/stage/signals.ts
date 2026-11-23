@@ -39,7 +39,14 @@ export function subscribeSignals(onChange: () => void): () => void {
   return () => mq.removeEventListener("change", onChange);
 }
 
+/** Diagnostics panel without the free camera (?stage-stats): measure the real cinematic camera. */
+export function statsRequested(): boolean {
+  return new URLSearchParams(window.location.search).has("stage-stats");
+}
+
 /** Diagnostics are on in development, or with ?stage-debug in the address. */
 export function debugRequested(): boolean {
-  return process.env.NODE_ENV === "development" || new URLSearchParams(window.location.search).has("stage-debug");
+  const q = new URLSearchParams(window.location.search);
+  if (q.has("stage-nodebug")) return false; // preview the real (cinematic) camera in development
+  return process.env.NODE_ENV === "development" || q.has("stage-debug");
 }

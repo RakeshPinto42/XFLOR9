@@ -6,7 +6,7 @@ import { useLocalStore } from "@/lib/storage/store";
 import { DiagnosticsPanel } from "./DiagnosticsPanel";
 import { FullStage } from "./FullStage";
 import type { SceneEntry } from "./registry";
-import { debugRequested, qualityPreference, readSignals, subscribeSignals } from "./signals";
+import { debugRequested, qualityPreference, readSignals, statsRequested, subscribeSignals } from "./signals";
 
 const noSubscribe = () => () => {};
 
@@ -20,6 +20,7 @@ export function StageHost({ scene }: { scene: SceneEntry }) {
   const signalsKey = useSyncExternalStore(subscribeSignals, () => JSON.stringify(readSignals()), () => "");
   const decision = signalsKey ? chooseMode(pref, JSON.parse(signalsKey)) : null;
   const debug = useSyncExternalStore(noSubscribe, debugRequested, () => false);
+  const stats = useSyncExternalStore(noSubscribe, statsRequested, () => false);
   // Set when Full can't continue (context lost, load error, too slow): fall back for this visit.
   const [fallback, setFallbackState] = useState<{ reason: string } | null>(null);
   // The first reason wins: leaving Full disposes the renderer, which itself fires a
@@ -63,7 +64,7 @@ export function StageHost({ scene }: { scene: SceneEntry }) {
         )}
       </div>
       <QualityPanel mode={mode} reason={reason} pref={pref} />
-      {(debug || showPanel) && <DiagnosticsPanel mode={mode} reason={reason} scene={scene} />}
+      {(debug || stats || showPanel) && <DiagnosticsPanel mode={mode} reason={reason} scene={scene} />}
     </>
   );
 }

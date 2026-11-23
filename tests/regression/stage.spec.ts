@@ -199,3 +199,44 @@ test("a model needing an unsupported extension fails clearly and the scene falls
   expect(consoleErrors.join("\n")).toContain("brass-vase-03 needs EXT_meshopt_compression");
   errors.length = 0; // the thrown error is the expected outcome here
 });
+
+// ---------- U1 benchmark: the monsoon neighbourhood ----------
+
+test("monsoon neighbourhood renders real pixels within the draw-call budget", async ({ page, browserName }) => {
+  await page.goto("/");
+  test.skip(!(await hasWebGL(page)), `${browserName}: no WebGL in this headless browser`);
+  test.setTimeout(90_000);
+  await page.goto("/lab/monsoon?stage-stats&stage-capture&t=30");
+  await expect(stage(page)).toHaveAttribute("data-mode", "full");
+  await expect(stage(page)).toHaveAttribute("data-scene", "monsoon-neighbourhood");
+  // Texture sets loaded (8 sets × 3 maps) and frames counted across every render pass.
+  await expect.poll(async () => (await stats(page)).textures, { timeout: 45_000 }).toBeGreaterThanOrEqual(24);
+  await expect.poll(async () => (await stats(page)).drawCalls, { timeout: 15_000 }).toBeGreaterThan(10);
+  const s = await stats(page);
+  expect(s.drawCalls).toBeLessThan(120); // was ~440 before merging; measured 53 on the reference laptop
+  await page.waitForFunction(() => typeof (window as unknown as { __xplor9CaptureScene?: unknown }).__xplor9CaptureScene === "function");
+  const colours = await page.evaluate(async () => {
+    const img = new Image();
+    img.src = (window as unknown as { __xplor9CaptureScene: (q?: number) => string }).__xplor9CaptureScene(0.9);
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = 160;
+    c.height = 90;
+    const ctx = c.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, 160, 90);
+    const d = ctx.getImageData(0, 0, 160, 90).data;
+    const set = new Set<number>();
+    for (let i = 0; i < d.length; i += 4) set.add((d[i] >> 3) * 1024 + (d[i + 1] >> 3) * 32 + (d[i + 2] >> 3));
+    return set.size;
+  });
+  expect(colours).toBeGreaterThan(60);
+});
+
+test("monsoon neighbourhood: Still shows its own rendered scene image", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/lab/monsoon");
+  await expect(stage(page)).toHaveAttribute("data-mode", "still");
+  await expect(page.getByTestId("stage-poster")).toHaveAttribute("src", "/stage/posters/monsoon-neighbourhood.webp");
+  const ok = await page.evaluate(async () => (await fetch("/stage/posters/monsoon-neighbourhood.webp")).ok);
+  expect(ok).toBe(true);
+});

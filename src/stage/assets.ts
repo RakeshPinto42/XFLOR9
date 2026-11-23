@@ -5,7 +5,7 @@ import { Mesh, type Material, type Object3D, type Texture } from "three";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import manifestJson from "../../content/assets/manifest.json";
-import { parseAssetManifest, type AssetRecord } from "@/engine/assets";
+import { parseAssetManifest, type AssetRecord, type ModelRecord, type TextureRecord } from "@/engine/assets";
 import { GlbError, readGlbSummary, unsupportedRequired } from "@/engine/glb";
 import { ResourceTracker } from "@/engine/resources";
 
@@ -20,6 +20,18 @@ const MANIFEST = new Map(parseAssetManifest(manifestJson).map((a) => [a.id, a]))
 export function assetRecord(id: string): AssetRecord {
   const rec = MANIFEST.get(id);
   if (!rec) throw new Error(`Unknown asset "${id}" (not in content/assets/manifest.json)`);
+  return rec;
+}
+
+export function modelRecord(id: string): ModelRecord {
+  const rec = assetRecord(id);
+  if (rec.kind !== "model") throw new Error(`Asset "${id}" is a ${rec.kind}, not a model`);
+  return rec;
+}
+
+export function textureRecord(id: string): TextureRecord {
+  const rec = assetRecord(id);
+  if (rec.kind !== "texture") throw new Error(`Asset "${id}" is a ${rec.kind}, not a texture set`);
   return rec;
 }
 
@@ -96,7 +108,7 @@ const cache = new Map<string, Promise<GLTF>>();
 export function loadModel(id: string): Promise<GLTF> {
   const existing = cache.get(id);
   if (existing) return existing;
-  const rec = assetRecord(id);
+  const rec = modelRecord(id);
   const promise = (async () => {
     const buffer = await fetchWithProgress(id, rec.file.path, rec.file.bytes);
     let missing: string[];
