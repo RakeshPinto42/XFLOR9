@@ -341,3 +341,23 @@ describe("other tabs", () => {
     expect(engine.getState().status).toBe("paused");
   });
 });
+
+describe("site-wide sound settings (A1)", () => {
+  it("scale the element's volume and mute it without changing the player's own settings", () => {
+    const { engine, audio, saved } = setup();
+    engine.setVolume(0.5);
+    engine.setOutput(0.4, false);
+    expect(audio.volume).toBeCloseTo(0.2);
+    expect(engine.getState().volume).toBe(0.5);
+    engine.setOutput(0.4, true);
+    expect(audio.muted).toBe(true);
+    expect(engine.getState().muted).toBe(false);
+    engine.setVolume(0.8); // the player's slider still works under site settings
+    expect(audio.volume).toBeCloseTo(0.32);
+    expect(audio.muted).toBe(true);
+    engine.setOutput(1, false);
+    expect(audio.volume).toBeCloseTo(0.8);
+    expect(audio.muted).toBe(false);
+    expect(saved.at(-1)).toEqual({ volume: 0.8, muted: false });
+  });
+});

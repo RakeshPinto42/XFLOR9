@@ -1,6 +1,10 @@
-# Shared audio architecture (plan for phase A1)
+# Shared audio architecture (phase A1)
 
-Status: planning (started alongside F1 increment 3, 2026-11-24). Nothing here is built yet.
+Status: A1 built (2026-11-24): engine and mixer (`src/engine/audio/`), sound control in the site
+header, radio following overall × music volume, scene bridge (`src/stage/audio/`) with the monsoon
+rain bed, roof/eave spatial loops and distance-delayed thunder. All current sound is procedural
+(`synth.ts`), so no audio files exist yet. Not yet built: dialogue content, birds/frogs, children
+and veranda-radio emitters (they wait for F4 characters and original music).
 Creative rules: [creative-direction.md](creative-direction.md). Roadmap: [roadmap.md](roadmap.md).
 
 ## Goals
@@ -77,4 +81,5 @@ characters      ──► dialogue bus ─┘
 2. Sound controls in the site shell (master mute, three sliders), accessible and remembered.
 3. Radio integration through the element's volume (no change to how streams play).
 4. Scene bridge and spatial emitters; the monsoon scene's rain bed, thunder and roof sounds.
-5. Rights records for audio files in the manifest; tests that every file has one.
+5. Rights records for audio files: a test fails if any file under `public/assets/` (audio included)
+   has no manifest record. The manifest gains an `audio` record kind with the first recording.

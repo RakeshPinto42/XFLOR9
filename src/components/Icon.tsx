@@ -16,6 +16,7 @@ const PATHS = {
   trash: "M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12H7zm3 2v8h2v-8zm4 0v8h2v-8z",
   prev: "M6 5h2v14H6zM20 5v14L9.5 12z",
   next: "M16 5h2v14h-2zM4 5v14l10.5-7z",
+  sliders: "M4 6h9v2H4zM17 6h3v2h-3zM13 4h4v6h-4zM4 16h3v2H4zM11 16h9v2h-9zM7 14h4v6H7z",
 } as const;
 
 export type IconName = keyof typeof PATHS;

@@ -13,6 +13,8 @@ import { Houses, type HouseSpec } from "./house";
 import { MonsoonSky } from "./sky";
 import { Vegetation, type Tree } from "./vegetation";
 import { Mist, Rain } from "./weather";
+import { MonsoonThunder } from "./sound";
+import { SpatialSound } from "@/stage/audio/SpatialSound";
 
 /**
  * U1 benchmark: a dark, misty Indian monsoon neighbourhood at dusk, drawn from its scene file
@@ -125,6 +127,8 @@ export default function MonsoonNeighbourhood({ level, debug, document: doc }: Sc
       {weather.mist && <Mist banks={weather.mist.banks} strength={mistStrength} />}
       {weather.rain && <Rain share={level.particles} maxDrops={weather.rain.maxDrops} />}
       {debug && <ActivityMarkers spots={doc.activities} />}
+      <SpatialSound anchors={doc.audio} />
+      {weather.lightning && <MonsoonThunder />}
       {fx && <StageEffects enabled={level.effects} bloom={fx.bloom} bloomThreshold={fx.bloomThreshold} vignette={fx.vignette} grain={fx.grain} />}
     </>
   );

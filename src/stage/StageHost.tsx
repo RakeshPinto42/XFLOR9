@@ -5,6 +5,7 @@ import { chooseMode, QUALITY_LABELS, QUALITY_PREFERENCES, type QualityMode } fro
 import { useLocalStore } from "@/lib/storage/store";
 import { DiagnosticsPanel } from "./DiagnosticsPanel";
 import { FullStage } from "./FullStage";
+import { SceneAmbience } from "./audio/SceneAmbience";
 import type { SceneEntry } from "./registry";
 import { debugRequested, qualityPreference, readSignals, statsRequested, subscribeSignals } from "./signals";
 
@@ -63,6 +64,7 @@ export function StageHost({ scene }: { scene: SceneEntry }) {
           <PosterView scene={scene} animate={mode === "lite"} />
         )}
       </div>
+      <SceneAmbience scene={scene} />
       <QualityPanel mode={mode} reason={reason} pref={pref} />
       {(debug || stats || showPanel) && <DiagnosticsPanel mode={mode} reason={reason} scene={scene} />}
     </>

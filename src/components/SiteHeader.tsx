@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MODULES } from "@/lib/modules";
+import { SoundControl } from "./SoundControl";
 
 const DOT: Record<string, string> = {
   radio: "bg-radio",
@@ -21,7 +22,7 @@ export function SiteHeader() {
         <Link href="/" className="logo-mark text-3xl leading-none" aria-label="XPLOR9 home">
           XPLOR9
         </Link>
-        <nav aria-label="Modules" className="-mx-1 flex-1 basis-full sm:basis-auto">
+        <nav aria-label="Modules" className="order-last -mx-1 flex-1 basis-full sm:order-none sm:basis-auto">
           <ul className="flex flex-wrap gap-1">
             {MODULES.map((m) => {
               const active = pathname === m.href || pathname.startsWith(`${m.href}/`);
@@ -42,6 +43,7 @@ export function SiteHeader() {
             })}
           </ul>
         </nav>
+        <SoundControl />
       </div>
     </header>
   );

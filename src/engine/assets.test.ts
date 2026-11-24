@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import raw from "../../content/assets/manifest.json";
 import { DRACO_FILES } from "../../scripts/assets/sync-draco";
@@ -43,6 +44,15 @@ describe("the real asset manifest", () => {
   it("has the F1 models and texture sets", () => {
     expect(models.map((a) => a.id).sort()).toEqual(["brass-vase-03", "monobloc-chair-01", "television-01"]);
     expect(textures.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("every file served from public/assets (models, textures, audio…) has a rights record", () => {
+    const recorded = new Set(assets.flatMap((a) => (a.kind === "model" ? [a.file.path] : a.maps.map((m) => m.path))));
+    const served = readdirSync("public/assets", { recursive: true, withFileTypes: true })
+      .filter((e) => e.isFile())
+      .map((e) => `/${relative("public", join(e.parentPath, e.name)).split(sep).join("/")}`);
+    expect(served.length).toBeGreaterThan(0);
+    expect(served.filter((p) => !recorded.has(p))).toEqual([]);
   });
 
   it.each(textures.flatMap((t) => t.maps.map((m) => [`${t.id}/${m.map}`, m] as const)))("texture %s matches its record", (_, m) => {

@@ -72,6 +72,8 @@ export class PlaybackEngine {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private onStarted: (() => void) | undefined;
   private readonly tabId = Math.random().toString(36).slice(2);
+  /** Site-wide sound settings applied on top of the player's own volume (A1 mixer). */
+  private output = { gain: 1, mute: false };
 
   constructor(private readonly deps: EngineDeps) {
     this.audio = deps.createAudio();
@@ -147,18 +149,33 @@ export class PlaybackEngine {
 
   setVolume(value: number) {
     const volume = clamp(value);
-    this.audio.volume = volume;
     const muted = volume === 0 ? this.state.muted : false; // moving the slider up unmutes
-    this.audio.muted = muted;
     this.set({ volume, muted });
+    this.applyOutput();
     this.deps.savePrefs({ volume, muted });
   }
 
   toggleMute() {
     const muted = !this.state.muted;
-    this.audio.muted = muted;
     this.set({ muted });
+    this.applyOutput();
     this.deps.savePrefs({ volume: this.state.volume, muted });
+  }
+
+  /**
+   * Site-wide sound settings (master × music volume, and the site's sound-off switch). They scale
+   * the element's own volume: the stream itself is never routed through Web Audio (other sites'
+   * streams don't permit it, and routing them would silence them). The player's saved volume and
+   * mute are unchanged.
+   */
+  setOutput(gain: number, mute: boolean) {
+    this.output = { gain: clamp(gain), mute };
+    this.applyOutput();
+  }
+
+  private applyOutput() {
+    this.audio.volume = clamp(this.state.volume * this.output.gain);
+    this.audio.muted = this.state.muted || this.output.mute;
   }
 
   /** Which MIME types this browser says it can decode (used for per-browser playability). */

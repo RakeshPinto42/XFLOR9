@@ -1,6 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { radioOutput } from "@/engine/audio/mixer";
+import { setRadioPlaying, soundPrefs } from "@/lib/sound/browser";
 import { STORAGE_KEYS, readJson, writeJson } from "@/lib/storage/local";
 import { PlaybackEngine, clamp, type CrossTabChannel } from "./engine";
 import type { PlaybackState } from "./types";
@@ -35,6 +37,16 @@ export function getPlaybackEngine(): PlaybackEngine {
     onStateChange: syncMediaSession,
   });
   bindMediaSessionActions(engine);
+  // Site-wide sound settings: overall × music volume scale the radio; ambience dips while it plays.
+  const e = engine;
+  const applySound = () => e.setOutput(radioOutput(soundPrefs.get()), false);
+  applySound();
+  soundPrefs.subscribe(applySound);
+  let playing = false;
+  e.subscribe(() => {
+    const now = e.getState().status === "playing";
+    if (now !== playing) setRadioPlaying((playing = now));
+  });
   return engine;
 }
 
