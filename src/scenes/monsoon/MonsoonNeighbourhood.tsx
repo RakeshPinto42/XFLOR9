@@ -1,9 +1,9 @@
 "use client";
 
-import { useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useMemo, useRef } from "react";
-import { CatmullRomCurve3, Vector3 } from "three";
-import type { HouseObject, PuddleObject, SceneCamera, TreeObject } from "@/engine/scene/format";
+import { useFrame } from "@react-three/fiber";
+import { Suspense, useEffect, useMemo } from "react";
+import type { HouseObject, PuddleObject, TreeObject } from "@/engine/scene/format";
+import { SceneCamera } from "@/stage/camera/SceneCamera";
 import { StageEffects } from "@/stage/effects";
 import type { SceneProps } from "@/stage/registry";
 import { ActivityMarkers, SceneLights, SceneObjects, useSceneSettings, type ObjectKit } from "@/stage/scene-view";
@@ -74,26 +74,9 @@ const toPuddles = memo((list: PuddleObject[]): [number, number, number, number, 
   list.map((p) => [p.position[0], p.position[2], p.size[0], p.size[1], p.rotation?.[1] ?? 0]),
 );
 
-/** The camera's slow loop along the document's path, always looking into the village. */
-function CameraPath({ path }: { path: NonNullable<SceneCamera["path"]> }) {
-  const camera = useThree((s) => s.camera);
-  const curve = useMemo(() => new CatmullRomCurve3(path.points.map((p) => new Vector3(...p)), path.closed, "centripetal"), [path]);
-  const look = useRef(new Vector3());
-  const ahead = useMemo(() => new Vector3(), []);
-  useFrame((_, delta) => {
-    const t = (atmosphere.uniforms.uTime.value / path.loopSeconds) % 1;
-    camera.position.copy(curve.getPointAt(t));
-    // Down the lane, a little ahead of the camera, drawn towards the lane's centre: the return
-    // leg becomes a slow pull-back rather than a turn towards the edge of the world.
-    const p = camera.position;
-    ahead.set(p.x * 0.35, Math.max(1.0, p.y * 0.45), p.z - path.lookAhead);
-    look.current.lerp(ahead, Math.min(1, delta * 1.5));
-    camera.lookAt(look.current);
-  });
-  return null;
-}
-
 const flash = () => atmosphere.uniforms.uFlash.value;
+/** The scene clock (honours ?t= and ?stage-pause): the camera path follows the weather. */
+const clock = () => atmosphere.uniforms.uTime.value;
 
 export default function MonsoonNeighbourhood({ level, debug, document: doc }: SceneProps) {
   useSceneSettings(doc);
@@ -122,7 +105,7 @@ export default function MonsoonNeighbourhood({ level, debug, document: doc }: Sc
     <>
       {doc.environment.sky === "monsoon-clouds" && <MonsoonSky />}
       <SceneLights lights={doc.lights} shadows={level.shadows} flash={flash} />
-      {!debug && doc.camera.path && <CameraPath path={doc.camera.path} />}
+      <SceneCamera camera={doc.camera} debug={debug} clock={clock} />
       <SceneObjects objects={doc.objects} kits={KITS} />
       {weather.mist && <Mist banks={weather.mist.banks} strength={mistStrength} />}
       {weather.rain && <Rain share={level.particles} maxDrops={weather.rain.maxDrops} />}

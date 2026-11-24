@@ -1,6 +1,6 @@
 "use client";
 
-import { OrbitControls, useProgress } from "@react-three/drei";
+import { useProgress } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
 import { assetProgress, knownAssets } from "./assets";
@@ -75,7 +75,6 @@ export function FullStage({
         />
         <StatsProbe level={level.name} />
         <CaptureHook />
-        {debug && <OrbitControls makeDefault target={[0, 1.1, 0]} />}
       </Canvas>
       <LoadingOverlay />
     </>
@@ -150,19 +149,22 @@ function StatsProbe({ level }: { level: string }) {
 /**
  * With ?stage-capture, exposes a function that renders the current frame and returns it as a
  * WebP data URL. Used by scripts/stage/capture-poster.ts to make the Lite/Still images from
- * the real scene (so the fallbacks always match it).
+ * the real scene (so the fallbacks always match it). Also exposes the camera position for F3 tests.
  */
 function CaptureHook() {
   const { gl, scene, camera } = useThree();
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has("stage-capture")) return;
-    const w = window as unknown as { __xplor9CaptureScene?: (quality?: number) => string };
+    const w = window as unknown as { __xplor9CaptureScene?: (quality?: number) => string; __xplor9CameraPosition?: () => number[] };
     w.__xplor9CaptureScene = (quality = 0.86) => {
       gl.render(scene, camera);
       return gl.domElement.toDataURL("image/webp", quality);
     };
+    // F3 tests: where the camera is (checks that camera modes move it, or don't).
+    w.__xplor9CameraPosition = () => camera.position.toArray();
     return () => {
       delete w.__xplor9CaptureScene;
+      delete w.__xplor9CameraPosition;
     };
   }, [gl, scene, camera]);
   return null;

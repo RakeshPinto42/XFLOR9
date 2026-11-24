@@ -21,10 +21,10 @@ what colour). Changing the numbers never needs a code change.
 
 | Field | Meaning |
 |---|---|
-| `formatVersion` | Format number (currently **1**). Older files are upgraded; newer ones are refused with a clear message. |
+| `formatVersion` | Format number (currently **2**). Older files are upgraded; newer ones are refused with a clear message. |
 | `id`, `title` | Scene id (lowercase, e.g. `monsoon-neighbourhood`) and a readable name. |
 | `environment` | Background, fog, exposure, sky, post effects and weather. |
-| `camera` | Field of view, clipping, start position and aim; optionally a looping cinematic path. |
+| `camera` | Field of view, clipping, start position and aim; optionally a looping cinematic path; the camera modes visitors may use (see below). |
 | `lights` | Hemisphere (sky light), directional (sun/moon), point (bulbs) and spot lights. |
 | `objects` | Everything placed in the scene (see below). |
 | `audio` | Sound positions for the A1 audio system (rain on roofs, eave drips, radio, birds…). |
@@ -53,6 +53,26 @@ Units: metres, radians, seconds. Colours: `"#rrggbb"`. Positions: `[x, y, z]`, y
 - `fog` is `exp2` (thickens with distance, outdoors) or `linear` (`near`/`far`, rooms), or `null`.
 - `effects` are switched off automatically at lower quality levels; `null` = none.
 - `rain.maxDrops` is the count at the highest quality; lower levels use a share of it.
+
+## Camera
+
+```json
+"camera": {
+  "fov": 42, "near": 0.1, "far": 400,
+  "position": [0.9, 3.2, 13], "target": [0.3, 1, -2],
+  "path": { "points": [[0.9, 3.2, 13], [2.4, 2.6, -8]], "closed": true, "loopSeconds": 95, "lookAhead": 15 },
+  "modes": ["cinematic"],
+  "startMode": "cinematic"
+}
+```
+
+- `path` (optional): a smooth loop through the points, once every `loopSeconds`. The camera looks
+  `lookAhead` metres further along -z, drawn towards the centre line. Without a path, the cinematic
+  mode holds the start shot.
+- `modes`: the camera modes visitors may use here: `cinematic`, `isometric`, `top-down`,
+  `third-person`, `first-person` (each at most once). `startMode` is the one the scene opens in.
+- The developer fly camera (`free`) is never listed: it is always available with `?stage-debug`.
+- Camera logic lives in `src/engine/camera/`; `src/stage/camera/` applies it to the canvas camera.
 
 ## Objects
 
@@ -97,7 +117,11 @@ object type a scene cannot draw is reported in the console, never silently dropp
 
 `UPGRADES` in `format.ts` holds one step per format change (`UPGRADES[1]` turns format 1 into 2,
 and so on). Loading a file applies every step it needs, in order, so files saved by an older Studio
-keep working. Today only format 1 exists, so the chain is empty; the mechanism itself is tested.
+keep working. The mechanism itself is tested.
+
+| Step | Change |
+|---|---|
+| 1 → 2 (F3) | `camera.modes` and `camera.startMode` added; format 1 scenes get `["cinematic"]` |
 
 When the format changes: raise `SCENE_FORMAT_VERSION`, add the upgrade step and its test, update
 this document, and re-save the shipped scene files.

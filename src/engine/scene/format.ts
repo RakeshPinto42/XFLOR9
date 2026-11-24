@@ -8,7 +8,7 @@
  * only by id from the asset manifest, and no string may carry a URL or a path.
  */
 
-export const SCENE_FORMAT_VERSION = 1;
+export const SCENE_FORMAT_VERSION = 2;
 
 /** Limits that keep a malformed or hostile file from exhausting the browser. */
 export const SCENE_LIMITS = {
@@ -171,14 +171,30 @@ export type SpotLight = {
 };
 export type SceneLight = HemisphereLight | DirectionalLight | PointLight | SpotLight;
 
+/**
+ * F3 camera modes. "free" is the developer fly camera: always available in developer mode, never
+ * offered to visitors, so scene files don't list it.
+ */
+export type CameraMode = "cinematic" | "free" | "isometric" | "top-down" | "third-person" | "first-person";
+export type VisitorCameraMode = Exclude<CameraMode, "free">;
+export const VISITOR_CAMERA_MODES: readonly VisitorCameraMode[] = ["cinematic", "isometric", "top-down", "third-person", "first-person"];
+
 export interface SceneCamera {
   fov: number;
   near: number;
   far: number;
+  /** Start position and aim (the cinematic mode holds this shot when there is no path). */
   position: Vec3;
   target: Vec3;
-  /** A looping cinematic path (smooth curve through the points). */
+  /**
+   * A looping cinematic path (smooth curve through the points). The camera looks `lookAhead`
+   * metres further along -z, drawn towards the scene's centre line (x = 0).
+   */
   path?: { points: Vec3[]; closed: boolean; loopSeconds: number; lookAhead: number };
+  /** Camera modes visitors may use in this scene (format 2). */
+  modes: VisitorCameraMode[];
+  /** The mode the scene opens in; one of `modes`. */
+  startMode: VisitorCameraMode;
 }
 
 export interface SceneEnvironment {
@@ -278,10 +294,13 @@ type Json = Record<string, unknown>;
 export type SceneUpgrade = (doc: Json) => Json;
 
 /**
- * The upgrade chain: UPGRADES[n] turns format n into n + 1. Empty while only format 1 exists;
- * every future format change adds a step here (and a test), so older files keep working.
+ * The upgrade chain: UPGRADES[n] turns format n into n + 1. Every format change adds a step here
+ * (and a test), so older files keep working.
  */
-export const UPGRADES: Readonly<Record<number, SceneUpgrade>> = {};
+export const UPGRADES: Readonly<Record<number, SceneUpgrade>> = {
+  // 1 → 2 (F3): cameras list their visitor modes. Format 1 scenes only had the cinematic view.
+  1: (doc) => (isRecord(doc.camera) ? { ...doc, camera: { ...doc.camera, modes: ["cinematic"], startMode: "cinematic" } } : doc),
+};
 
 /** Brings any supported older document up to `current`. Never mutates its input. */
 export function upgradeScene(raw: unknown, upgrades: Readonly<Record<number, SceneUpgrade>> = UPGRADES, current: number = SCENE_FORMAT_VERSION): Json {
@@ -497,7 +516,13 @@ class Checker {
   }
 
   camera(c: unknown) {
-    if (!this.fields("camera", c, ["fov", "near", "far", "position", "target"], ["path"])) return;
+    if (!this.fields("camera", c, ["fov", "near", "far", "position", "target", "modes", "startMode"], ["path"])) return;
+    if (this.list("camera.modes", c.modes, VISITOR_CAMERA_MODES.length)) {
+      if (c.modes.length === 0) this.fail("camera.modes", "needs at least one mode");
+      c.modes.forEach((m, i) => this.oneOf(`camera.modes[${i}]`, m, VISITOR_CAMERA_MODES));
+      if (new Set(c.modes).size !== c.modes.length) this.fail("camera.modes", "lists a mode twice");
+      if (!c.modes.includes(c.startMode)) this.fail("camera.startMode", "must be one of the scene's modes");
+    }
     this.num("camera.fov", c.fov, 5, 150);
     this.num("camera.near", c.near, 0.001, 100);
     this.num("camera.far", c.far, 1, 100_000);

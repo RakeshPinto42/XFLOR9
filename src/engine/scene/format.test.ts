@@ -17,7 +17,7 @@ function minimal(): SceneDocument {
     id: "test-scene",
     title: "Test scene",
     environment: { background: "#101010", fog: null, exposure: 1, sky: null, effects: null, weather: { rain: null, mist: null, lightning: null } },
-    camera: { fov: 45, near: 0.1, far: 100, position: [0, 1.5, 5], target: [0, 1, 0] },
+    camera: { fov: 45, near: 0.1, far: 100, position: [0, 1.5, 5], target: [0, 1, 0], modes: ["cinematic", "first-person"], startMode: "cinematic" },
     lights: [{ id: "sun", type: "directional", position: [5, 10, 5], color: "#ffffff", intensity: 1 }],
     objects: [
       { id: "floor", type: "plane", position: [0, 0, 0], rotation: [-Math.PI / 2, 0, 0], size: [4, 4], material: { color: "#888888" } },
@@ -90,6 +90,15 @@ describe("validation", () => {
     expect(problems(mutate((d) => (d.objects[0].position = [1e9, 0, 0])))).toContain("objects[0] (floor).position[0]: must be between -10000 and 10000 (got 1000000000)");
     expect(problems(mutate((d) => (d.camera.far = 0.05)))).toEqual(expect.arrayContaining(["camera: far must be beyond near"]));
   });
+  it("checks the camera's visitor modes (format 2)", () => {
+    expect(problems(mutate((d) => (d.camera.modes = [])))).toContain("camera.modes: needs at least one mode");
+    expect(problems(mutate((d) => (d.camera.modes = ["cinematic", "free"])))).toContain(
+      "camera.modes[1]: must be one of: cinematic, isometric, top-down, third-person, first-person",
+    );
+    expect(problems(mutate((d) => (d.camera.modes = ["cinematic", "cinematic"])))).toContain("camera.modes: lists a mode twice");
+    expect(problems(mutate((d) => (d.camera.startMode = "top-down")))).toContain("camera.startMode: must be one of the scene's modes");
+    expect(problems(mutate((d) => delete d.camera.startMode))).toContain("camera: startMode is required");
+  });
   it("refuses assets that are not in the manifest, or of the wrong kind", () => {
     expect(problems(mutate((d) => (d.objects[1].asset = "not-a-model")))).toContain('objects[1] (tv).asset: "not-a-model" is not a model in the asset manifest');
     expect(problems(mutate((d) => (d.objects[1].asset = "clay-roof-tiles")))).toContain('objects[1] (tv).asset: "clay-roof-tiles" is not a model in the asset manifest');
@@ -131,8 +140,17 @@ describe("format versions and upgrades", () => {
     ]);
     expect(problems(mutate((d) => (d.formatVersion = 0)))).toEqual(["formatVersion 0 does not exist (the first format is 1)"]);
   });
-  // Only format 1 exists today, so the chain is exercised with test upgrades: this is the
-  // mechanism every future format change will use.
+  it("upgrades a format 1 file: its camera gets the cinematic mode", () => {
+    const v1 = mutate((d) => {
+      d.formatVersion = 1;
+      delete d.camera.modes;
+      delete d.camera.startMode;
+    });
+    const out = parseScene(v1, known);
+    expect(out.formatVersion).toBe(2);
+    expect(out.camera).toMatchObject({ modes: ["cinematic"], startMode: "cinematic" });
+  });
+  // The chain itself, exercised with test upgrades: the mechanism every format change uses.
   it("applies each upgrade step in order and stamps the new version", () => {
     const steps = {
       1: (d: Record<string, unknown>) => ({ ...d, renamed: d.title, title: undefined }),

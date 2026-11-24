@@ -127,6 +127,8 @@ function monsoon(): SceneDocument {
       position: path[0],
       target: [0.9 * 0.35, 1, 13 - 15],
       path: { points: path, closed: true, loopSeconds: 95, lookAhead: 15 },
+      modes: ["cinematic"],
+      startMode: "cinematic",
     },
     lights: [
       { id: "overcast-sky", type: "hemisphere", sky: "#8a9aa9", ground: "#3a3a2e", intensity: 1.25, flashBoost: 2.4 },
@@ -177,7 +179,7 @@ function livingRoom(): SceneDocument {
       weather: { rain: null, mist: null, lightning: null },
     },
     // Aimed at the origin, as the stage camera was before F2 (same framing).
-    camera: { fov: 45, near: 0.05, far: 60, position: [0, 1.4, 4.2], target: [0, 0, 0] },
+    camera: { fov: 45, near: 0.05, far: 60, position: [0, 1.4, 4.2], target: [0, 0, 0], modes: ["cinematic"], startMode: "cinematic" },
     lights: [
       { id: "fill", type: "hemisphere", sky: "#ffd9a8", ground: "#3a2a24", intensity: 0.35 },
       { id: "bulb", type: "point", position: [0.6, 2.6, 0.4], color: "#ffb86b", intensity: 9, distance: 9, decay: 2, shadow: { mapSize: 1024 } },

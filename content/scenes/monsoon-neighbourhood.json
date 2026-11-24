@@ -1,5 +1,5 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "monsoon-neighbourhood",
   "title": "Monsoon neighbourhood",
   "environment": {
@@ -193,7 +193,11 @@
       "closed": true,
       "loopSeconds": 95,
       "lookAhead": 15
-    }
+    },
+    "modes": [
+      "cinematic"
+    ],
+    "startMode": "cinematic"
   },
   "lights": [
     {
