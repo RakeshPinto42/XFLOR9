@@ -48,3 +48,21 @@ Last updated: 2026-11-23 (F1 increment 1).
 | SF-3 | An invalid scene file falls back to Lite through the existing scene error path; this is covered by unit tests of the validator, not by a browser test with a broken file. | Low | F2 | Add when the Studio can save files. |
 | SF-4 | The monsoon camera path's aiming rule (look down the lane, drawn to its centre) is still code; the file sets only the path, loop time and look-ahead. F3 generalises cameras. | Low | F2 | F3. |
 | ST-9 | The F1 scene uses a stand-in box for the TV cabinet until increment 3 builds the teak cabinet, sofa, centre table and three-blade fan. | Info | F1.2 | |
+
+## TV (M3)
+
+| ID | Issue | Severity | Found | Status |
+|---|---|---|---|---|
+| TV-1 | The Internet Archive's player reports nothing to the page, so XPLOR9 can't tell when an Archive film is playing, paused or finished (no auto-next; it counts as "on" while shown). YouTube programmes report all of these. | Low | M3 | Provider limitation |
+| TV-2 | The Internet Archive player logs its own script errors in the browser console (inside its frame); they don't affect XPLOR9. | Info | M3 | Provider |
+| TV-3 | A YouTube playlist (a series) only reports per-video events, so the TV doesn't move to the next programme when a series ends. | Info | M3 | By design |
+| TV-4 | Languages marked "not recorded" (several Films Division shorts, two documentaries) need checking by watching. | Low | M3 | Content review |
+| TV-5 | Picture House films: whether each Internet Archive copy carries a later (possibly copyrighted) music track is unverified; the films themselves are public domain. | Medium | M3 | Content review before release |
+
+## Homepage (Monsoon Lane)
+
+| ID | Issue | Severity | Found | Status |
+|---|---|---|---|---|
+| HM-1 | Lite and Still show the old monsoon poster, without the five signboards; the list of links is the way in. | Low | Home 3D | Render a new poster (`npm run stage:poster`) |
+| HM-2 | Headless Chromium draws the street at about 1 frame a second (software WebGL), so the sign-click test needs a long timeout. Real GPUs are unaffected (see ST-4). | Info | Home 3D | Test environment |
+| HM-3 | The homepage now downloads three.js on a first visit (it used to be a light page). Slow devices fall back to Lite/Still, but first-load size should be checked in the performance audit. | Medium | Home 3D | Performance audit |

@@ -1,0 +1,557 @@
+{
+  "version": 1,
+  "channels": [
+    {
+      "id": "story-hour",
+      "name": "Story Hour",
+      "description": "Hindi television serials adapted from great Indian writers, from the public broadcaster's archive.",
+      "programmes": [
+        {
+          "id": "tehreer",
+          "title": "Tehreer: Munshi Premchand Ki",
+          "description": "Stories by Munshi Premchand adapted for television, directed by Gulzar.",
+          "language": "hi",
+          "year": null,
+          "source": {
+            "provider": "youtube-playlist",
+            "playlistId": "PLqtVCj5iilH7rvXx2pTXDuv4Dbbkf6aW-"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Playlist on Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/playlist?list=PLqtVCj5iilH7rvXx2pTXDuv4Dbbkf6aW-"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "godaan",
+          "title": "Godaan",
+          "description": "Premchand's novel of a poor farmer's life, the first twelve episodes of Tehreer.",
+          "language": "hi",
+          "year": null,
+          "source": {
+            "provider": "youtube-playlist",
+            "playlistId": "PLqtVCj5iilH6_TCV3baeTg9JwaGn2gcq3"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Playlist on Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/playlist?list=PLqtVCj5iilH6_TCV3baeTg9JwaGn2gcq3"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "vividha",
+          "title": "Vividha",
+          "description": "A series of television films based on Rabindranath Tagore's stories.",
+          "language": "hi",
+          "year": null,
+          "source": {
+            "provider": "youtube-playlist",
+            "playlistId": "PLqtVCj5iilH7TZfR8CXFl_WECXvGt_0XT"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Playlist on Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/playlist?list=PLqtVCj5iilH7TZfR8CXFl_WECXvGt_0XT"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "trishna",
+          "title": "Trishna",
+          "description": "A Doordarshan television series from 1985.",
+          "language": "hi",
+          "year": 1985,
+          "source": {
+            "provider": "youtube-playlist",
+            "playlistId": "PLqtVCj5iilH5KGKAjymB6u4bUovs7Qmx0"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Playlist on Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/playlist?list=PLqtVCj5iilH5KGKAjymB6u4bUovs7Qmx0"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "neenv",
+          "title": "Neenv",
+          "description": "Life among the students of a boarding school (episode 1).",
+          "language": "hi",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "gLI8kE_PWok"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=gLI8kE_PWok"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "bharat-ek-khoj",
+          "title": "Bharat Ek Khoj",
+          "description": "Shyam Benegal's series on India's history, based on Jawaharlal Nehru's The Discovery of India.",
+          "language": "hi",
+          "year": 1988,
+          "source": {
+            "provider": "youtube-playlist",
+            "playlistId": "PLqtVCj5iilH4w0Y8KBB4fqBu25T0sGhXG"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Playlist on Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/playlist?list=PLqtVCj5iilH4w0Y8KBB4fqBu25T0sGhXG"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cartoon-time",
+      "name": "Cartoon Time",
+      "description": "Animated shorts made in India by the government's Films Division.",
+      "programmes": [
+        {
+          "id": "ek-anek-aur-ekta",
+          "title": "Ek Anek Aur Ekta",
+          "description": "The animated short about unity that a generation learnt by heart.",
+          "language": "hi",
+          "year": 1974,
+          "source": {
+            "provider": "youtube",
+            "videoId": "bI376UnsUMg"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Films Division's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=bI376UnsUMg"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "the-balloon",
+          "title": "The Balloon",
+          "description": "An animated short from Films Division.",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "Xor9hxZsdoA"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Films Division's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=Xor9hxZsdoA"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "umbrella",
+          "title": "Umbrella",
+          "description": "An animated short from Films Division.",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "pMsvJo9lZcU"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Films Division's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=pMsvJo9lZcU"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "dancing-forms",
+          "title": "Dancing Forms",
+          "description": "An animated short from Films Division.",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "QP80F1wudB8"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Films Division's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=QP80F1wudB8"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "tree-of-unity",
+          "title": "Tree of Unity",
+          "description": "An animated short from Films Division.",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "m1p2spebtxs"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Films Division's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=m1p2spebtxs"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "making-of-cartoon-films",
+          "title": "Making of Cartoon Films",
+          "description": "How animated films were made, by hand, frame by frame.",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "nbBwyP5NWqQ"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Films Division's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=nbBwyP5NWqQ"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "glimpses-of-indian-animation",
+          "title": "Glimpses of Indian Animation",
+          "description": "A look back at Indian animated film.",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "sv5-YYesbUk"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Films Division's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=sv5-YYesbUk"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    },
+    {
+      "id": "window-on-india",
+      "name": "Window on India",
+      "description": "Documentaries about India's places and history from the public broadcaster's archive.",
+      "programmes": [
+        {
+          "id": "imperial-city-of-vijayanagara",
+          "title": "Spectacular India: Imperial City of Vijayanagara",
+          "description": "The ruins of the Vijayanagara empire's capital at Hampi (episode 24).",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "kTaP3dUmz1c"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=kTaP3dUmz1c"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "azadi-ki-kahani-1",
+          "title": "Azadi Ki Kahani: Arrival of Foreigners in India",
+          "description": "The story of India's independence, beginning with the arrival of European traders (episode 1).",
+          "language": "unknown",
+          "year": null,
+          "source": {
+            "provider": "youtube",
+            "videoId": "0hESf7WgTTA"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+            "evidence": [
+              {
+                "claim": "Uploaded by Prasar Bharati Archives's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=0hESf7WgTTA"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    },
+    {
+      "id": "picture-house",
+      "name": "Picture House",
+      "description": "Silent-era classics that are now in the public domain.",
+      "programmes": [
+        {
+          "id": "raja-harishchandra",
+          "title": "Raja Harishchandra",
+          "description": "The surviving reels of India's first feature film, by Dadasaheb Phalke.",
+          "language": "none",
+          "year": 1913,
+          "source": {
+            "provider": "archive",
+            "identifier": "RajaHarishchandra1913"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Cinematograph film: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.26). Published 1913, so public domain in India since 1974.",
+            "us": "Published 1913; US copyright in works published before 1931 has expired.",
+            "evidence": [
+              {
+                "claim": "Published in 1913.",
+                "source": "https://en.wikipedia.org/wiki/Raja_Harishchandra"
+              },
+              {
+                "claim": "Copy held by the Internet Archive.",
+                "source": "https://archive.org/details/RajaHarishchandra1913"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "the-gold-rush",
+          "title": "The Gold Rush",
+          "description": "Charlie Chaplin's silent comedy of a prospector in the Klondike (the 1925 silent version).",
+          "language": "none",
+          "year": 1925,
+          "source": {
+            "provider": "archive",
+            "identifier": "the-gold-rush-film-1925"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Cinematograph film: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.26). Published 1925, so public domain in India since 1986.",
+            "us": "Published 1925; US copyright in works published before 1931 has expired.",
+            "evidence": [
+              {
+                "claim": "Published in 1925.",
+                "source": "https://en.wikipedia.org/wiki/The_Gold_Rush"
+              },
+              {
+                "claim": "Copy held by the Internet Archive.",
+                "source": "https://archive.org/details/the-gold-rush-film-1925"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "the-general",
+          "title": "The General",
+          "description": "Buster Keaton chases a stolen locomotive across enemy lines.",
+          "language": "none",
+          "year": 1926,
+          "source": {
+            "provider": "archive",
+            "identifier": "TheGeneral"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Cinematograph film: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.26). Published 1926, so public domain in India since 1987.",
+            "us": "Published 1926; US copyright in works published before 1931 has expired.",
+            "evidence": [
+              {
+                "claim": "Published in 1926.",
+                "source": "https://en.wikipedia.org/wiki/The_General_(1926_film)"
+              },
+              {
+                "claim": "Copy held by the Internet Archive.",
+                "source": "https://archive.org/details/TheGeneral"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "college",
+          "title": "College",
+          "description": "Buster Keaton tries every sport to win over a girl.",
+          "language": "none",
+          "year": 1927,
+          "source": {
+            "provider": "archive",
+            "identifier": "college"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Cinematograph film: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.26). Published 1927, so public domain in India since 1988.",
+            "us": "Published 1927; US copyright in works published before 1931 has expired.",
+            "evidence": [
+              {
+                "claim": "Published in 1927.",
+                "source": "https://en.wikipedia.org/wiki/College_(1927_film)"
+              },
+              {
+                "claim": "Copy held by the Internet Archive.",
+                "source": "https://archive.org/details/college"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "steamboat-bill-jr",
+          "title": "Steamboat Bill, Jr.",
+          "description": "Buster Keaton on a river steamboat, and the famous falling house front.",
+          "language": "none",
+          "year": 1928,
+          "source": {
+            "provider": "archive",
+            "identifier": "SteamboatBillJr"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Cinematograph film: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.26). Published 1928, so public domain in India since 1989.",
+            "us": "Published 1928; US copyright in works published before 1931 has expired.",
+            "evidence": [
+              {
+                "claim": "Published in 1928.",
+                "source": "https://en.wikipedia.org/wiki/Steamboat_Bill,_Jr."
+              },
+              {
+                "claim": "Copy held by the Internet Archive.",
+                "source": "https://archive.org/details/SteamboatBillJr"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "fiddlesticks",
+          "title": "Fiddlesticks",
+          "description": "Ub Iwerks's first Flip the Frog cartoon, with music.",
+          "language": "none",
+          "year": 1930,
+          "source": {
+            "provider": "archive",
+            "identifier": "FLIP_FROG-FIDDLESTICKS"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Cinematograph film: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.26). Published 1930, so public domain in India since 1991.",
+            "us": "Published 1930; US copyright in works published before 1931 has expired.",
+            "evidence": [
+              {
+                "claim": "Published in 1930.",
+                "source": "https://en.wikipedia.org/wiki/Flip_the_Frog"
+              },
+              {
+                "claim": "Copy held by the Internet Archive.",
+                "source": "https://archive.org/details/FLIP_FROG-FIDDLESTICKS"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    }
+  ],
+  "guide": [
+    {
+      "id": "malgudi-days",
+      "title": "Malgudi Days",
+      "years": "From 1986",
+      "language": "hi",
+      "description": "R. K. Narayan's stories of Swami and the small town of Malgudi, directed by Shankar Nag.",
+      "watch": [
+        {
+          "platform": "Prime Video",
+          "url": "https://www.primevideo.com/detail/0GURGG31ZD0TXODLKAPW6ZS4LP",
+          "access": "subscription"
+        }
+      ],
+      "verifiedAt": "2026-11-24"
+    },
+    {
+      "id": "byomkesh-bakshi",
+      "title": "Byomkesh Bakshi",
+      "years": "1993–1997",
+      "language": "hi",
+      "description": "Basu Chatterjee's adaptation of Sharadindu Bandyopadhyay's detective stories, with Rajit Kapur as Byomkesh.",
+      "watch": [
+        {
+          "platform": "Prasar Bharati (official website)",
+          "url": "https://prasarbharati.gov.in/tag/byomkesh/",
+          "access": "free"
+        }
+      ],
+      "verifiedAt": "2026-11-24"
+    }
+  ]
+}

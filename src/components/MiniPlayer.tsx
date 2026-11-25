@@ -10,6 +10,7 @@ const STATUS_TEXT: Record<Exclude<PlaybackState["status"], "idle" | "error">, st
   buffering: "Buffering…",
   playing: "Live",
   paused: "Paused",
+  ended: "Finished",
 };
 
 /**
@@ -24,7 +25,7 @@ export function MiniPlayer() {
   const { status, source, error } = state;
   const active = status === "loading" || status === "playing" || status === "buffering";
   const mainAction = status === "error" ? "Retry" : active ? "Pause" : "Play";
-  const statusText = status === "error" || status === "idle" ? null : STATUS_TEXT[status];
+  const statusText = status === "error" || status === "idle" ? null : status === "playing" && !source.live ? "Playing" : STATUS_TEXT[status];
 
   return (
     <>

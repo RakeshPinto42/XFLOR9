@@ -70,3 +70,25 @@ test("developer mode: keys are released when the window loses focus (nothing sti
   expect(distance(await position(page), after)).toBeLessThan(0.01);
   await page.keyboard.up("KeyW");
 });
+
+test("developer mode: dragging over the page turns the view, but not when the drag starts on a control", async ({ page, browserName }) => {
+  await open(page, "/lab/living-room?stage-debug&stage-capture", browserName);
+  const dir = () => page.evaluate(() => (window as unknown as { __xplor9CameraDirection: () => number[] }).__xplor9CameraDirection());
+  await page.waitForTimeout(300); // the camera takes its look from the start shot on the first frame
+  const start = await dir();
+  // The page's content covers the canvas: drags must still reach the camera (found in F3 review).
+  await page.mouse.move(900, 600);
+  await page.mouse.down();
+  await page.mouse.move(700, 600, { steps: 8 });
+  await page.mouse.up();
+  await expect.poll(async () => distance(await dir(), start)).toBeGreaterThan(0.3);
+  const turned = await dir();
+  const link = page.locator('body > header a[href="/reading"]');
+  const box = (await link.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 300, box.y + 200, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(200);
+  expect(distance(await dir(), turned)).toBeLessThan(0.01);
+});

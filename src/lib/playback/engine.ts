@@ -191,6 +191,15 @@ export class PlaybackEngine {
     this.clearTimer();
     const gen = ++this.generation;
 
+    // A paused or finished track carries on in place (from where it paused; from the start after
+    // its end): only live streams have to reconnect.
+    if (!source.live && this.activeUrl === source.url && (this.state.status === "paused" || this.state.status === "ended")) {
+      this.set({ status: "loading", error: null });
+      this.armTimer(gen, LOAD_TIMEOUT_MS, "timeout");
+      this.playElement(gen);
+      return;
+    }
+
     if (!this.deps.isOnline()) {
       this.release();
       this.fail("offline");
@@ -203,6 +212,10 @@ export class PlaybackEngine {
     this.audio.load();
     this.armTimer(gen, LOAD_TIMEOUT_MS, "timeout");
 
+    this.playElement(gen);
+  }
+
+  private playElement(gen: number) {
     this.audio.play().catch((err: unknown) => {
       if (gen !== this.generation) return;
       const name = err instanceof Error ? err.name : "";
@@ -234,8 +247,13 @@ export class PlaybackEngine {
       if (this.isCurrent() && (this.state.status === "playing" || this.state.status === "buffering")) this.pause();
     });
     on("ended", () => {
-      // A live stream "ending" means the broadcaster dropped the connection.
-      if (this.isCurrent() && this.state.source?.live) this.fail("network");
+      if (!this.isCurrent()) return;
+      // A live stream "ending" means the broadcaster dropped the connection; a track simply ended.
+      if (this.state.source?.live) this.fail("network");
+      else {
+        this.clearTimer();
+        this.set({ status: "ended", error: null });
+      }
     });
     on("error", () => {
       if (!this.isCurrent()) return;

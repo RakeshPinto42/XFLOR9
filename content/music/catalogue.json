@@ -1,0 +1,671 @@
+{
+  "version": 1,
+  "cassettes": [
+    {
+      "id": "rainy-day-romance",
+      "name": "Rainy Day Romance",
+      "description": "The love songs of the nineties, for a wet afternoon by the window.",
+      "colours": {
+        "shell": "#26262b",
+        "label": "#e3a82b"
+      },
+      "tracks": [
+        {
+          "id": "dheere-dheere",
+          "title": "Dheere Dheere Se Meri Zindagi Mein Aana",
+          "artist": "Kumar Sanu, Anuradha Paudwal",
+          "film": "Aashiqui",
+          "year": 1990,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "KeyfUuXPOcY"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=KeyfUuXPOcY"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "dil-hai-ke-manta-nahin",
+          "title": "Dil Hai Ke Manta Nahin",
+          "artist": null,
+          "film": "Dil Hai Ke Manta Nahin",
+          "year": 1991,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "IVeGCYxT_IU"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=IVeGCYxT_IU"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "pehla-nasha",
+          "title": "Pehla Nasha",
+          "artist": "Udit Narayan, Sadhana Sargam",
+          "film": "Jo Jeeta Wohi Sikandar",
+          "year": 1992,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "Ki41AKu0iHc"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UC_A7K2dXFsTMAciGmnNxy-Q",
+            "evidence": [
+              {
+                "claim": "Uploaded by Saregama Music's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=Ki41AKu0iHc"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "jaadu-teri-nazar",
+          "title": "Jaadu Teri Nazar",
+          "artist": "Udit Narayan",
+          "film": "Darr",
+          "year": 1993,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "FD3vgLOEdgk"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UC_A7K2dXFsTMAciGmnNxy-Q",
+            "evidence": [
+              {
+                "claim": "Uploaded by Saregama Music's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=FD3vgLOEdgk"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "ek-ladki-ko-dekha",
+          "title": "Ek Ladki Ko Dekha",
+          "artist": "Kumar Sanu",
+          "film": "1942: A Love Story",
+          "year": 1994,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "htMvfOfixuM"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UC_A7K2dXFsTMAciGmnNxy-Q",
+            "evidence": [
+              {
+                "claim": "Uploaded by Saregama Music's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=htMvfOfixuM"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "pardesi-pardesi",
+          "title": "Pardesi Pardesi",
+          "artist": "Udit Narayan, Alka Yagnik",
+          "film": "Raja Hindustani",
+          "year": 1996,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "W5lusYuAW0s"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCJrDMFOdv1I2k8n9oK_V21w",
+            "evidence": [
+              {
+                "claim": "Uploaded by Tips Official's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=W5lusYuAW0s"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "ishq-bina",
+          "title": "Ishq Bina",
+          "artist": "Kavita Krishnamurthy, Sukhwinder Singh",
+          "film": "Taal",
+          "year": 1999,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "XG2RLhSIOLg"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCJrDMFOdv1I2k8n9oK_V21w",
+            "evidence": [
+              {
+                "claim": "Uploaded by Tips Official's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=XG2RLhSIOLg"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shaadi-season",
+      "name": "Shaadi Season",
+      "description": "Dance-floor favourites from weddings, sangeets and every baraat in the lane.",
+      "colours": {
+        "shell": "#7a1f2b",
+        "label": "#f2d16b"
+      },
+      "tracks": [
+        {
+          "id": "pehla-pehla-pyaar",
+          "title": "Pehla Pehla Pyaar",
+          "artist": null,
+          "film": "Hum Aapke Hain Koun..!",
+          "year": 1994,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "KXkmrco12hI"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UC_A7K2dXFsTMAciGmnNxy-Q",
+            "evidence": [
+              {
+                "claim": "Uploaded by Saregama Music's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=KXkmrco12hI"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "soldier-soldier",
+          "title": "Soldier Soldier",
+          "artist": "Kumar Sanu, Alka Yagnik",
+          "film": "Soldier",
+          "year": 1998,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "j4xlOb3B5Ro"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCJrDMFOdv1I2k8n9oK_V21w",
+            "evidence": [
+              {
+                "claim": "Uploaded by Tips Official's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=j4xlOb3B5Ro"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "ankhiyon-se-goli-maare",
+          "title": "Ankhiyon Se Goli Maare",
+          "artist": "Sonu Nigam, Jaspinder Narula",
+          "film": "Dulhe Raja",
+          "year": 1998,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "rY_0SOlmrdY"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=rY_0SOlmrdY"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "taal-se-taal-mila",
+          "title": "Taal Se Taal Mila",
+          "artist": "Alka Yagnik, Udit Narayan",
+          "film": "Taal",
+          "year": 1999,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "rjtUQAz2KsU"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCJrDMFOdv1I2k8n9oK_V21w",
+            "evidence": [
+              {
+                "claim": "Uploaded by Tips Official's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=rjtUQAz2KsU"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "thumka-lagake",
+          "title": "Thumka Lagake Zara Naacho",
+          "artist": null,
+          "film": "Akhiyon Se Goli Maare",
+          "year": 2002,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "C353QLAf9TU"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=C353QLAf9TU"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "lal-dupatta",
+          "title": "Lal Dupatta",
+          "artist": "Alka Yagnik, Udit Narayan",
+          "film": "Mujhse Shaadi Karogi",
+          "year": 2004,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "1jjDs69WWUQ"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=1jjDs69WWUQ"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    },
+    {
+      "id": "two-thousands-mixtape",
+      "name": "2000s Mixtape",
+      "description": "Songs from the first ten years of the new century, recorded off the radio onto one tape.",
+      "colours": {
+        "shell": "#1f3f7a",
+        "label": "#e6e0d2"
+      },
+      "tracks": [
+        {
+          "id": "kaho-naa-pyar-hai",
+          "title": "Kaho Naa Pyar Hai",
+          "artist": "Udit Narayan, Alka Yagnik",
+          "film": "Kaho Naa... Pyaar Hai",
+          "year": 2000,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "1Nf8eQ9dkGY"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UC_A7K2dXFsTMAciGmnNxy-Q",
+            "evidence": [
+              {
+                "claim": "Uploaded by Saregama Music's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=1Nf8eQ9dkGY"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "maahi-ve",
+          "title": "Maahi Ve",
+          "artist": null,
+          "film": "Kaante",
+          "year": 2002,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "ejDRaO-1VPI"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=ejDRaO-1VPI"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "aashiq-banaya-aapne",
+          "title": "Aashiq Banaya Aapne",
+          "artist": "Himesh Reshammiya, Shreya Ghoshal",
+          "film": "Aashiq Banaya Aapne",
+          "year": 2005,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "0bAVd9jJE2Q"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=0bAVd9jJE2Q"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "bhool-bhulaiyaa",
+          "title": "Bhool Bhulaiyaa",
+          "artist": "Neeraj Shridhar",
+          "film": "Bhool Bhulaiyaa",
+          "year": 2007,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "B9_nql5xBFo"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=B9_nql5xBFo"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "tum-se-hi",
+          "title": "Tum Se Hi",
+          "artist": "Mohit Chauhan",
+          "film": "Jab We Met",
+          "year": 2007,
+          "language": "hi",
+          "source": {
+            "provider": "youtube",
+            "videoId": "mt9xg0mmt28"
+          },
+          "rights": {
+            "basis": "official-upload",
+            "uploaderChannelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+            "evidence": [
+              {
+                "claim": "Uploaded by T-Series's own channel; embedding allowed (YouTube oEmbed returned 200 on 2026-11-24).",
+                "source": "https://www.youtube.com/watch?v=mt9xg0mmt28"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    },
+    {
+      "id": "old-records",
+      "name": "Old Records",
+      "description": "India's first gramophone stars, from 78 rpm records of 1906–1925, in the public domain.",
+      "colours": {
+        "shell": "#3a2a1a",
+        "label": "#c8b48a"
+      },
+      "tracks": [
+        {
+          "id": "aye-garjat",
+          "title": "Aye Garjat",
+          "artist": "Malka Jan (Badi Malka of Calcutta)",
+          "film": null,
+          "year": 1906,
+          "language": "hi",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "garjat-aaye",
+            "file": "garjat aaye.mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1906, so public domain in India since 1967.",
+            "us": "Published 1906; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as Beka-Grand-Record No. 1577, released 1906.",
+                "source": "https://archive.org/details/garjat-aaye"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "bersay-badarva-ray",
+          "title": "Bersay Badarva Ray",
+          "artist": "Gauhar Jaan",
+          "film": null,
+          "year": 1912,
+          "language": "hi",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "46048malharcorr",
+            "file": "46048malharcorr.mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1912, so public domain in India since 1973.",
+            "us": "Published 1912; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as Pathé 46048, released 1912.",
+                "source": "https://archive.org/details/46048malharcorr"
+              },
+              {
+                "claim": "Gauhar Jaan recorded for gramophone companies in India from 1902.",
+                "source": "https://en.wikipedia.org/wiki/Gauhar_Jaan"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "sitar-tilak-kamod",
+          "title": "Sitar Gat: Tilak Kamod",
+          "artist": "Fazal Hussain",
+          "film": null,
+          "year": 1920,
+          "language": "none",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "hmv-p-17531-8-15443-sitar-jod-tilak-kamod-fazal-hussain",
+            "file": "HMV P 17531 8-15444 - SITAR GAT - TILAK KAMOD FAZAL HUSSAIN.mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1920, so public domain in India since 1981.",
+            "us": "Published 1920; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as His Master's Voice P. 17531, released 1920.",
+                "source": "https://archive.org/details/hmv-p-17531-8-15443-sitar-jod-tilak-kamod-fazal-hussain"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "clarinet-durbari",
+          "title": "Clarinet: Durbari Kanada",
+          "artist": "N. Mazumdar",
+          "film": null,
+          "year": 1920,
+          "language": "none",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "r-25419001-1670636675-8915",
+            "file": "A - Clarionet - Durbari Kanera.mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1920, so public domain in India since 1981.",
+            "us": "Published 1920; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as His Master's Voice P. 4879, released 1920.",
+                "source": "https://archive.org/details/r-25419001-1670636675-8915"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "shehnai-asavari",
+          "title": "Shehnai: Asavari",
+          "artist": "Talim Hussain",
+          "film": null,
+          "year": 1921,
+          "language": "none",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "3053-1591a-11648-r-talim-hossein",
+            "file": "#3053#_1591a - 11648-R TALIM HOSSEIN - शहनाई - आसावरी.mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1921, so public domain in India since 1982.",
+            "us": "Published 1921; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as His Master's Voice P. 4573, released 1921.",
+                "source": "https://archive.org/details/3053-1591a-11648-r-talim-hossein"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "kafi-nagaratnam",
+          "title": "Kafi",
+          "artist": "Bangalore Nagaratnam",
+          "film": null,
+          "year": 1922,
+          "language": "unknown",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "p-5345-gc-1313340-kafi-bangalore-nagarathanamma",
+            "file": "P-5345-GC-1313340 - Kafi - Bangalore Nagarathanamma.mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1922, so public domain in India since 1983.",
+            "us": "Published 1922; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as His Master's Voice P. 5345, released 1922.",
+                "source": "https://archive.org/details/p-5345-gc-1313340-kafi-bangalore-nagarathanamma"
+              },
+              {
+                "claim": "Bangalore Nagaratnam (1878–1952), Carnatic singer from Karnataka.",
+                "source": "https://en.wikipedia.org/wiki/Bangalore_Nagarathnamma"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "pi-bin-ya-gat",
+          "title": "Pi Bin Ya Gat Bhai (Des)",
+          "artist": "Mushtari Bai",
+          "film": null,
+          "year": 1925,
+          "language": "hi",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "des-pi-bin-ya-gat-bhai",
+            "file": "Des - Pi Bin Ya Gat Bhai .mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1925, so public domain in India since 1986.",
+            "us": "Published 1925; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as His Master's Voice P. 10532, released 1925.",
+                "source": "https://archive.org/details/des-pi-bin-ya-gat-bhai"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        },
+        {
+          "id": "harmonium-desh",
+          "title": "Harmonium: Desh",
+          "artist": "Govindrao Tembe",
+          "film": null,
+          "year": 1925,
+          "language": "none",
+          "source": {
+            "provider": "archive-audio",
+            "identifier": "a_20230510",
+            "file": "A - हार्मोनियम तर्ज - देश - मधुकर वन वन.mp3"
+          },
+          "rights": {
+            "basis": "public-domain",
+            "india": "Sound recording: copyright lasts 60 years from the year after publication (Copyright Act 1957, s.27). Published 1925, so public domain in India since 1986.",
+            "us": "Published 1925; US sound recordings published before 1926 are in the public domain (Music Modernization Act 2018).",
+            "evidence": [
+              {
+                "claim": "The Internet Archive record (from Discogs) gives this 78 rpm record as His Master's Voice P. 9287, released 1925.",
+                "source": "https://archive.org/details/a_20230510"
+              }
+            ],
+            "verifiedAt": "2026-11-24"
+          }
+        }
+      ]
+    }
+  ]
+}

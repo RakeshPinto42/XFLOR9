@@ -7,7 +7,7 @@ const known: KnownAssets = {
   models: new Set(manifest.assets.filter((a) => a.kind === "model").map((a) => a.id)),
   textures: new Set(manifest.assets.filter((a) => a.kind === "texture").map((a) => a.id)),
 };
-const SCENES = ["monsoon-neighbourhood", "living-room"];
+const SCENES = ["monsoon-neighbourhood", "living-room", "cassette-shop"];
 const fileText = (id: string) => readFileSync(`content/scenes/${id}.json`, "utf8");
 
 /** A small valid scene to break in specific ways. */

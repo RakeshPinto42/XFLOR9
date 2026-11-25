@@ -361,3 +361,29 @@ describe("site-wide sound settings (A1)", () => {
     expect(saved.at(-1)).toEqual({ volume: 0.8, muted: false });
   });
 });
+
+describe("tracks (Music): resume where paused, and report the end", () => {
+  const track: PlaybackSource = { id: "music:old-records:gauhar", kind: "music", title: "Bersay Badarva Ray", url: "https://archive.example/a.mp3", live: false };
+  it("resumes a paused track without reloading it", () => {
+    const { engine, audio } = setup();
+    engine.load(track);
+    audio.emit("playing");
+    engine.pause();
+    expect(audio.src).toBe(track.url); // kept: a track isn't a live download
+    const loads = audio.loads;
+    engine.play();
+    expect(audio.loads).toBe(loads);
+    audio.emit("playing");
+    expect(engine.getState().status).toBe("playing");
+  });
+  it("a finished track reports 'ended' (not an error), and play starts it again", () => {
+    const { engine, audio } = setup();
+    engine.load(track);
+    audio.emit("playing");
+    audio.emit("ended");
+    expect(engine.getState()).toMatchObject({ status: "ended", error: null });
+    engine.play();
+    audio.emit("playing");
+    expect(engine.getState().status).toBe("playing");
+  });
+});

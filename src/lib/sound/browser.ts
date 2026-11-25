@@ -45,9 +45,9 @@ export function getMixer(): AudioMixer {
   return m;
 }
 
-/** The radio tells the mixer when it plays, so ambience can dip under it. */
-export function setRadioPlaying(playing: boolean) {
-  getMixer().setRadioPlaying(playing);
+/** A player tells the mixer when it plays, so ambience can dip under it: "audio" = the shared audio player (radio stations, Music's recordings); "tv"/"music" = embedded video players. */
+export function setMediaPlaying(player: "audio" | "tv" | "music", playing: boolean) {
+  getMixer().setMediaPlaying(player, playing);
 }
 
 const subscribeMixer = (l: () => void) => getMixer().subscribe(l);

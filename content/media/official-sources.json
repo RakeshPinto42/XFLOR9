@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "youtube": [
+    {
+      "channelId": "UCWxqSvqiH8PGpSNPSVtFwGw",
+      "handle": "@DDARCHIVES",
+      "name": "Prasar Bharati Archives",
+      "owner": "Prasar Bharati, India's public broadcaster (Doordarshan and All India Radio)",
+      "evidence": [
+        {
+          "claim": "Prasar Bharati's official Archives page says its Central Archives publishes AIR and DD content on YouTube and links to youtube.com/c/DDARCHIVES, which resolves to this channel id.",
+          "source": "https://prasarbharati.gov.in/prasar-bharati-archives/"
+        }
+      ],
+      "verifiedAt": "2026-11-24"
+    },
+    {
+      "channelId": "UCEV8LcN8kq2up4mRM_SCOZw",
+      "handle": "@FilmsDivision",
+      "name": "Films Division",
+      "owner": "Films Division, Ministry of Information and Broadcasting, Government of India (now part of NFDC)",
+      "evidence": [
+        {
+          "claim": "Government press release (PIB, Ministry of Information and Broadcasting) names youtube.com/user/FilmsDivision as Films Division's channel; it resolves to this channel id.",
+          "source": "https://pib.gov.in/PressReleasePage.aspx?PRID=1771426"
+        }
+      ],
+      "verifiedAt": "2026-11-24"
+    },
+    {
+      "channelId": "UCq-Fj5jknLsUf-MWSy4_brA",
+      "handle": "@tseries",
+      "name": "T-Series",
+      "owner": "Super Cassettes Industries (T-Series), Indian music label",
+      "evidence": [
+        {
+          "claim": "T-Series' official website links to youtube.com/user/tseries, which resolves to this channel id.",
+          "source": "https://www.tseries.com/"
+        }
+      ],
+      "verifiedAt": "2026-11-24"
+    },
+    {
+      "channelId": "UC_A7K2dXFsTMAciGmnNxy-Q",
+      "handle": "@SaregamaMusic",
+      "name": "Saregama Music",
+      "owner": "Saregama India (formerly The Gramophone Company of India / HMV), Indian music label",
+      "evidence": [
+        {
+          "claim": "Saregama's official website links to youtube.com/c/SaregamaMusic, which resolves to this channel id.",
+          "source": "https://www.saregama.com/"
+        }
+      ],
+      "verifiedAt": "2026-11-24"
+    },
+    {
+      "channelId": "UCJrDMFOdv1I2k8n9oK_V21w",
+      "handle": "@tipsofficial",
+      "name": "Tips Official",
+      "owner": "Tips Industries (Tips Music), Indian music label",
+      "evidence": [
+        {
+          "claim": "Tips' official website links to youtube.com/@tipsofficial, which resolves to this channel id.",
+          "source": "https://tips.in/"
+        }
+      ],
+      "verifiedAt": "2026-11-24"
+    }
+  ]
+}

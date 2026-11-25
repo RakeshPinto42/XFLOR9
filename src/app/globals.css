@@ -642,6 +642,26 @@ html[data-stage-active] body > header,
 html[data-stage-active] body > footer {
   position: relative;
   z-index: 10;
-  background: rgb(236 225 200 / 0.9);
-  backdrop-filter: blur(8px);
+  /* Night over the scene, not a beige bar: the world shows through. */
+  background: linear-gradient(rgb(8 11 26 / 0.82), rgb(8 11 26 / 0.55));
+  border-color: transparent;
+  color: var(--color-panel);
+  backdrop-filter: blur(6px);
+}
+html[data-stage-active] body > header .logo-mark {
+  color: var(--color-panel);
+}
+html[data-stage-active] body > header a[aria-current="page"],
+html[data-stage-active] body > header button[aria-pressed="true"] {
+  background: var(--color-panel);
+  color: var(--color-ink);
+}
+html[data-stage-active] body > header :is(a, button):not([aria-current="page"], [aria-pressed="true"]):hover {
+  background: rgb(255 255 255 / 0.12);
+}
+
+/* TV (M3): the official player sits on the CRT glass, with the glass's rounded corners. */
+.tv-glass {
+  border-radius: 9% / 11%;
+  box-shadow: 0 0 2.5rem rgb(188 212 255 / 0.25);
 }

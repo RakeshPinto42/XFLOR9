@@ -6,7 +6,7 @@ import { stageStats } from "./diagnostics";
 import type { SceneEntry } from "./registry";
 
 /** Developer diagnostics (development, ?stage-debug, or the ` key). Stats are also exposed as data for tests. */
-export function DiagnosticsPanel({ mode, reason, scene }: { mode: QualityMode; reason: string; scene: SceneEntry }) {
+export function DiagnosticsPanel({ mode, reason, scene, debug }: { mode: QualityMode; reason: string; scene: SceneEntry; debug: boolean }) {
   const s = useSyncExternalStore(stageStats.subscribe, stageStats.get, stageStats.server);
   const rows: [string, string | number][] = [
     ["Scene", scene.id],
@@ -39,7 +39,7 @@ export function DiagnosticsPanel({ mode, reason, scene }: { mode: QualityMode; r
           </div>
         ))}
       </dl>
-      {mode === "full" && <p className="mt-2 text-[#c8ffe4]/70">Drag to orbit, scroll to zoom. Press ` to hide.</p>}
+      {mode === "full" && debug && <p className="mt-2 text-[#c8ffe4]/70">Drag to look · W A S D / arrows to move · E/Q up/down · Shift faster · wheel while dragging sets speed. Press ` to hide.</p>}
     </aside>
   );
 }

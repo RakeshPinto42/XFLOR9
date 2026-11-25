@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
 import { assetProgress, knownAssets } from "./assets";
 import { parseScene } from "@/engine/scene/format";
-import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
+import { ACESFilmicToneMapping, SRGBColorSpace, Vector3 } from "three";
 import { AdaptiveQuality, QUALITY_LEVELS } from "@/engine/adaptive";
 import { stageStats } from "./diagnostics";
 import type { SceneEntry, SceneProps } from "./registry";
@@ -155,16 +155,18 @@ function CaptureHook() {
   const { gl, scene, camera } = useThree();
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has("stage-capture")) return;
-    const w = window as unknown as { __xplor9CaptureScene?: (quality?: number) => string; __xplor9CameraPosition?: () => number[] };
+    const w = window as unknown as { __xplor9CaptureScene?: (quality?: number) => string; __xplor9CameraPosition?: () => number[]; __xplor9CameraDirection?: () => number[] };
     w.__xplor9CaptureScene = (quality = 0.86) => {
       gl.render(scene, camera);
       return gl.domElement.toDataURL("image/webp", quality);
     };
     // F3 tests: where the camera is (checks that camera modes move it, or don't).
     w.__xplor9CameraPosition = () => camera.position.toArray();
+    w.__xplor9CameraDirection = () => camera.getWorldDirection(new Vector3()).toArray();
     return () => {
       delete w.__xplor9CaptureScene;
       delete w.__xplor9CameraPosition;
+      delete w.__xplor9CameraDirection;
     };
   }, [gl, scene, camera]);
   return null;

@@ -33,6 +33,17 @@ export interface SceneEntry {
 
 export const SCENES: readonly SceneEntry[] = [
   {
+    // The homepage: Monsoon Lane, with a painted signboard for each module (same scene file).
+    id: "home-street",
+    path: "/",
+    title: "Monsoon Lane",
+    description:
+      "A small Indian lane on a monsoon evening: tiled-roof houses with warm lights, rain and mist, and five hand-painted signboards on wooden posts along the lane for Radio, TV, Music, Games and the Reading Room.",
+    poster: "/stage/posters/monsoon-neighbourhood.webp",
+    load: () => import("@/scenes/home/HomeStreet"),
+    document: () => import("../../content/scenes/monsoon-neighbourhood.json"),
+  },
+  {
     id: "monsoon-neighbourhood",
     path: "/lab/monsoon",
     title: "Monsoon neighbourhood",
@@ -51,6 +62,28 @@ export const SCENES: readonly SceneEntry[] = [
     poster: "/stage/posters/living-room.webp",
     load: () => import("@/scenes/living-room/LivingRoom"),
     document: () => import("../../content/scenes/living-room.json"),
+  },
+  {
+    // M3: the TV module is the family CRT in the same living room (same scene file and poster).
+    id: "tv-room",
+    path: "/tv",
+    title: "The family TV",
+    description:
+      "The family CRT television in its wooden cabinet in a warmly lit 1990s Indian living room on a rainy evening. When a programme is chosen the set glows on and the view moves in to its screen.",
+    poster: "/stage/posters/living-room.webp",
+    load: () => import("@/scenes/tv/TvRoom"),
+    document: () => import("../../content/scenes/living-room.json"),
+  },
+  {
+    // M4: the Music module is a cassette shop on the monsoon street.
+    id: "cassette-shop",
+    path: "/music",
+    title: "Cassette shop",
+    description:
+      "A small cassette shop at dusk: shelves of tapes on yellowed walls, a wooden counter with a portable tape deck and a little TV, a plastic chair for the shopkeeper, and blue evening light through the side doorway.",
+    poster: "/stage/posters/cassette-shop.webp",
+    load: () => import("@/scenes/music/MusicShop"),
+    document: () => import("../../content/scenes/cassette-shop.json"),
   },
 ];
 

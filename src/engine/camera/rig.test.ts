@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { damp, fly, forward, FREE_SPEED, lookFrom, loopPhase, pathAim, PITCH_LIMIT, turn, wheelSpeed } from "./rig";
+import { damp, fly, forward, framingDistance, FREE_SPEED, lookFrom, loopPhase, pathAim, PITCH_LIMIT, turn, wheelSpeed } from "./rig";
 
 const close = (a: number[], b: number[], digits = 6) => a.forEach((v, i) => expect(v).toBeCloseTo(b[i], digits));
 
@@ -76,5 +76,19 @@ describe("free camera", () => {
     expect(wheelSpeed(6, 0)).toBe(6);
     expect(wheelSpeed(FREE_SPEED.max, -1)).toBe(FREE_SPEED.max);
     expect(wheelSpeed(FREE_SPEED.min, 1)).toBe(FREE_SPEED.min);
+  });
+});
+
+describe("framing a screen", () => {
+  const fov = (45 * Math.PI) / 180;
+  it("on a wide window, the screen's height decides the distance", () => {
+    const d = framingDistance(0.375, 0.31, fov, 16 / 9, 0.55, 0.9);
+    expect(0.31 / (2 * d * Math.tan(fov / 2))).toBeCloseTo(0.55);
+  });
+  it("on a tall phone window, the width decides, and the screen still fits", () => {
+    const d = framingDistance(0.375, 0.31, fov, 0.5, 0.55, 0.9);
+    const visibleH = 2 * d * Math.tan(fov / 2);
+    expect(0.375 / (visibleH * 0.5)).toBeCloseTo(0.9);
+    expect(0.31 / visibleH).toBeLessThan(0.55);
   });
 });

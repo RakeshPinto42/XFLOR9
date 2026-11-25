@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { radioOutput } from "@/engine/audio/mixer";
-import { setRadioPlaying, soundPrefs } from "@/lib/sound/browser";
+import { setMediaPlaying, soundPrefs } from "@/lib/sound/browser";
 import { STORAGE_KEYS, readJson, writeJson } from "@/lib/storage/local";
 import { PlaybackEngine, clamp, type CrossTabChannel } from "./engine";
 import type { PlaybackState } from "./types";
@@ -45,7 +45,7 @@ export function getPlaybackEngine(): PlaybackEngine {
   let playing = false;
   e.subscribe(() => {
     const now = e.getState().status === "playing";
-    if (now !== playing) setRadioPlaying((playing = now));
+    if (now !== playing) setMediaPlaying("audio", (playing = now));
   });
   return engine;
 }

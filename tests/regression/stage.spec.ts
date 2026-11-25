@@ -75,11 +75,15 @@ test("without WebGL the scene falls back to Lite, with a reason", async ({ page 
 
 test("the visitor's quality choice is remembered", async ({ page }) => {
   await page.goto(LAB);
+  // The panel is folded into one small button until opened.
+  await page.getByTestId("stage-quality").locator("summary").click();
   await page.getByRole("group", { name: "Scene quality" }).getByText("Still", { exact: true }).click();
   await expect(stage(page)).toHaveAttribute("data-mode", "still");
   await page.reload();
   await expect(stage(page)).toHaveAttribute("data-mode", "still");
   await expect(page.getByTestId("stage-reason")).toContainText("You chose Still");
+  // Reloading folds the panel again.
+  if (!(await page.getByTestId("stage-quality").evaluate((d) => (d as HTMLDetailsElement).open))) await page.getByTestId("stage-quality").locator("summary").click();
   await page.getByRole("group", { name: "Scene quality" }).getByText("Automatic", { exact: true }).click();
   await expect(page.getByTestId("stage-reason")).not.toContainText("You chose");
 });
@@ -89,7 +93,8 @@ test("pages without a scene download no 3D code", async ({ page }) => {
   page.on("response", async (r) => {
     if (r.request().resourceType() === "script" && r.ok()) scripts.push(await r.text().catch(() => ""));
   });
-  for (const path of ["/", "/reading", "/radio", "/reading/the-time-machine"]) {
+  // The homepage is a scene page (Monsoon Lane), so it is not in this list.
+  for (const path of ["/games", "/reading", "/radio", "/reading/the-time-machine"]) {
     await page.goto(path, { waitUntil: "networkidle" });
   }
   expect(scripts.length).toBeGreaterThan(0);

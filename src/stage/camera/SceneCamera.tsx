@@ -58,13 +58,20 @@ const KEYS = {
 } as const;
 const MOVE_KEYS = new Set<string>(Object.values(KEYS).flat());
 
+/** Where a drag must not turn the camera: the page's own controls and fields. */
+const UI = "a, button, input, select, textarea, label, summary, [contenteditable], [role='dialog'], [role='slider']";
+
 /**
  * Developer fly camera: drag to look, W/A/S/D or arrows to move, E/Q up and down, Shift for
- * speed, mouse wheel to change speed. Passes through everything (it's for inspecting scenes).
+ * speed, mouse wheel while dragging to change speed. Passes through everything (it's for
+ * inspecting scenes).
+ *
+ * The canvas sits behind the page (the page's content covers it), so drags are read from the
+ * whole window, except drags that start on the page's controls. The wheel only changes speed
+ * during a drag, so it never takes over page scrolling.
  */
 function FreeCamera() {
   const camera = useThree((s) => s.camera);
-  const canvas = useThree((s) => s.gl.domElement);
   const held = useHeldKeys();
   const look = useRef<Look | null>(null);
   const speed = useRef<number>(FREE_SPEED.initial);
@@ -74,10 +81,10 @@ function FreeCamera() {
     let dragging: number | null = null;
     let last = [0, 0];
     const down = (e: PointerEvent) => {
-      if (e.button !== 0 || dragging !== null) return;
+      if (e.button !== 0 || dragging !== null || (e.target instanceof Element && e.target.closest(UI))) return;
       dragging = e.pointerId;
       last = [e.clientX, e.clientY];
-      canvas.setPointerCapture(e.pointerId);
+      e.preventDefault(); // no text selection while dragging the view
     };
     const move = (e: PointerEvent) => {
       if (e.pointerId !== dragging || !look.current) return;
@@ -88,22 +95,23 @@ function FreeCamera() {
       if (e.pointerId === dragging) dragging = null;
     };
     const wheel = (e: WheelEvent) => {
+      if (dragging === null) return;
       e.preventDefault();
       speed.current = wheelSpeed(speed.current, e.deltaY);
     };
-    canvas.addEventListener("pointerdown", down);
-    canvas.addEventListener("pointermove", move);
-    canvas.addEventListener("pointerup", up);
-    canvas.addEventListener("pointercancel", up);
-    canvas.addEventListener("wheel", wheel, { passive: false });
+    window.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    window.addEventListener("wheel", wheel, { passive: false });
     return () => {
-      canvas.removeEventListener("pointerdown", down);
-      canvas.removeEventListener("pointermove", move);
-      canvas.removeEventListener("pointerup", up);
-      canvas.removeEventListener("pointercancel", up);
-      canvas.removeEventListener("wheel", wheel);
+      window.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      window.removeEventListener("wheel", wheel);
     };
-  }, [canvas]);
+  }, []);
 
   useFrame((_, delta) => {
     // Start from wherever the camera is on the first frame (the scene's start shot), so

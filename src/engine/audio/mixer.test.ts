@@ -124,8 +124,20 @@ describe("the mixer", () => {
     await tick();
     mixer.setPrefs({ ...on, ambience: 0.5 });
     expect(gains()[1].target).toBe(0.5);
-    mixer.setRadioPlaying(true);
+    mixer.setMediaPlaying("radio", true);
     expect(gains()[1].target).toBeCloseTo(0.5 * DUCK_LEVEL);
+  });
+  it("stays ducked until every player has stopped (radio stopping doesn't un-duck the TV)", async () => {
+    const { mixer, gains } = setup();
+    mixer.unlock();
+    await tick();
+    mixer.setPrefs({ ...on, ambience: 0.5 });
+    mixer.setMediaPlaying("tv", true);
+    mixer.setMediaPlaying("radio", true);
+    mixer.setMediaPlaying("radio", false);
+    expect(gains()[1].target).toBeCloseTo(0.5 * DUCK_LEVEL);
+    mixer.setMediaPlaying("tv", false);
+    expect(gains()[1].target).toBe(0.5);
   });
   it("turning sound off silences and suspends; hidden tab fades out and resumes when visible", async () => {
     const { mixer, contexts, gains } = setup();

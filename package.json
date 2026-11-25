@@ -15,7 +15,8 @@
     "stage:measure": "node scripts/stage/measure.ts",
     "scenes:export": "node scripts/scenes/export-scenes.ts",
     "assets:sync-draco": "node scripts/assets/sync-draco.ts",
-    "stage:poster": "node scripts/stage/capture-poster.ts"
+    "stage:poster": "node scripts/stage/capture-poster.ts",
+    "media:verify": "node scripts/media/verify-media.ts"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

@@ -66,7 +66,7 @@ export function StageHost({ scene }: { scene: SceneEntry }) {
       </div>
       <SceneAmbience scene={scene} />
       <QualityPanel mode={mode} reason={reason} pref={pref} />
-      {(debug || stats || showPanel) && <DiagnosticsPanel mode={mode} reason={reason} scene={scene} />}
+      {(debug || stats || showPanel) && <DiagnosticsPanel mode={mode} reason={reason} scene={scene} debug={debug} />}
     </>
   );
 }
@@ -85,12 +85,17 @@ function PosterView({ scene, animate }: { scene: SceneEntry; animate: boolean })
 
 function QualityPanel({ mode, reason, pref }: { mode: QualityMode; reason: string; pref: string }) {
   return (
-    <section
-      aria-label="Scene quality"
-      className="fixed bottom-4 left-4 z-20 max-w-xs rounded-2xl bg-ink/85 p-3 text-sm text-panel shadow-lg backdrop-blur"
+    // Folded into one small button so it never covers the page (it used to hide content on phones).
+    <details
+      data-testid="stage-quality"
+      className="group fixed bottom-3 left-3 z-20 max-w-xs rounded-2xl bg-ink/80 text-xs text-panel shadow-lg backdrop-blur open:p-3 open:text-sm"
     >
+      <summary className="cursor-pointer list-none rounded-2xl px-3 py-1.5 font-semibold group-open:mb-1.5 group-open:p-0">
+        {QUALITY_LABELS[mode]}
+        <span className="sr-only"> scene quality: change</span>
+      </summary>
       <fieldset>
-        <legend className="mb-1.5 font-semibold">Scene quality</legend>
+        <legend className="sr-only">Scene quality</legend>
         <div className="flex flex-wrap gap-1.5">
           {QUALITY_PREFERENCES.map((p) => (
             <label
@@ -106,7 +111,7 @@ function QualityPanel({ mode, reason, pref }: { mode: QualityMode; reason: strin
       <p className="mt-2 text-xs text-panel/80" aria-live="polite" data-testid="stage-reason">
         Showing {QUALITY_LABELS[mode]}. {reason}
       </p>
-    </section>
+    </details>
   );
 }
 

@@ -64,9 +64,9 @@ export function parseSoundPrefs(raw: unknown): SoundPrefs {
   };
 }
 
-/** Volume of one bus (before the master), including ducking while the radio plays. */
-export function busGain(p: SoundPrefs, bus: Bus, radioPlaying: boolean): number {
-  return p[bus] * (bus === "ambience" && radioPlaying ? DUCK_LEVEL : 1);
+/** Volume of one bus (before the master), including ducking while a player (radio, TV, music) plays. */
+export function busGain(p: SoundPrefs, bus: Bus, mediaPlaying: boolean): number {
+  return p[bus] * (bus === "ambience" && mediaPlaying ? DUCK_LEVEL : 1);
 }
 
 /** Overall output: silent unless the visitor turned sound on. */
@@ -111,7 +111,8 @@ export class AudioMixer {
   private master: GainLike | null = null;
   private buses = new Map<Bus, GainLike>();
   private prefs: SoundPrefs = DEFAULT_SOUND_PREFS;
-  private radioPlaying = false;
+  /** Players currently playing ("radio", "tv", "music"): ambience dips while any is. */
+  private mediaPlaying = new Set<string>();
   private hidden = false;
   private voices = 0;
   private listeners = new Set<() => void>();
@@ -156,8 +157,10 @@ export class AudioMixer {
     if (wasOn && !prefs.soundOn && this.ctx?.state === "running") void this.ctx.suspend().then(() => this.emit());
   }
 
-  setRadioPlaying(playing: boolean) {
-    this.radioPlaying = playing;
+  /** A player (radio, TV, music) started or stopped. Each reports for itself, so one stopping never un-ducks another. */
+  setMediaPlaying(player: string, playing: boolean) {
+    if (playing) this.mediaPlaying.add(player);
+    else this.mediaPlaying.delete(player);
     this.applyGains();
   }
 
@@ -217,7 +220,7 @@ export class AudioMixer {
     if (!this.ctx || !this.master) return;
     const t = this.ctx.currentTime;
     this.master.gain.setTargetAtTime(this.hidden ? 0 : masterGain(this.prefs), t, FADE);
-    for (const [b, g] of this.buses) g.gain.setTargetAtTime(busGain(this.prefs, b, this.radioPlaying), t, FADE);
+    for (const [b, g] of this.buses) g.gain.setTargetAtTime(busGain(this.prefs, b, this.mediaPlaying.size > 0), t, FADE);
   }
 
   private emit() {

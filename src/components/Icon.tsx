@@ -17,6 +17,9 @@ const PATHS = {
   prev: "M6 5h2v14H6zM20 5v14L9.5 12z",
   next: "M16 5h2v14h-2zM4 5v14l10.5-7z",
   sliders: "M4 6h9v2H4zM17 6h3v2h-3zM13 4h4v6h-4zM4 16h3v2H4zM11 16h9v2h-9zM7 14h4v6H7z",
+  stop: "M6 6h12v12H6z",
+  expand: "M4 4h6v2H6v4H4zM14 4h6v6h-2V6h-4zM4 14h2v4h4v2H4zM18 14h2v6h-6v-2h4z",
+  external: "M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14zM5 5h6v2H7v10h10v-4h2v6H5z",
 } as const;
 
 export type IconName = keyof typeof PATHS;

@@ -72,3 +72,12 @@ phone (model to be provided).
   ones; inspect before and after; preserve animation, skeletons and morph targets; record sources.
 - Characters start from verified CC0 sources; licensed characters only via the future licensing route.
 - Hindi and Kannada catalogue books wait for verifiable editions (see R5).
+- 2026-11-24: order changed at the owner's request: after F3 step 1, TV (M3) and then Music (M4)
+  are built now as complete Three.js modules; F3 steps 2–4 (isometric, top-down, walking modes,
+  touch) resume afterwards. TV and Music content: official uploads from allow-listed rights-holder
+  channels (YouTube, official player) or public domain in India and the US (Internet Archive);
+  see `content/media/official-sources.json` and `npm run media:verify`.
+- 2026-11-25: product-first, at the owner's request ("make it simple, build the product first end to
+  end"). All five modules work end to end before more foundation work: Radio, Reading Room, TV (M3),
+  Music (M4) and Games (M5: Saanp and Mines, 2D, best scores in this browser). F3 steps 2–4, E1, F4,
+  Studio and the universe phases follow, in that order, once the owner has reviewed the working product.

@@ -1,6 +1,7 @@
-/** Shared playback contracts. Module-agnostic: radio today, music and TV later. */
+/** Shared playback contracts. Module-agnostic: radio stations and Music's audio tracks. */
 
-export type PlaybackStatus = "idle" | "loading" | "playing" | "buffering" | "paused" | "error";
+/** "ended": a track (not a live stream) played to its end. */
+export type PlaybackStatus = "idle" | "loading" | "playing" | "buffering" | "paused" | "ended" | "error";
 
 /**
  * "unplayable": the browser couldn't open the source. Browsers report an unreachable server
@@ -15,9 +16,9 @@ export interface PlaybackError {
 }
 
 export interface PlaybackSource {
-  /** Stable id, e.g. "radio:<stationuuid>". */
+  /** Stable id, e.g. "radio:<stationuuid>" or "music:<cassette>:<track>". */
   id: string;
-  kind: "radio";
+  kind: "radio" | "music";
   title: string;
   subtitle?: string;
   url: string;

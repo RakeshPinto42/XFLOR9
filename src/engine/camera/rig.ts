@@ -102,3 +102,15 @@ export function wheelSpeed(speed: number, wheelDeltaY: number): number {
   const factor = wheelDeltaY < 0 ? 1.2 : wheelDeltaY > 0 ? 1 / 1.2 : 1;
   return clamp(speed * factor, FREE_SPEED.min, FREE_SPEED.max);
 }
+
+// ---------- framing ----------------------------------------------------------------------------
+
+/**
+ * How far in front of a flat rectangle (a TV screen) the camera must stand, looking straight at
+ * it, so it fills at most `heightShare` of the view's height and `widthShare` of its width.
+ * Works for wide desktop and tall phone windows alike (`aspect` = width / height).
+ */
+export function framingDistance(width: number, height: number, fovY: number, aspect: number, heightShare: number, widthShare: number): number {
+  const visibleHeight = Math.max(height / heightShare, width / (widthShare * aspect));
+  return visibleHeight / (2 * Math.tan(fovY / 2));
+}
