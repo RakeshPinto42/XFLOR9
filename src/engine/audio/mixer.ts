@@ -30,7 +30,7 @@ export interface SoundPrefs {
 }
 
 export const DEFAULT_SOUND_PREFS: SoundPrefs = {
-  soundOn: false,
+  soundOn: true,
   master: 0.8,
   ambience: 0.8,
   music: 1,
@@ -54,7 +54,7 @@ export function parseSoundPrefs(raw: unknown): SoundPrefs {
   const r = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : {};
   const d = DEFAULT_SOUND_PREFS;
   return {
-    soundOn: r.soundOn === true,
+    soundOn: typeof r.soundOn === "boolean" ? r.soundOn : d.soundOn,
     master: unit(r.master, d.master),
     ambience: unit(r.ambience, d.ambience),
     music: unit(r.music, d.music),

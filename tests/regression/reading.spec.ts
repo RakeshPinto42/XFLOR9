@@ -84,8 +84,7 @@ test("favourites persist across reloads and appear in My Library", async ({ page
   await expect(page.getByText("Your favourites")).toBeVisible();
 });
 
-test("radio page still loads its tuner", async ({ page }) => {
+test("the radio window still loads its tuner", async ({ page }) => {
   await page.goto("/radio");
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.locator("main")).not.toBeEmpty();
+  await expect(page.locator('[data-app="radio"]').getByRole("button", { name: /^Play/ }).first()).toBeVisible({ timeout: 30_000 });
 });

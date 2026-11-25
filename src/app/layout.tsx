@@ -1,9 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Shrikhand, Silkscreen } from "next/font/google";
-import { MiniPlayer } from "@/components/MiniPlayer";
-import { SiteHeader } from "@/components/SiteHeader";
-import { STORAGE_KEYS } from "@/lib/storage/local";
-import { StageRoot } from "@/stage/StageRoot";
 import "./globals.css";
 
 // next/font self-hosts these at build time: no runtime requests to Google.
@@ -13,37 +9,21 @@ const silkscreen = Silkscreen({ weight: "400", subsets: ["latin"], variable: "--
 
 export const metadata: Metadata = {
   title: { default: "XPLOR9: Your childhood. Reconnected.", template: "%s | XPLOR9" },
-  description:
-    "Radio, TV, music, games and a reading room inspired by Indian 90s and 2000s entertainment.",
+  description: "A nostalgic personal computer of radio, television, music, video, games and a reading room, from the years 1990 to 2010.",
 };
 
-// Runs before first paint so returning visitors never see a flash of the intro.
-const introSeenScript = `try{if(localStorage.getItem(${JSON.stringify(
-  STORAGE_KEYS.introSeen,
-)})==="true")document.documentElement.dataset.introSeen="true"}catch(e){}`;
+export const viewport: Viewport = { themeColor: "#245edb" };
+
+// Runs before first paint: pages shown inside a desktop window (the Reading Room) drop their own top bar.
+const embeddedScript = `try{if(window.self!==window.top)document.documentElement.dataset.embedded="true"}catch(e){document.documentElement.dataset.embedded="true"}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${shrikhand.variable} ${hanken.variable} ${silkscreen.variable} antialiased`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${shrikhand.variable} ${hanken.variable} ${silkscreen.variable} antialiased`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: introSeenScript }} />
+        <script dangerouslySetInnerHTML={{ __html: embeddedScript }} />
       </head>
-      <body className="flex min-h-dvh flex-col">
-        {/* The one shared 3D stage: renders nothing on pages without a scene. */}
-        <StageRoot />
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <footer className="border-t-2 border-ink/15">
-          <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-ink-soft sm:px-6">
-            Everything XPLOR9 remembers, like favourites and progress, stays in this browser.
-          </div>
-        </footer>
-        <MiniPlayer />
-      </body>
+      <body className="min-h-dvh">{children}</body>
     </html>
   );
 }

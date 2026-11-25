@@ -1,7 +1,7 @@
 # Known issues and technical debt (for the product-wide audit)
 
 Recorded as found, so the final audit has one list. Severity is a first estimate.
-Last updated: 2026-11-23 (F1 increment 1).
+Last updated: 2026-11-26 (D1 desktop).
 
 ## Reading Room
 
@@ -27,27 +27,11 @@ Last updated: 2026-11-23 (F1 increment 1).
 | PL-2 | Mixed line endings appeared after `git stash`; scripted text edits then silently failed to match. Consider a `.gitattributes` with `* text=auto eol=lf`. | Low | R4 | Developer hygiene. |
 | PL-3 | Wikimedia sites block unidentified automated clients (bot challenge / UA policy); Project Gutenberg's main site has maintenance windows (the PGLAF mirror works but is slow). | Info | R5 | Affects future catalogue work only. |
 
-## 3D stage (F1)
+## Retired with the 3D stage (D1, 2026-11-26)
 
-| # | Issue | Severity | Found | Notes |
-|---|---|---|---|---|
-| ST-1 | React Three Fiber 9.8.2 logs "THREE.Clock: This module has been deprecated" (three r187). Harmless; comes from R3F internals. | Info | F1.1 | Re-check on the next R3F update. |
-| ST-2 | drei 10.7.9 depends on stats-gl, which brings a second copy of three (0.170) into node_modules. Not bundled unless drei's `StatsGl` is used, so it is not used. | Low | F1.1 | Technical debt: watch bundle analysis. |
-| ST-3 | Scene pages give the site header/footer a backdrop through a global CSS rule keyed on `html[data-stage-active]`. Works, but a layout-level slot for scene pages would be cleaner once more scenes exist. | Low | F1.1 | Technical debt. |
-| ST-4 | Headless browsers render WebGL in software: stage tests prove correctness only, never frame rates. Performance is measured on the reference laptop. | Info | F1.1 | |
-| ST-5 | During development, Turbopack missed a CSS change appended from the shell until the file was edited again. | Info | F1.1 | Development only. |
-| ST-6 | `npm audit` reports 4 moderate advisories (glob/minimatch DoS via crafted patterns) inside the development-only asset tools (@gltf-transform/cli). They only run locally on our own fixed paths and never ship to the site; not force-upgraded (breaking). | Low | F1.2 | Re-check when @gltf-transform updates. |
-| ST-7 | The Khronos validator can't inspect inside Draco-compressed geometry; the build compensates by decoding the result and comparing counts with the source. | Info | F1.2 | |
-| ST-8 | A model that fails to load stays failed for the visit (the scene shows Lite with a reason); reloading retries. Intentional: retrying inside React suspense looped forever. | Info | F1.2 | |
-| ST-10 | Monsoon scene: the free (debug) camera can still look past the edge of the world; the cinematic camera never does. | Info | F1.3 | |
-| ST-11 | Monsoon scene: houses are generated procedurally from plastered and tiled boxes; they read as village houses but lack fine detail (eaves trim, grilles, clutter). Upgrades come with the Studio (S1–S3) and the U1 phase. | Low | F1.3 | Planned. |
-| ST-12 | Monsoon scene: activity locations are empty until F4 characters exist; the street currently has no people. | Info | F1.3 | F4. |
-| ST-13 | Headless WebKit renders the monsoon scene slowly in software; in one full regression run the following WebKit test's page setup timed out once (passed on re-run). | Low | F1.3 | Watch for repeats. |
-| SF-1 | Scene format: `interactions` and `transitions` are placeholders (id, kind/trigger, target) until the phases that design them. | Info | F2 | F4, M, U2. |
-| SF-2 | Scene format: the upgrade chain is empty because only format 1 exists; the mechanism is unit-tested with test steps. | Info | F2 | First format change. |
-| SF-3 | An invalid scene file falls back to Lite through the existing scene error path; this is covered by unit tests of the validator, not by a browser test with a broken file. | Low | F2 | Add when the Studio can save files. |
-| SF-4 | The monsoon camera path's aiming rule (look down the lane, drawn to its centre) is still code; the file sets only the path, loop time and look-ahead. F3 generalises cameras. | Low | F2 | F3. |
-| ST-9 | The F1 scene uses a stand-in box for the TV cabinet until increment 3 builds the teak cabinet, sofa, centre table and three-blade fan. | Info | F1.2 | |
+ST-1 to ST-13, SF-1 to SF-4 and HM-1 to HM-3 no longer apply: the Three.js stage, scenes, scene
+format and 3D homepage were removed (archived at tag `cinematic-3d-archive`). ST-6 (npm audit
+advisories in the 3D asset tools) is resolved: `npm audit` now reports 0 vulnerabilities.
 
 ## TV (M3)
 
@@ -59,10 +43,16 @@ Last updated: 2026-11-23 (F1 increment 1).
 | TV-4 | Languages marked "not recorded" (several Films Division shorts, two documentaries) need checking by watching. | Low | M3 | Content review |
 | TV-5 | Picture House films: whether each Internet Archive copy carries a later (possibly copyrighted) music track is unverified; the films themselves are public domain. | Medium | M3 | Content review before release |
 
-## Homepage (Monsoon Lane)
+## Desktop (D1)
 
 | ID | Issue | Severity | Found | Status |
 |---|---|---|---|---|
-| HM-1 | Lite and Still show the old monsoon poster, without the five signboards; the list of links is the way in. | Low | Home 3D | Render a new poster (`npm run stage:poster`) |
-| HM-2 | Headless Chromium draws the street at about 1 frame a second (software WebGL), so the sign-click test needs a long timeout. Real GPUs are unaffected (see ST-4). | Info | Home 3D | Test environment |
-| HM-3 | The homepage now downloads three.js on a first visit (it used to be a light page). Slow devices fall back to Lite/Still, but first-load size should be checked in the performance audit. | Medium | Home 3D | Performance audit |
+| DK-1 | Radio, TV, Music, Games and the Reading Room keep their earlier web-page styling inside their windows (beige pages, rounded cards). They work fully, but don't yet look like desktop applications. | Medium | D1 | Planned: D2 |
+| DK-2 | The master volume and Mute don't reach YouTube's or the Internet Archive's players; those have their own volume controls. | Low | D1 | YouTube could be scaled through its player API (D2) |
+| DK-3 | Video can't search all of YouTube: that needs a YouTube Data API key on the server. Featured items, verified channels and pasted links work. | Medium (feature gap) | D1 | Planned: D3 |
+| DK-4 | A channel's "latest uploads" list is the rights holder's own uploads, but not curated by era. | Low | D1 | Content review |
+| DK-5 | Open windows are not reopened after a reload or a new log-in; only each app's window place is remembered. | Low | D1 | By design for now |
+| DK-6 | Alt+Tab and the Windows key belong to the operating system; the desktop uses Ctrl+Esc for the start menu and the taskbar for switching. | Info | D1 | Browser limitation |
+| DK-7 | The Reading Room's frame shares the browser's history: the browser's own Back button can step back inside the Reading Room before leaving the desktop. The window's Back/Forward buttons behave as expected. | Low | D1 | |
+| DK-8 | Desktop icons can't be dragged into a custom arrangement. | Low | D1 | Planned: D4 |
+| DK-9 | Music and TV copy still mention "the shop's TV" and "the family set" from the 3D rooms in a few places. | Low | D1 | D2 |

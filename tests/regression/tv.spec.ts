@@ -110,7 +110,7 @@ test("favourites and recently watched are remembered across visits", async ({ pa
   expect(new URL((await player(page).getAttribute("src"))!).href).toBe("https://archive.org/embed/TheGeneral?autoplay=1");
   await expect(page.getByTestId("tv-status")).toHaveText("Public domain in India and the US · Internet Archive");
   await page.getByRole("button", { name: "Switch off" }).click();
-  await page.reload();
+  await page.goto("/tv");
   await expect(page.getByRole("region", { name: "Favourites" })).toContainText("Godaan");
   await expect(page.getByRole("region", { name: "Recently watched" })).toContainText("The General");
 });
@@ -140,33 +140,11 @@ test("offline: says so instead of loading a player", async ({ page, context }) =
   await context.setOffline(false);
 });
 
-test("without the 3D room (reduced motion → Still), the player has its own CRT frame", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
+test("the player plays in its own CRT frame inside the TV window", async ({ page }) => {
   await stubProviders(page);
   await page.goto("/tv");
-  await expect(page.getByTestId("stage")).toHaveAttribute("data-mode", "still");
   await watch(page, /Cartoon Time/, "Ek Anek Aur Ekta");
   await expect(page.getByTestId("tv-player")).toHaveAttribute("data-placement", "frame");
+  await expect(page.locator('[data-app="tv"]').getByTestId("tv-player")).toBeVisible();
   await expect(player(page)).toBeVisible();
-});
-
-test("with the 3D room, the player sits on the TV's glass once the camera arrives", async ({ page, browserName }) => {
-  await page.goto("/");
-  const webgl = await page.evaluate(() => !!document.createElement("canvas").getContext("webgl2"));
-  test.skip(!webgl, `${browserName}: no WebGL in this headless browser`);
-  const requests = await stubProviders(page);
-  await page.goto("/tv");
-  await expect(page.getByTestId("stage")).toHaveAttribute("data-mode", "full");
-  await watch(page, /Cartoon Time/, "Ek Anek Aur Ekta");
-  const frame = page.getByTestId("tv-player");
-  await expect(frame).toHaveAttribute("data-placement", "glass", { timeout: 30_000 });
-  await expect.poll(async () => frame.evaluate((el) => getComputedStyle(el).opacity), { timeout: 15_000 }).toBe("1");
-  const box = (await frame.boundingBox())!;
-  const vp = page.viewportSize()!;
-  // The screen fills a good part of the window and sits within it.
-  expect(box.height / vp.height).toBeGreaterThan(0.4);
-  expect(box.x).toBeGreaterThanOrEqual(0);
-  expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
-  // Moving from the page onto the glass never reloaded the player (it would restart the film).
-  expect(requests.filter((u) => u.includes("/embed/bI376UnsUMg"))).toHaveLength(1);
 });

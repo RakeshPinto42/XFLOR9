@@ -1,17 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { EmbedPlayer, type EmbedPlayerHandle } from "@/features/media/EmbedPlayer";
 import { PlayerFrame } from "@/features/media/PlayerFrame";
 import { MEDIA_LANGUAGES, PROVIDER_NAMES, sourcePage } from "@/features/media/catalogue";
 import { NO_RESPONSE, UNAVAILABLE_CODES, type PlayerEvent } from "@/features/media/playerMessages";
 import { getPlaybackEngine } from "@/lib/playback/browser";
+import { useExclusiveMedia } from "@/lib/playback/mediaFocus";
 import { setMediaPlaying } from "@/lib/sound/browser";
 import { useLocalStore } from "@/lib/storage/store";
 import { WATCH_ACCESS, type Programme, type TvCatalogue, type TvChannel } from "./catalogue";
 import { recordTvWatch, toggleTvFavourite, tvFavourites, tvRecents } from "./tvStores";
-import { screenView as tvView } from "@/features/media/screenState";
 
 /**
  * The TV module (M3). In the room: a programme guide (channels, favourites, recently watched,
@@ -44,7 +44,6 @@ export function TvExperience({ catalogue, uploaders }: { catalogue: TvCatalogue;
   const player = useRef<EmbedPlayerHandle>(null);
   const favourites = useLocalStore(tvFavourites);
   const recents = useLocalStore(tvRecents);
-  const view = useSyncExternalStore(tvView.subscribe, tvView.get, tvView.server);
   const byId = useMemo(() => {
     const m = new Map<string, { channel: TvChannel; programme: Programme }>();
     for (const channel of catalogue.channels) for (const programme of channel.programmes) m.set(programme.id, { channel, programme });
@@ -59,13 +58,11 @@ export function TvExperience({ catalogue, uploaders }: { catalogue: TvCatalogue;
     setNow((prev) => ({ channel, programme, status: "loading", attempt: (prev?.attempt ?? 0) + 1 }));
     setAnnounce(`Now on ${channel.name}: ${programme.title}.`);
     recordTvWatch(programme.id);
-    tvView.set({ on: true, watching: true });
   }, []);
 
   const switchOff = useCallback(() => {
     setNow(null);
     setAnnounce("The TV is off.");
-    tvView.set({ on: false, watching: false });
   }, []);
 
   /** Next (or previous) programme on the same channel that hasn't failed during this visit. */
@@ -125,6 +122,8 @@ export function TvExperience({ catalogue, uploaders }: { catalogue: TvCatalogue;
 
   // One sound at a time, and the rain dips under the TV.
   const playing = status === "playing";
+  // Another window (Music, Video) starting pauses the TV; Archive films can only be switched off.
+  useExclusiveMedia("tv", playing, () => (now?.programme.source.provider === "archive" ? switchOff() : player.current?.pause()));
   useEffect(() => {
     if (!playing) return;
     const radio = getPlaybackEngine();
@@ -144,14 +143,10 @@ export function TvExperience({ catalogue, uploaders }: { catalogue: TvCatalogue;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when playing starts/stops
   }, [playing]);
 
-  // Leaving the page switches the set off.
-  useEffect(() => () => tvView.set({ on: false, watching: false }), []);
-
   const channel = catalogue.channels.find((c) => c.id === channelId) ?? catalogue.channels[0];
   const favouriteItems = favourites.map((id) => byId.get(id)).filter((x) => x !== undefined);
   const recentItems = recents.map((id) => byId.get(id)).filter((x) => x !== undefined);
   const showPlayer = now && now.status !== "offline";
-  const onGlass = view.room3d && view.screen !== null;
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6" aria-labelledby="tv-title">
@@ -177,7 +172,7 @@ export function TvExperience({ catalogue, uploaders }: { catalogue: TvCatalogue;
       )}
 
       {showPlayer && (
-        <PlayerFrame onGlass={onGlass} visible={!onGlass || view.settled} rect={view.screen}>
+        <PlayerFrame>
           <EmbedPlayer
             key={`${now.programme.id}:${now.attempt}`}
             ref={player}

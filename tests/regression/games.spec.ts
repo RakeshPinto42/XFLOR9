@@ -15,7 +15,7 @@ test.afterEach(() => expect(errors, "uncaught page errors").toEqual([]));
 test("Saanp: starts from the keyboard, ends at the wall, and the best score survives a reload", async ({ page }) => {
   await page.goto("/games");
   await page.evaluate(() => localStorage.setItem("xplor9.games.best", JSON.stringify({ saanp: 3, minesSeconds: null })));
-  await page.reload();
+  await page.goto("/games"); // a reload returns to the desktop; the address reopens the window
   await expect(page.getByText("Best 3")).toBeVisible();
 
   const board = page.getByTestId("saanp-board");
@@ -25,13 +25,13 @@ test("Saanp: starts from the keyboard, ends at the wall, and the best score surv
   // Heading straight up from the middle of a 16-row board hits the wall in ~1 s.
   await expect(page.getByRole("status").filter({ hasText: "Game over" })).toBeVisible({ timeout: 5_000 });
   await expect(page.getByRole("button", { name: "Play again" })).toBeVisible();
-  await page.reload();
+  await page.goto("/games"); // a reload returns to the desktop; the address reopens the window
   await expect(page.getByText("Best 3")).toBeVisible(); // a lower score doesn't replace the best
 });
 
 test("Saanp: Space pauses and resumes", async ({ page }) => {
   await page.goto("/games");
-  await page.getByRole("button", { name: "Start" }).click();
+  await page.getByRole("button", { name: "Start", exact: true }).click();
   await page.keyboard.press(" ");
   await expect(page.getByText("Paused. Press Space or Start.")).toBeVisible();
   await page.keyboard.press(" ");
@@ -68,8 +68,9 @@ test("Mines: first square is safe, flags work by right-click and keyboard, a min
   await expect(board.getByRole("button", { name: /: closed$/ })).toHaveCount(81);
 });
 
-test("Games is reachable from the site navigation", async ({ page }) => {
+test("Games opens from its desktop icon", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("xplor9.session", "in"));
   await page.goto("/");
-  await page.getByRole("navigation", { name: "Modules" }).getByRole("link", { name: "Games" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Games" })).toBeVisible();
+  await page.getByRole("button", { name: /^Games:/ }).dblclick();
+  await expect(page.locator('[data-app="games"]').getByRole("heading", { level: 1, name: "Games" })).toBeVisible();
 });

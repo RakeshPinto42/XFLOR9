@@ -39,7 +39,8 @@ export function getPlaybackEngine(): PlaybackEngine {
   bindMediaSessionActions(engine);
   // Site-wide sound settings: overall × music volume scale the radio; ambience dips while it plays.
   const e = engine;
-  const applySound = () => e.setOutput(radioOutput(soundPrefs.get()), false);
+  // The desktop's master mute (sound off) silences the radio too.
+  const applySound = () => e.setOutput(radioOutput(soundPrefs.get()), !soundPrefs.get().soundOn);
   applySound();
   soundPrefs.subscribe(applySound);
   let playing = false;

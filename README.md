@@ -1,6 +1,6 @@
 # XPLOR9
 
-Your childhood. Reconnected. Radio, TV, music, games and a reading room inspired by Indian 90s and 2000s entertainment.
+Your childhood. Reconnected. A nostalgic personal computer from 1990–2010: radio, television, music, video, games and a reading room, in windows on a desktop.
 
 ## Run locally
 
@@ -13,11 +13,11 @@ npm run lint
 
 ## Structure
 
-- `src/lib/modules.ts`: the five modules (name, route, status). Flip a status to make a module live.
-- `src/lib/storage/`: local-only persistence. Nothing leaves the browser.
-- `src/components/`: shared shell (header, CRT intro, module devices, placeholder pages).
-- `src/app/`: routes for `/`, `/radio`, `/tv`, `/music`, `/games`, `/reading`.
+- `src/features/desktop/`: the XPLOR9 computer: boot and welcome screens, desktop, windows, taskbar, start menu, Control Panel, Notepad, system sounds.
+- `src/features/{radio,tv,music,video,games,reading}/`: the applications.
+- `src/lib/`: playback engine, sound settings, local-only storage. Nothing leaves the browser.
+- `src/app/`: `/` (the desktop), `/reading/*` (Reading Room and reader), `/api/radio/*`. Old `/radio`, `/tv`, `/music`, `/games` addresses open the matching window.
 
-Planning: [docs/roadmap.md](docs/roadmap.md) (master roadmap), [docs/creative-direction.md](docs/creative-direction.md) (creative standard), [docs/known-issues.md](docs/known-issues.md). Engine: [docs/scene-format.md](docs/scene-format.md) (scene files), [docs/asset-pipeline.md](docs/asset-pipeline.md), [docs/audio-architecture.md](docs/audio-architecture.md), [docs/character-system.md](docs/character-system.md).
+Planning: [docs/roadmap.md](docs/roadmap.md), [docs/desktop-architecture.md](docs/desktop-architecture.md), [docs/known-issues.md](docs/known-issues.md).
 
 Content rules: only public-domain, properly licensed or officially embeddable content. Radio streams are played directly from the broadcaster (HTTPS only, never proxied).

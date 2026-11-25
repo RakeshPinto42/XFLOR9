@@ -1,23 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MEDIA_LANGUAGES, PROVIDER_NAMES, sourcePage } from "@/features/media/catalogue";
 import { EmbedPlayer, type EmbedPlayerHandle } from "@/features/media/EmbedPlayer";
 import { PlayerFrame } from "@/features/media/PlayerFrame";
 import { NO_RESPONSE, UNAVAILABLE_CODES, type PlayerEvent } from "@/features/media/playerMessages";
-import { screenView } from "@/features/media/screenState";
 import { getPlaybackEngine, usePlayback } from "@/lib/playback/browser";
+import { useExclusiveMedia } from "@/lib/playback/mediaFocus";
 import { setMediaPlaying } from "@/lib/sound/browser";
 import { useLocalStore } from "@/lib/storage/store";
 import { cassettePlayback, type Cassette, type Track } from "./catalogue";
 import { musicFavourites, musicRecents, recordMusicPlay, toggleMusicFavourite } from "./musicStores";
 import { neighbour, parseTrackId, playAudioTrack } from "./queue";
-import { shopState } from "./shopState";
 
 /**
- * The Music module (M4): a cassette shop on the monsoon street. Each tape plays one way:
- *   - video tapes (official label uploads) play in YouTube's player on the shop's TV (YouTube
+ * The Music app (M4): cassettes of songs. Each tape plays one way:
+ *   - video tapes (official label uploads) play in YouTube's player (YouTube
  *     requires its player to be visible), and the view moves to the TV;
  *   - the public-domain tape plays as audio in the deck through the site's shared player, so it
  *     keeps playing across pages (mini-player) and moves on to the next track by itself.
@@ -43,7 +42,6 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
   const audio = usePlayback();
   const favourites = useLocalStore(musicFavourites);
   const recents = useLocalStore(musicRecents);
-  const view = useSyncExternalStore(screenView.subscribe, screenView.get, screenView.server);
   const byTrack = useMemo(() => {
     const m = new Map<string, { cassette: Cassette; track: Track }>();
     for (const cassette of cassettes) for (const track of cassette.tracks) m.set(track.id, { cassette, track });
@@ -53,25 +51,13 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
   // The audio tape the shared player holds (if any), and whether it is playing.
   const audioAt = parseTrackId(audio.source?.id);
   const audioNow = audioAt ? byTrack.get(audioAt.trackId) : undefined;
-  const audioPlaying = !!audioNow && (audio.status === "playing" || audio.status === "buffering" || audio.status === "loading");
 
-  // Tell the shop which tapes stand on the counter, which is in the deck, and whether it plays.
-  useEffect(() => {
-    shopState.set({ tapes: cassettes.map((c) => ({ id: c.id, shell: c.colours.shell, label: c.colours.label })) });
-    return () => shopState.set({ tapes: [], inDeck: null, playing: false });
-  }, [cassettes]);
-  const deckTape = video?.cassette.id ?? audioNow?.cassette.id ?? null;
-  const deckPlaying = video ? video.status === "playing" : audioPlaying;
-  useEffect(() => {
-    shopState.set({ inDeck: deckTape, playing: deckPlaying });
-  }, [deckTape, deckPlaying]);
 
   const play = useCallback(
     (cassette: Cassette, track: Track) => {
       recordMusicPlay(track.id);
       if (cassettePlayback(cassette) === "audio") {
         setVideo(null);
-        screenView.set({ on: false, watching: false });
         playAudioTrack(cassettes, cassette, track);
         setAnnounce(`Playing “${track.title}” from ${cassette.name} in the tape deck.`);
         return;
@@ -81,8 +67,7 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
         return;
       }
       setVideo((prev) => ({ cassette, track, status: "loading", attempt: (prev?.attempt ?? 0) + 1 }));
-      setAnnounce(`Playing “${track.title}” from ${cassette.name} on the shop's TV.`);
-      screenView.set({ on: true, watching: true });
+      setAnnounce(`Playing “${track.title}” from ${cassette.name}.`);
     },
     [cassettes],
   );
@@ -90,7 +75,6 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
   const stopVideo = useCallback(() => {
     setVideo(null);
     setAnnounce("Stopped.");
-    screenView.set({ on: false, watching: false });
   }, []);
 
   /** Next or previous track on the same tape that hasn't failed during this visit. */
@@ -137,6 +121,8 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
 
   // One sound at a time; the rain dips under the video.
   const videoPlaying = status === "playing";
+  // Another window (TV, Video) starting pauses this tape.
+  useExclusiveMedia("music", videoPlaying, () => player.current?.pause());
   useEffect(() => {
     if (!videoPlaying) return;
     const engine = getPlaybackEngine();
@@ -152,12 +138,9 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
     };
   }, [videoPlaying]);
 
-  // Leaving the page switches the shop's TV off (an audio tape keeps playing in the mini-player).
-  useEffect(() => () => screenView.set({ on: false, watching: false }), []);
 
   const favouriteItems = favourites.map((id) => byTrack.get(id)).filter((x) => x !== undefined);
   const recentItems = recents.map((id) => byTrack.get(id)).filter((x) => x !== undefined);
-  const onGlass = view.room3d && view.screen !== null;
   const problem = video && videoProblem(video);
   const currentId = video?.track.id ?? audioNow?.track.id ?? null;
 
@@ -173,7 +156,7 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
             Music
           </h1>
           <p className="mt-1 text-sm text-panel/85">
-            The cassette shop on the corner. Tapes of film songs play in the labels&apos; official YouTube player on the shop&apos;s TV;
+            Tapes of film songs play in the labels&apos; official YouTube player;
             the old records tape plays in the deck. Nothing loads from YouTube or the Internet Archive until you press play.
           </p>
           {audioNow && (
@@ -215,7 +198,7 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
       )}
 
       {video && video.status !== "offline" && (
-        <PlayerFrame onGlass={onGlass} visible={!onGlass || view.settled} rect={view.screen}>
+        <PlayerFrame>
           <EmbedPlayer
             key={`${video.track.id}:${video.attempt}`}
             ref={player}
@@ -312,7 +295,7 @@ function CassetteCard({
   currentId: string | null;
   uploaders: Record<string, string>;
 }) {
-  const how = cassettePlayback(c) === "audio" ? "Plays in the tape deck" : "Plays on the shop's TV (YouTube)";
+  const how = cassettePlayback(c) === "audio" ? "Plays in the tape deck" : "Plays in YouTube's player";
   return (
     <div className="rounded-xl bg-panel/10 p-3" data-testid="music-cassette" data-id={c.id}>
       <div className="flex items-start gap-3">

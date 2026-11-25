@@ -51,6 +51,10 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // The modules now open as windows on the desktop; old addresses open the right window.
+  async redirects() {
+    return ["radio", "tv", "music", "games", "video"].map((app) => ({ source: `/${app}`, destination: `/?open=${app}`, permanent: false }));
+  },
   async headers() {
     return [
       {

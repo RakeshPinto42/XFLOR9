@@ -66,9 +66,9 @@ function setup(prefs = on) {
 }
 
 describe("saved settings", () => {
-  it("default to silent with sensible volumes", () => {
+  it("default to sound on (nothing plays before a gesture) with sensible volumes", () => {
     expect(parseSoundPrefs(null)).toEqual(DEFAULT_SOUND_PREFS);
-    expect(DEFAULT_SOUND_PREFS.soundOn).toBe(false);
+    expect(DEFAULT_SOUND_PREFS.soundOn).toBe(true);
   });
   it("repair each corrupted field on its own", () => {
     const p = parseSoundPrefs({ soundOn: "yes", master: 7, ambience: -1, music: Number.NaN, effects: "0.5", dialogue: 0.3, reduceSudden: true });
@@ -78,7 +78,7 @@ describe("saved settings", () => {
 
 describe("volume maths", () => {
   it("is silent overall until the visitor turns sound on", () => {
-    expect(masterGain(DEFAULT_SOUND_PREFS)).toBe(0);
+    expect(masterGain({ ...DEFAULT_SOUND_PREFS, soundOn: false })).toBe(0);
     expect(masterGain(on)).toBe(on.master);
   });
   it("ducks only ambience while the radio plays", () => {
@@ -99,7 +99,7 @@ describe("volume maths", () => {
 
 describe("the mixer", () => {
   it("creates nothing before a gesture, and nothing on a gesture while sound is off", () => {
-    const { mixer, contexts } = setup(DEFAULT_SOUND_PREFS);
+    const { mixer, contexts } = setup({ ...DEFAULT_SOUND_PREFS, soundOn: false });
     expect(contexts).toHaveLength(0);
     mixer.unlock();
     expect(contexts).toHaveLength(0);

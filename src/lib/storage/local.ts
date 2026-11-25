@@ -20,6 +20,9 @@ export const STORAGE_KEYS = {
   tvFavourites: `${PREFIX}tv.favourites`,
   tvRecents: `${PREFIX}tv.recents`,
   gamesBest: `${PREFIX}games.best`,
+  desktopPrefs: `${PREFIX}desktop.prefs`,
+  desktopGeometry: `${PREFIX}desktop.geometry`,
+  notepad: `${PREFIX}notepad`,
 } as const;
 
 export function readJson<T>(key: string, fallback: T): T {
