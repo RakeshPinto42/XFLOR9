@@ -7,9 +7,11 @@ import { getPlaybackEngine } from "@/lib/playback/browser";
 import { STORAGE_KEYS } from "@/lib/storage/local";
 import { createLocalStore } from "@/lib/storage/store";
 import { ensureGraph, setEq } from "./audioGraph";
-import { cassettePlayback, type Cassette, type Track } from "./catalogue";
+import type { MediaLanguage, MediaRights } from "@/features/media/catalogue";
+import type { Cassette, Track } from "./catalogue";
 import { DEFAULT_EQ, parseEq, type EqSettings } from "./eq";
-import { recordMusicPlay } from "./musicStores";
+import { addedId, isAddedId, type AddedVideo } from "./library";
+import { musicLibrary, recordMusicPlay } from "./musicStores";
 import { EMPTY_PLAYLIST, parsePlaylist, step, type Playlist } from "./playlist";
 import { parseTrackId, trackSource } from "./queue";
 
@@ -30,9 +32,40 @@ export interface VideoNow {
   attempt: number;
   time: PlayerTime;
 }
+/** A song as the player sees it: a catalogue track, or a video added from Video or TV. */
+export type EntryTrack = Omit<Track, "language" | "rights"> & { language: MediaLanguage | null; rights: MediaRights | null };
 export interface Entry {
   cassette: Cassette;
-  track: Track;
+  track: EntryTrack;
+  /** Set for a video added from Video or TV. */
+  added?: AddedVideo;
+}
+
+/** Where added videos sit in the library (not a real tape: it has no tracks of its own). */
+export const ADDED_TAPE: Cassette = {
+  id: "added",
+  name: "From Video and TV",
+  description: "Videos you added to your playlists from the Video and TV windows.",
+  colours: { shell: "#8a3b2f", label: "#f2e6c9" },
+  tracks: [],
+};
+
+export function addedEntry(v: AddedVideo): Entry {
+  return {
+    cassette: ADDED_TAPE,
+    added: v,
+    track: { id: addedId(v.videoId), title: v.title, artist: v.by, film: null, year: null, language: null, source: { provider: "youtube", videoId: v.videoId }, rights: null },
+  };
+}
+
+/** How a song plays: as audio through the shared player (public-domain records) or in YouTube's player. */
+export const entryPlayback = (e: Entry): "audio" | "video" => (e.track.source.provider === "archive-audio" ? "audio" : "video");
+
+function lookup(id: string | undefined): Entry | undefined {
+  if (!id) return undefined;
+  if (!isAddedId(id)) return byId.get(id);
+  const v = musicLibrary.get().videos.find((x) => addedId(x.videoId) === id);
+  return v ? addedEntry(v) : undefined;
 }
 
 export const musicEq = createLocalStore<EqSettings>(STORAGE_KEYS.musicEq, DEFAULT_EQ, parseEq);
@@ -69,8 +102,10 @@ export function initMusic(cassettes: readonly Cassette[]) {
   if (initialised) return;
   initialised = true;
   const known = new Set(byId.keys());
-  playlistStore = createLocalStore<Playlist>(STORAGE_KEYS.musicPlaylist, EMPTY_PLAYLIST, (raw) => parsePlaylist(raw, known));
+  const playable = { has: (id: string) => known.has(id) || !!lookup(id) };
+  playlistStore = createLocalStore<Playlist>(STORAGE_KEYS.musicPlaylist, EMPTY_PLAYLIST, (raw) => parsePlaylist(raw, playable));
   playlistStore.subscribe(emit);
+  musicLibrary.subscribe(emit); // added videos' titles
   setEq(musicEq.get());
   musicEq.subscribe(() => setEq(musicEq.get()));
 
@@ -103,7 +138,7 @@ export const music = {
     return () => void listeners.delete(l);
   },
   get: () => snapshot,
-  entry: (id: string | undefined) => (id ? byId.get(id) : undefined),
+  entry: lookup,
 
   /** The Music window opened (videos can play) or closed (a playing video stops). */
   mount() {
@@ -130,12 +165,12 @@ export const music = {
     clearAdvance();
     const p = playlistStore.get();
     const id = p.items[index];
-    const e = id ? byId.get(id) : undefined;
+    const e = lookup(id);
     if (!e) return;
     playlistStore.set({ ...p, index });
-    recordMusicPlay(e.track.id);
+    if (!e.added) recordMusicPlay(e.track.id);
     const engine = getPlaybackEngine();
-    if (cassettePlayback(e.cassette) === "audio") {
+    if (entryPlayback(e) === "audio") {
       video = null;
       handle = null;
       ensureGraph();
@@ -240,7 +275,7 @@ export const music = {
 
 function currentIsAudio(): boolean {
   const p = playlistStore.get();
-  const e = byId.get(p.items[p.index] ?? "");
+  const e = lookup(p.items[p.index]);
   const at = parseTrackId(getPlaybackEngine().getState().source?.id);
   return !!e && !!at && at.trackId === e.track.id;
 }
@@ -260,9 +295,9 @@ function advance(dir: 1 | -1, auto: boolean, delay: number) {
       if (auto) music.stop();
       return;
     }
-    const e = byId.get(p.items[i]);
+    const e = lookup(p.items[i]);
     // Videos need the window open; with it closed, the playlist stops at the next video.
-    if (e && cassettePlayback(e.cassette) === "video" && windows === 0) {
+    if (e && entryPlayback(e) === "video" && windows === 0) {
       playlistStore.set({ ...p, index: i });
       music.stop();
       return;

@@ -13,7 +13,8 @@
 | Apps | `src/features/desktop/apps.ts`, `AppContent.tsx` | App list (one source for icons, start menu, taskbar) and each app's component, loaded on first open |
 | Sound | `src/features/desktop/systemSounds.ts`, `src/lib/sound/`, `src/engine/audio/mixer.ts` | Synthesised system sounds on the shared mixer's effects bus; master volume and mute also scale the radio |
 | Your data (P2) | `src/features/data/` (`registry.ts`, `backup.ts`, `localData.ts`), `apps/DataPanel.tsx` | Which app owns each stored setting; the backup file format and its validation; restore (all or nothing), storage used, clearing. Control Panel → Your data |
-| One sound at a time | `src/lib/playback/mediaFocus.ts` | TV, Music videos, Video and the shared audio player pause each other |
+| One sound at a time, one tray | `src/lib/playback/mediaFocus.ts` | TV, Music videos, Video and the shared audio player pause each other; each window publishes what it plays (`useMediaSession`) and the tray shows the latest (`chooseNowPlaying`) |
+| Saved playlists (P3) | `src/features/music/library.ts`, `musicStores.ts`, `AddToMusic.tsx` | Saved Music playlists and videos added from Video and TV (`xplor9.music.library`, validated on read) |
 
 ## Choices and trade-offs
 
@@ -54,3 +55,17 @@
   the Control Panel reopens on Your data with the result, rather than refreshing every app in place.
 - **Automatic clean-up:** the panel can ask the browser to keep XPLOR9's data (`navigator.storage.persist`);
   the browser decides.
+
+## One media system (P3)
+
+- **Every player publishes a session** (title, status, toggle, stop, which window) through
+  `useMediaSession` in `mediaFocus.ts`, which also does "one sound at a time". The shared audio
+  player (radio, records) isn't published; the tray reads it directly.
+- **The tray shows one player**: the one that most recently took the speakers if it still has
+  something, else one that's playing, else the shared player, else any window's (`chooseNowPlaying`,
+  unit-tested). Players that can't be controlled from outside (Internet Archive) offer Stop only.
+- **Saved playlists** hold the same ids as the playing playlist: catalogue track ids, or
+  `yt:<videoId>` for a video added from Video or TV, whose title and channel are kept with the
+  playlists (`musicLibrary`). Video and TV write only there, never to the playing playlist, so they
+  work without Music being open. Only single YouTube videos can be added: Music advances when
+  YouTube's player reports the end.

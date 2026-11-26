@@ -28,7 +28,7 @@ export const DATA_APPS: readonly DataApp[] = [
   },
   { id: "radio", name: "Radio", holds: "favourite stations, presets, recently played and filters", keys: [K.radioFavourites, K.radioRecents, K.radioPrefs, K.radioPresets] },
   { id: "tv", name: "Television", holds: "favourite and recently watched programmes", keys: [K.tvFavourites, K.tvRecents] },
-  { id: "music", name: "Music", holds: "the playlist, favourites, recently played, equaliser and layout", keys: [K.musicFavourites, K.musicRecents, K.musicPlaylist, K.musicEq, K.musicView] },
+  { id: "music", name: "Music", holds: "the playlist, saved playlists, videos added from Video and TV, favourites, recently played, equaliser and layout", keys: [K.musicFavourites, K.musicRecents, K.musicPlaylist, K.musicEq, K.musicView, K.musicLibrary] },
   { id: "video", name: "Video", holds: "watch history and favourite videos and channels", keys: [K.videoHistory, K.videoFavourites] },
   { id: "arcade", name: "Arcade", holds: "best scores and game settings", keys: [K.gamesBest, K.arcadePrefs] },
   { id: "notepad", name: "Notepad", holds: "your note", keys: [K.notepad] },

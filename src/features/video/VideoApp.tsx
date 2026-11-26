@@ -4,11 +4,12 @@ import { useCallback, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { EmbedPlayer, type EmbedPlayerHandle, type PlayerTime } from "@/features/media/EmbedPlayer";
 import { sourcePage, type MediaSource } from "@/features/media/catalogue";
-import { nextStatus, statusLabel, type EmbedStatus } from "@/features/media/embedStatus";
+import { nextStatus, sessionDetail, sessionStatus, statusLabel, type EmbedStatus } from "@/features/media/embedStatus";
 import { MediaTransport, fullscreen, revealPlayer } from "@/features/media/MediaTransport";
 import type { PlayerEvent } from "@/features/media/playerMessages";
 import { getPlaybackEngine, usePlayback } from "@/lib/playback/browser";
-import { useExclusiveMedia } from "@/lib/playback/mediaFocus";
+import { AddToMusic, addableVideo } from "@/features/music/AddToMusic";
+import { useMediaSession } from "@/lib/playback/mediaFocus";
 import { STORAGE_KEYS } from "@/lib/storage/local";
 import { createLocalStore, useLocalStore } from "@/lib/storage/store";
 import { SEARCH_ERROR_MESSAGES, looksLikeLink, parseSearchQuery, type SearchErrorCode, type SearchPage, type SearchResult } from "./search";
@@ -83,7 +84,23 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
   }, []);
 
   const playing = now?.status === "playing";
-  useExclusiveMedia("video", playing, () => player.current?.pause());
+  const stop = useCallback(() => {
+    setNow(null);
+    setTime(null);
+  }, []);
+  useMediaSession(
+    "video",
+    now && {
+      app: "video",
+      title: now.video.title,
+      subtitle: now.video.by,
+      status: sessionStatus(now.status),
+      detail: sessionDetail(now.status),
+      toggle: () => (now.status === "playing" ? player.current?.pause() : player.current?.play()),
+      stop,
+    },
+    () => player.current?.pause(),
+  );
 
   /** Runs a search (or the next page of the current one) through XPLOR9's server. */
   const runSearch = async (q: string, pageToken: string | null) => {
@@ -242,10 +259,7 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
               controllable={!!now}
               time={time}
               onPlayPause={() => (playing ? player.current?.pause() : player.current?.play())}
-              onStop={() => {
-                setNow(null);
-                setTime(null);
-              }}
+              onStop={stop}
               onSeek={(s) => player.current?.seek(s)}
               volume={Math.round(audio.volume * 100)}
               onVolume={(v) => {
@@ -265,6 +279,7 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
                   >
                     <Icon name={fav ? "heart" : "heartOutline"} className="h-4 w-4" />
                   </button>
+                  <AddToMusic video={addableVideo(now.video.source, now.video.title, now.video.by, "video")} />
                   {(now.status === "unavailable" || now.status === "no-response") && (
                     <button type="button" className="mx-key" onClick={() => play(now.video)}>
                       <Icon name="retry" className="h-4 w-4" /> Try again

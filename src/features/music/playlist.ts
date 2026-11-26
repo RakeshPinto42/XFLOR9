@@ -19,7 +19,7 @@ export const EMPTY_PLAYLIST: Playlist = { items: [], index: -1, shuffle: false, 
 export const MAX_ITEMS = 500;
 
 /** Saved playlists may be old or edited by hand: keep only known tracks, fix the position. */
-export function parsePlaylist(raw: unknown, known: ReadonlySet<string>): Playlist {
+export function parsePlaylist(raw: unknown, known: { has(id: string): boolean }): Playlist {
   const r = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : {};
   const items = Array.isArray(r.items) ? r.items.filter((x): x is string => typeof x === "string" && known.has(x)).slice(0, MAX_ITEMS) : [];
   const index = typeof r.index === "number" && Number.isInteger(r.index) && r.index >= 0 && r.index < items.length ? r.index : items.length ? 0 : -1;

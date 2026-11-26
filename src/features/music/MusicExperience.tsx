@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { EmbedPlayer, type EmbedPlayerHandle } from "@/features/media/EmbedPlayer";
 import { MEDIA_LANGUAGES, PROVIDER_NAMES, sourcePage } from "@/features/media/catalogue";
 import { getPlaybackEngine, usePlayback } from "@/lib/playback/browser";
-import { useExclusiveMedia } from "@/lib/playback/mediaFocus";
+import { useMediaSession } from "@/lib/playback/mediaFocus";
 import { useLocalStore } from "@/lib/storage/store";
 import { getAnalyser } from "./audioGraph";
-import { cassettePlayback, type Cassette, type Track } from "./catalogue";
+import { cassettePlayback, type Cassette } from "./catalogue";
 import { EQ_BANDS, EQ_LIMIT, EQ_PRESETS, bandLabel, presetName } from "./eq";
-import { initMusic, music, musicEq, musicView, useMusic, type Entry, type VideoNow } from "./musicPlayer";
-import { musicFavourites, musicRecents, toggleMusicFavourite } from "./musicStores";
+import { addedId, deletePlaylist, findByName, removeFromPlaylist, removeVideo, renamePlaylist, savePlaylist } from "./library";
+import { entryPlayback, initMusic, music, musicEq, musicView, useMusic, type Entry, type EntryTrack, type VideoNow } from "./musicPlayer";
+import { musicFavourites, musicLibrary, musicRecents, toggleMusicFavourite } from "./musicStores";
 import { append, clear, clock, move, removeAt, replaceAll } from "./playlist";
 import { parseTrackId } from "./queue";
 import "./amp.css";
@@ -26,10 +27,11 @@ import "./amp.css";
  * video playing they say so instead of pretending.
  */
 
-const trackMeta = (t: Track) => [t.film, t.year, t.artist].filter(Boolean).join(" · ") || MEDIA_LANGUAGES[t.language];
-const isVideoEntry = (e: Entry | undefined) => !!e && cassettePlayback(e.cassette) === "video";
+const trackMeta = (t: EntryTrack) => [t.film, t.year, t.artist].filter(Boolean).join(" · ") || (t.language ? MEDIA_LANGUAGES[t.language] : "");
+const isVideoEntry = (e: Entry | undefined) => !!e && entryPlayback(e) === "video";
 
-function rightsLine(t: Track, uploaders: Record<string, string>): string {
+function rightsLine(t: EntryTrack, uploaders: Record<string, string>): string {
+  if (!t.rights) return `YouTube video by ${t.artist ?? "its uploader"}, added from Video or TV · YouTube`;
   return t.rights.basis === "official-upload"
     ? `Official upload by ${uploaders[t.rights.uploaderChannelId] ?? "its label"} · ${PROVIDER_NAMES[t.source.provider]}`
     : "Public-domain recording (India and US) · Internet Archive";
@@ -74,7 +76,22 @@ export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[
 
   // One sound at a time: a video playing here pauses TV, Video and the radio, and the other way round.
   // (Records play through the shared player, which claims the speakers as "audio"; that must not pause them.)
-  useExclusiveMedia("music", video?.status === "playing", () => music.pauseVideo());
+  // The tray shows a video playing here (records are shown through the shared player).
+  useMediaSession(
+    "music",
+    video && current
+      ? {
+          app: "music",
+          title: current.track.title,
+          subtitle: current.track.artist ?? current.cassette.name,
+          status: state === "problem" ? "problem" : state,
+          detail: state === "problem" ? (videoProblem(video, current) ?? "Can't be played") : undefined,
+          toggle: () => music.toggle(),
+          stop: () => music.stop(),
+        }
+      : null,
+    () => music.pauseVideo(),
+  );
 
   const problem = video ? videoProblem(video, current) : audioIsCurrent && audio.status === "error" ? (audio.error?.message ?? "This record couldn't play.") : null;
 
@@ -431,6 +448,8 @@ function EqSlider({ label, short, value, onChange }: { label: string; short: str
 function PlaylistPanel({ skip, onAdd }: { skip: ReadonlySet<string>; onAdd: () => void }) {
   const { playlist } = useMusic();
   const [selected, setSelected] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [savedNote, setSavedNote] = useState("");
   const list = useRef<HTMLOListElement>(null);
   const sel = Math.min(selected, playlist.items.length - 1);
 
@@ -550,7 +569,30 @@ function PlaylistPanel({ skip, onAdd }: { skip: ReadonlySet<string>; onAdd: () =
         >
           Clear
         </button>
+        <button
+          type="button"
+          className="amp-toggle"
+          disabled={!playlist.items.length}
+          onClick={() => {
+            setSaving(true);
+            setSavedNote("");
+          }}
+        >
+          Save…
+        </button>
       </div>
+      {saving && (
+        <SaveForm
+          items={playlist.items}
+          onDone={(m) => {
+            setSaving(false);
+            setSavedNote(m);
+          }}
+        />
+      )}
+      <p className="amp-note" role="status">
+        {savedNote}
+      </p>
     </section>
   );
 }
@@ -600,7 +642,7 @@ function VideoPane({ video, entry, uploaders }: { video: VideoNow; entry: Entry;
 
 // ---------------------------------------------------------------------------- library
 
-type Shelf = { kind: "tape"; id: string } | { kind: "favourites" } | { kind: "recent" };
+type Shelf = { kind: "tape"; id: string } | { kind: "favourites" } | { kind: "recent" } | { kind: "saved"; id: string } | { kind: "added" };
 
 const Library = function Library({
   ref,
@@ -614,15 +656,40 @@ const Library = function Library({
   currentId: string | null;
 }) {
   const [shelf, setShelf] = useState<Shelf>({ kind: "tape", id: cassettes[0].id });
+  const [editing, setEditing] = useState<"rename" | "delete" | null>(null);
   const favourites = useLocalStore(musicFavourites);
   const recents = useLocalStore(musicRecents);
+  const lib = useLocalStore(musicLibrary);
   const tape = shelf.kind === "tape" ? cassettes.find((c) => c.id === shelf.id) : undefined;
-  const entries: Entry[] =
-    shelf.kind === "tape" && tape
-      ? tape.tracks.map((track) => ({ cassette: tape, track }))
-      : (shelf.kind === "favourites" ? favourites : recents).map((id) => music.entry(id)).filter((e): e is Entry => !!e);
-  const ids = entries.map((e) => e.track.id);
-  const heading = tape ? tape.name : shelf.kind === "favourites" ? "Favourites" : "Recently played";
+  const saved = shelf.kind === "saved" ? lib.playlists.find((p) => p.id === shelf.id) : undefined;
+  // Each row keeps its place in a saved playlist (the same song may appear twice).
+  const listed: string[] = saved
+    ? saved.items
+    : shelf.kind === "added"
+      ? lib.videos.map((v) => addedId(v.videoId))
+      : shelf.kind === "favourites"
+        ? favourites
+        : shelf.kind === "recent"
+          ? recents
+          : [];
+  const rows: { e: Entry; at: number }[] = tape
+    ? tape.tracks.map((track, at) => ({ e: { cassette: tape, track }, at }))
+    : listed.flatMap((id, at) => {
+        const e = music.entry(id);
+        return e ? [{ e, at }] : [];
+      });
+  const ids = rows.map((r) => r.e.track.id);
+  const heading = tape
+    ? tape.name
+    : saved
+      ? saved.name
+      : shelf.kind === "added"
+        ? "From Video and TV"
+        : shelf.kind === "favourites"
+          ? "Favourites"
+          : shelf.kind === "recent"
+            ? "Recently played"
+            : "Playlist deleted";
 
   const playFrom = (start: number) => {
     music.setPlaylist((p) => replaceAll(p, ids, start));
@@ -635,6 +702,20 @@ const Library = function Library({
     music.setPlaylist(append(p, [id]));
     music.playAt(music.get().playlist.items.length - 1);
   };
+  const open = (next: Shelf) => {
+    setShelf(next);
+    setEditing(null);
+  };
+  const empty =
+    shelf.kind === "favourites"
+      ? "No favourites yet. Press ♥ next to a song."
+      : shelf.kind === "saved"
+        ? saved
+          ? "This playlist is empty. Add videos from Video or TV, or save the playlist you're playing under this name."
+          : "This playlist was deleted."
+        : shelf.kind === "added"
+          ? "Nothing added yet. In Video or TV, press “Add to a Music playlist” while a video plays."
+          : "Nothing played yet.";
 
   return (
     <section ref={ref} className="amp-panel amp-library" aria-label="Media library">
@@ -645,18 +726,28 @@ const Library = function Library({
         <nav className="amp-lib-tree" aria-label="Library">
           <p className="amp-lib-group">Tapes</p>
           {cassettes.map((c) => (
-            <button key={c.id} type="button" className="amp-lib-node" aria-current={shelf.kind === "tape" && shelf.id === c.id ? "true" : undefined} onClick={() => setShelf({ kind: "tape", id: c.id })}>
+            <button key={c.id} type="button" className="amp-lib-node" aria-current={shelf.kind === "tape" && shelf.id === c.id ? "true" : undefined} onClick={() => open({ kind: "tape", id: c.id })}>
               <TapeArt cassette={c} size={26} />
               {c.name}
             </button>
           ))}
           <p className="amp-lib-group">Your music</p>
-          <button type="button" className="amp-lib-node" aria-current={shelf.kind === "favourites" ? "true" : undefined} onClick={() => setShelf({ kind: "favourites" })}>
+          <button type="button" className="amp-lib-node" aria-current={shelf.kind === "favourites" ? "true" : undefined} onClick={() => open({ kind: "favourites" })}>
             ♥ Favourites ({favourites.length})
           </button>
-          <button type="button" className="amp-lib-node" aria-current={shelf.kind === "recent" ? "true" : undefined} onClick={() => setShelf({ kind: "recent" })}>
+          <button type="button" className="amp-lib-node" aria-current={shelf.kind === "recent" ? "true" : undefined} onClick={() => open({ kind: "recent" })}>
             Recently played
           </button>
+          <button type="button" className="amp-lib-node" aria-current={shelf.kind === "added" ? "true" : undefined} onClick={() => open({ kind: "added" })}>
+            From Video and TV ({lib.videos.length})
+          </button>
+          <p className="amp-lib-group">Saved playlists</p>
+          {lib.playlists.length === 0 && <p className="amp-lib-hint">None yet. Use Save under the playlist.</p>}
+          {lib.playlists.map((p) => (
+            <button key={p.id} type="button" className="amp-lib-node" aria-current={shelf.kind === "saved" && shelf.id === p.id ? "true" : undefined} onClick={() => open({ kind: "saved", id: p.id })}>
+              {p.name} ({p.items.length})
+            </button>
+          ))}
         </nav>
         <div className="amp-lib-main">
           <div className="amp-lib-head">
@@ -668,18 +759,49 @@ const Library = function Library({
                   {tape.description} {cassettePlayback(tape) === "audio" ? "Plays as audio, with the equaliser." : "Plays in YouTube's player, in the video pane."}
                 </p>
               )}
+              {saved && <p className="amp-lib-desc">{saved.items.length} songs, saved in this browser.</p>}
+              {shelf.kind === "added" && <p className="amp-lib-desc">Videos you added from Video and TV. Removing one here takes it out of every saved playlist.</p>}
             </div>
-            <div className="flex shrink-0 gap-1">
-              <button type="button" className="amp-toggle" disabled={!ids.length} onClick={() => playFrom(0)} aria-label={`Play tape: ${heading}`}>
-                Play tape
+            <div className="flex shrink-0 flex-wrap gap-1">
+              <button type="button" className="amp-toggle" disabled={!ids.length} onClick={() => playFrom(0)} aria-label={tape ? `Play tape: ${heading}` : `Play all: ${heading}`}>
+                {tape ? "Play tape" : "Play all"}
               </button>
               <button type="button" className="amp-toggle" disabled={!ids.length} onClick={() => music.setPlaylist((p) => append(p, ids))}>
                 Add to playlist
               </button>
+              {saved && (
+                <>
+                  <button type="button" className="amp-toggle" onClick={() => setEditing("rename")}>
+                    Rename…
+                  </button>
+                  <button type="button" className="amp-toggle" onClick={() => setEditing("delete")}>
+                    Delete…
+                  </button>
+                </>
+              )}
             </div>
           </div>
-          {entries.length === 0 ? (
-            <p className="amp-empty">{shelf.kind === "favourites" ? "No favourites yet. Press ♥ next to a song." : "Nothing played yet."}</p>
+          {saved && editing === "rename" && <RenameForm key={saved.id} id={saved.id} name={saved.name} onDone={() => setEditing(null)} />}
+          {saved && editing === "delete" && (
+            <div role="alertdialog" aria-labelledby="amp-delete-text" className="amp-inline-form">
+              <p id="amp-delete-text">Delete the playlist “{saved.name}”? The songs stay in the library.</p>
+              <button
+                type="button"
+                className="amp-toggle"
+                onClick={() => {
+                  musicLibrary.set((l) => deletePlaylist(l, saved.id));
+                  open({ kind: "added" });
+                }}
+              >
+                Delete playlist
+              </button>
+              <button type="button" className="amp-toggle" onClick={() => setEditing(null)} autoFocus>
+                Cancel
+              </button>
+            </div>
+          )}
+          {rows.length === 0 ? (
+            <p className="amp-empty">{empty}</p>
           ) : (
             <table className="amp-lib-table">
               <thead>
@@ -695,10 +817,10 @@ const Library = function Library({
                 </tr>
               </thead>
               <tbody>
-                {entries.map((e) => {
+                {rows.map(({ e, at }) => {
                   const fav = favourites.includes(e.track.id);
                   return (
-                    <tr key={`${e.cassette.id}:${e.track.id}`} aria-current={currentId === e.track.id ? "true" : undefined} data-testid="music-track" onDoubleClick={() => playOne(e.track.id)}>
+                    <tr key={`${e.cassette.id}:${e.track.id}:${at}`} aria-current={currentId === e.track.id ? "true" : undefined} data-testid="music-track" onDoubleClick={() => playOne(e.track.id)}>
                       <td className="font-bold">{e.track.title}</td>
                       <td>{trackMeta(e.track)}</td>
                       <td className="amp-col-src" title={rightsLine(e.track, uploaders)}>
@@ -711,15 +833,27 @@ const Library = function Library({
                         <button type="button" className="amp-mini" onClick={() => music.setPlaylist((p) => append(p, [e.track.id]))} aria-label={`Add ${e.track.title} to the playlist`}>
                           +
                         </button>
-                        <button
-                          type="button"
-                          className="amp-mini"
-                          aria-pressed={fav}
-                          onClick={() => toggleMusicFavourite(e.track.id)}
-                          aria-label={`${fav ? "Remove" : "Add"} ${e.track.title} ${fav ? "from" : "to"} favourites`}
-                        >
-                          ♥
-                        </button>
+                        {!e.added && (
+                          <button
+                            type="button"
+                            className="amp-mini"
+                            aria-pressed={fav}
+                            onClick={() => toggleMusicFavourite(e.track.id)}
+                            aria-label={`${fav ? "Remove" : "Add"} ${e.track.title} ${fav ? "from" : "to"} favourites`}
+                          >
+                            ♥
+                          </button>
+                        )}
+                        {saved && (
+                          <button type="button" className="amp-mini" onClick={() => musicLibrary.set((l) => removeFromPlaylist(l, saved.id, at))} aria-label={`Remove ${e.track.title} from ${saved.name}`}>
+                            ✕
+                          </button>
+                        )}
+                        {shelf.kind === "added" && e.added && (
+                          <button type="button" className="amp-mini" onClick={() => musicLibrary.set((l) => removeVideo(l, e.added!.videoId))} aria-label={`Remove ${e.track.title} from Music`}>
+                            ✕
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -733,6 +867,71 @@ const Library = function Library({
     </section>
   );
 };
+
+function RenameForm({ id, name, onDone }: { id: string; name: string; onDone: () => void }) {
+  const [value, setValue] = useState(name);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <form
+      className="amp-inline-form"
+      aria-label="Rename playlist"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const r = renamePlaylist(musicLibrary.get(), id, value);
+        if (!r.ok) return setError(r.reason);
+        musicLibrary.set(r.lib);
+        onDone();
+      }}
+    >
+      <label>
+        <span className="sr-only">New name</span>
+        <input className="amp-input" value={value} maxLength={60} onChange={(e) => setValue(e.target.value)} autoFocus />
+      </label>
+      <button type="submit" className="amp-toggle">
+        Rename
+      </button>
+      <button type="button" className="amp-toggle" onClick={onDone}>
+        Cancel
+      </button>
+      {error && <p role="alert">{error}</p>}
+    </form>
+  );
+}
+
+/** Saves the playlist being played under a name (a new saved playlist, or the one with that name replaced). */
+function SaveForm({ items, onDone }: { items: readonly string[]; onDone: (message: string) => void }) {
+  const lib = useLocalStore(musicLibrary);
+  const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const existing = name.trim() ? findByName(lib, name) : undefined;
+  return (
+    <form
+      className="amp-inline-form"
+      aria-label="Save playlist"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const r = savePlaylist(musicLibrary.get(), name, items, () => crypto.randomUUID());
+        if (!r.ok) return setError(r.reason);
+        musicLibrary.set(r.lib);
+        const saved = r.lib.playlists.find((p) => p.id === r.id)!;
+        onDone(r.replaced ? `Replaced “${saved.name}”.` : `Saved as “${saved.name}”.`);
+      }}
+    >
+      <label>
+        <span className="sr-only">Playlist name</span>
+        <input className="amp-input" placeholder="Playlist name" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} autoFocus />
+      </label>
+      <button type="submit" className="amp-toggle">
+        {existing ? "Replace" : "Save"}
+      </button>
+      <button type="button" className="amp-toggle" onClick={() => onDone("")}>
+        Cancel
+      </button>
+      {existing && !error && <p>This replaces the songs in “{existing.name}”.</p>}
+      {error && <p role="alert">{error}</p>}
+    </form>
+  );
+}
 
 /** Cover art for a tape, drawn from its own colours (original artwork; no album covers are copied). */
 function TapeArt({ cassette: c, size, className }: { cassette: Cassette; size: number; className?: string }) {

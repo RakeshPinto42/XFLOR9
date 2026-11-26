@@ -547,3 +547,38 @@
     animation: none;
   }
 }
+
+/* ---------- saved playlists (P3) ---------- */
+.amp-lib-hint {
+  padding: 2px 8px 6px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.amp-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-top: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font-size: 12.5px;
+}
+.amp-inline-form > p {
+  flex-basis: 100%;
+}
+.amp-input {
+  min-height: 24px;
+  padding: 2px 8px;
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ui-text);
+  font: inherit;
+}
+.amp-input:focus-visible,
+.amp-toggle:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
+}

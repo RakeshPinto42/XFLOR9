@@ -10,7 +10,7 @@ import type { Cassette, Track } from "./catalogue";
 
 const PREFIX = "music:";
 
-export function trackSource(c: Cassette, t: Track): PlaybackSource {
+export function trackSource(c: Cassette, t: Pick<Track, "id" | "title" | "artist" | "year" | "source">): PlaybackSource {
   if (t.source.provider !== "archive-audio") throw new Error(`${t.id} is not an audio track`);
   return {
     id: `${PREFIX}${c.id}:${t.id}`,

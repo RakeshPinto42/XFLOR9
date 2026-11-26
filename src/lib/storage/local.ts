@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
   musicPlaylist: `${PREFIX}music.playlist`,
   musicEq: `${PREFIX}music.eq`,
   musicView: `${PREFIX}music.view`,
+  musicLibrary: `${PREFIX}music.library`,
   tvFavourites: `${PREFIX}tv.favourites`,
   tvRecents: `${PREFIX}tv.recents`,
   gamesBest: `${PREFIX}games.best`,

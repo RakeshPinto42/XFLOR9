@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { getPlaybackEngine, usePlayback } from "@/lib/playback/browser";
+import { chooseNowPlaying, useMediaSessions, type MediaSession } from "@/lib/playback/mediaFocus";
 import { soundPrefs, useSoundPrefs } from "@/lib/sound/browser";
 import { APP_BY_ID, type AppId } from "./apps";
 import { DesktopIcon } from "./icons";
@@ -83,9 +84,15 @@ function TrayPopup({ label, icon, children, testId }: { label: string; icon: Rea
 
 const ACTIVE = new Set(["loading", "playing", "buffering"]);
 
-/** The shared audio player (radio stations, Music's records), shown only while it has something. */
+/**
+ * What's playing, in any window: the shared audio player (radio, Music's records) or a window's
+ * own player (TV, Video, Music's videos). Shown only while something is loaded.
+ */
 function NowPlaying() {
   const state = usePlayback();
+  const { sessions, lastClaim } = useMediaSessions();
+  const shown = chooseNowPlaying(sessions, lastClaim, !!state.source);
+  if (shown && shown !== "audio") return <WindowPlayer session={sessions.get(shown)!} />;
   if (!state.source) return null;
   const engine = getPlaybackEngine();
   const active = ACTIVE.has(state.status);
@@ -135,6 +142,59 @@ function NowPlaying() {
               className="xp-button"
               onClick={() => {
                 wm.open(state.source!.id.startsWith("music:") ? "music" : "radio");
+                close();
+              }}
+            >
+              Show player
+            </button>
+          </div>
+        </div>
+      )}
+    </TrayPopup>
+  );
+}
+
+const SESSION_STATUS: Record<MediaSession["status"], string> = { loading: "Loading…", playing: "Playing", paused: "Paused", stopped: "Finished", problem: "Can't play" };
+
+/** A window's own player (TV, Video, Music's videos), controlled through what the window published. */
+function WindowPlayer({ session: s }: { session: MediaSession }) {
+  const playing = s.status === "playing";
+  const status = s.status === "problem" ? (s.detail ?? SESSION_STATUS.problem) : SESSION_STATUS[s.status];
+  const title = APP_BY_ID[s.app as AppId]?.title;
+  return (
+    <TrayPopup label={`Now playing: ${s.title}`} icon={<DesktopIcon name="note" size={16} className={playing ? "xp-pulse" : ""} />} testId="tray-now-playing">
+      {(close) => (
+        <div className="w-64 space-y-2">
+          <p className="truncate font-bold" title={s.title}>
+            {s.title}
+          </p>
+          <p className="truncate" aria-live="polite">
+            {status}
+            {s.subtitle ? ` · ${s.subtitle}` : ""}
+            {title ? ` · ${title}` : ""}
+          </p>
+          {!s.toggle && <p className="text-[12px] opacity-75">This player can only be stopped from here.</p>}
+          <div className="flex flex-wrap gap-1">
+            {s.toggle && (
+              <button type="button" className="xp-button" onClick={s.toggle} disabled={s.status === "loading"}>
+                {playing ? "Pause" : "Play"}
+              </button>
+            )}
+            <button
+              type="button"
+              className="xp-button"
+              onClick={() => {
+                s.stop();
+                close();
+              }}
+            >
+              Stop
+            </button>
+            <button
+              type="button"
+              className="xp-button"
+              onClick={() => {
+                wm.open(s.app as AppId);
                 close();
               }}
             >

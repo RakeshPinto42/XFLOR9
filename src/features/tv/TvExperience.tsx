@@ -4,11 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { EmbedPlayer, type EmbedPlayerHandle, type PlayerTime } from "@/features/media/EmbedPlayer";
 import { MEDIA_LANGUAGES, PROVIDER_NAMES, sourcePage } from "@/features/media/catalogue";
-import { isPermanentError, nextStatus, type EmbedStatus } from "@/features/media/embedStatus";
+import { isPermanentError, nextStatus, sessionDetail, sessionStatus, type EmbedStatus } from "@/features/media/embedStatus";
 import { MediaTransport, fullscreen, revealPlayer } from "@/features/media/MediaTransport";
 import type { PlayerEvent } from "@/features/media/playerMessages";
 import { getPlaybackEngine, usePlayback } from "@/lib/playback/browser";
-import { useExclusiveMedia } from "@/lib/playback/mediaFocus";
+import { AddToMusic, addableVideo } from "@/features/music/AddToMusic";
+import { useMediaSession } from "@/lib/playback/mediaFocus";
 import { useLocalStore } from "@/lib/storage/store";
 import { WATCH_ACCESS, type Programme, type TvCatalogue, type TvChannel } from "./catalogue";
 import { recordTvWatch, toggleTvFavourite, tvFavourites, tvRecents } from "./tvStores";
@@ -115,13 +116,26 @@ export function TvExperience({ catalogue, uploaders }: { catalogue: TvCatalogue;
   // have no remote control, so they're switched off instead.
   const playing = status === "playing";
   const archive = now?.programme.source.provider === "archive";
-  useExclusiveMedia("tv", playing, () => (archive ? switchOff() : player.current?.pause()));
+  const canControl = !!now && !archive && now.status !== "offline";
+  useMediaSession(
+    "tv",
+    now && {
+      app: "tv",
+      title: now.programme.title,
+      subtitle: now.channel.name,
+      status: sessionStatus(now.status),
+      detail: sessionDetail(now.status),
+      toggle: canControl ? () => (now.status === "playing" ? player.current?.pause() : player.current?.play()) : undefined,
+      stop: switchOff,
+    },
+    () => (archive ? switchOff() : player.current?.pause()),
+  );
 
   const channel = catalogue.channels.find((c) => c.id === channelId) ?? catalogue.channels[0];
   const favouriteItems = favourites.map((id) => byId.get(id)).filter((x) => x !== undefined);
   const recentItems = recents.map((id) => byId.get(id)).filter((x) => x !== undefined);
   const problem = now && problemText(now);
-  const controllable = !!now && !archive && now.status !== "offline";
+  const controllable = canControl;
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const index = catalogue.channels.findIndex((c) => c.id === channel.id);
   const onTabKey = (e: React.KeyboardEvent) => {
@@ -242,6 +256,14 @@ export function TvExperience({ catalogue, uploaders }: { catalogue: TvCatalogue;
                   <button type="button" className="mx-key" onClick={() => toggleTvFavourite(now.programme.id)} aria-pressed={fav} aria-label={fav ? "Remove from favourites" : "Add to favourites"}>
                     <Icon name={fav ? "heart" : "heartOutline"} className="h-4 w-4" />
                   </button>
+                  <AddToMusic
+                    video={addableVideo(
+                      now.programme.source,
+                      now.programme.title,
+                      (now.programme.rights.basis === "official-upload" ? uploaders[now.programme.rights.uploaderChannelId] : undefined) ?? now.channel.name,
+                      "tv",
+                    )}
+                  />
                   {(now.status === "no-response" || now.status === "offline") && (
                     <button type="button" className="mx-key" onClick={() => watch(now.channel, now.programme)}>
                       <Icon name="retry" className="h-4 w-4" /> Try again

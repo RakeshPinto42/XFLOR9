@@ -37,3 +37,14 @@ export function statusLabel(s: EmbedStatus): string {
       return "Not responding";
   }
 }
+
+/** How the tray shows an embedded player's status ("offline" = never loaded). */
+export function sessionStatus(s: EmbedStatus | "offline"): "loading" | "playing" | "paused" | "stopped" | "problem" {
+  if (s === "loading" || s === "playing" || s === "paused") return s;
+  if (s === "ended") return "stopped";
+  return "problem";
+}
+
+export function sessionDetail(s: EmbedStatus | "offline"): string {
+  return s === "offline" ? "You're offline" : statusLabel(s);
+}

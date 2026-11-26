@@ -386,3 +386,41 @@
   height: 150px;
   aspect-ratio: auto;
 }
+
+/* "+ Music": add the playing video to a Music playlist (P3) */
+.mx-add {
+  position: relative;
+}
+.mx-pop {
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  bottom: calc(100% + 6px);
+  width: min(300px, 80vw);
+  padding: 10px;
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(10 20 40 / 0.25);
+  color: var(--ui-text);
+  font-size: 13px;
+}
+.mx-pop-title {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.mx-pop-list {
+  display: grid;
+  max-height: 180px;
+  gap: 4px;
+  margin-bottom: 8px;
+  overflow: auto;
+}
+.mx-pop-form label {
+  margin-bottom: 4px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.mx-pop-note {
+  margin-top: 8px;
+}

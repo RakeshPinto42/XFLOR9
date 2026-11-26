@@ -1,7 +1,7 @@
 # Known issues and technical debt (for the product-wide audit)
 
 Recorded as found, so the final audit has one list. Severity is a first estimate.
-Last updated: 2026-11-27 (P2).
+Last updated: 2026-11-27 (P3).
 
 ## Reading Room
 
@@ -103,3 +103,15 @@ advisories in the 3D asset tools) is resolved: `npm audit` now reports 0 vulnera
 | P2-5 | Backup files aren't encrypted. They hold only what XPLOR9 keeps (favourites, notes, progress, imported books), but the note and books are readable by anyone who has the file. | Info | P2 | By design |
 | P2-6 | "Keep XPLOR9's data" asks the browser not to remove data when space is low; browsers decide for themselves (Chrome often agrees only for sites used a lot) and Safari may still remove data from sites not visited for a while. A backup file is the dependable way. | Info | P2 | Platform |
 | P2-7 | In one WebKit run, the "old addresses open their window" test failed once; it passed in the full run and on every re-run (3 of 3). Not related to P2's changes. | Low | P2 | Watch (test timing) |
+
+## P3 One media system
+
+| ID | Issue | Severity | Found | Status |
+|---|---|---|---|---|
+| P3-1 | **Fixed in P3.** The tray showed only the radio and Music's records. It now shows whatever plays in any window (TV, Video, Music's videos too), with Pause/Play, Stop and Show player; it follows the player that most recently started. | Was Medium | P3 | Fixed |
+| P3-2 | **Fixed in P3.** Music had one playlist. It now keeps saved playlists (save, replace, rename, delete, remove a song), and single YouTube videos from Video and TV can be added to them ("+ Music"). | Was Medium | P3 | Fixed |
+| P3-3 | Only single YouTube videos can be added to Music: Internet Archive films and whole YouTube playlists (series) can't, because Music needs the player to say when a song ends. The button is disabled and says why. | Info | P3 | By design |
+| P3-4 | The tray can only stop an Internet Archive film (its player has no remote control); it says so. | Info | P3 | Platform |
+| P3-5 | Videos added from Video or TV play in Music's video pane, so (like Music's YouTube tapes) they need the Music window open; with it closed, a playlist stops at the next video. | Info | P3 | Platform (YouTube requires its player visible) |
+| P3-6 | A video added from a pasted link is titled "Pasted link" (YouTube's title isn't known without searching). | Low | P3 | Open |
+| P3-7 | The tray shows one player at a time (the latest); others paused in their windows are reached from their windows or the taskbar. | Info | P3 | By design |
