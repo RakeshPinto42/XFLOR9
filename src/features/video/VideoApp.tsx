@@ -11,6 +11,7 @@ import { getPlaybackEngine, usePlayback } from "@/lib/playback/browser";
 import { useExclusiveMedia } from "@/lib/playback/mediaFocus";
 import { STORAGE_KEYS } from "@/lib/storage/local";
 import { createLocalStore, useLocalStore } from "@/lib/storage/store";
+import { SEARCH_ERROR_MESSAGES, looksLikeLink, parseSearchQuery, type SearchErrorCode, type SearchPage, type SearchResult } from "./search";
 import { parseSavedVideos, parseYouTubeLink, rememberVideo, toggleSavedVideo, uploadsPlaylist, videoKey, type SavedVideo } from "./youtubeLink";
 
 /**
@@ -20,8 +21,9 @@ import { parseSavedVideos, parseYouTubeLink, rememberVideo, toggleSavedVideo, up
  *     upload by a verified rights-holder channel);
  *   - Official channels: the full public uploads of those verified channels;
  *   - History and Favourites, kept in this browser;
+ *   - Search: all of YouTube (embeddable videos only), through XPLOR9's server so the API key stays
+ *     there; thumbnails load from YouTube only after the visitor searches;
  *   - a pasted YouTube link (any video whose owner allows embedding; YouTube decides).
- * Searching all of YouTube needs a YouTube Data API key and is not part of this version.
  */
 
 export interface VideoChannel {
@@ -38,7 +40,12 @@ export interface FeaturedVideo {
 }
 
 type YtSource = SavedVideo["source"];
-type Shelf = "featured" | "channels" | "history" | "favourites";
+type Shelf = "search" | "featured" | "channels" | "history" | "favourites";
+type SearchState =
+  | { status: "idle" }
+  | { status: "loading"; q: string }
+  | { status: "ready"; q: string; results: SearchResult[]; next: string | null; more: "idle" | "loading" | SearchErrorCode }
+  | { status: "error"; q: string; code: SearchErrorCode };
 interface Now {
   video: SavedVideo;
   status: EmbedStatus;
@@ -51,6 +58,8 @@ const isYt = (s: MediaSource): s is YtSource => s.provider === "youtube" || s.pr
 
 export function VideoApp({ channels, featured }: { channels: VideoChannel[]; featured: FeaturedVideo[] }) {
   const [shelf, setShelf] = useState<Shelf>("featured");
+  const [search, setSearch] = useState<SearchState>({ status: "idle" });
+  const searchSeq = useRef(0);
   const [now, setNow] = useState<Now | null>(null);
   const [time, setTime] = useState<PlayerTime | null>(null);
   const [link, setLink] = useState("");
@@ -76,8 +85,47 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
   const playing = now?.status === "playing";
   useExclusiveMedia("video", playing, () => player.current?.pause());
 
+  /** Runs a search (or the next page of the current one) through XPLOR9's server. */
+  const runSearch = async (q: string, pageToken: string | null) => {
+    const seq = ++searchSeq.current;
+    if (!pageToken) setSearch({ status: "loading", q });
+    else setSearch((cur) => (cur.status === "ready" ? { ...cur, more: "loading" } : cur));
+    let code: SearchErrorCode = "unavailable";
+    try {
+      const params = new URLSearchParams({ q });
+      if (pageToken) params.set("pageToken", pageToken);
+      const res = await fetch(`/api/video/search?${params}`);
+      const body = (await res.json().catch(() => null)) as (SearchPage & { error?: { code?: string } }) | null;
+      if (seq !== searchSeq.current) return; // a newer search has started
+      if (res.ok && body && Array.isArray(body.results)) {
+        setSearch((cur) =>
+          pageToken && cur.status === "ready"
+            ? { ...cur, results: [...cur.results, ...body.results.filter((r) => !cur.results.some((x) => x.videoId === r.videoId))], next: body.nextPageToken, more: "idle" }
+            : { status: "ready", q, results: body.results, next: body.nextPageToken, more: "idle" },
+        );
+        return;
+      }
+      const c = body?.error?.code;
+      if (typeof c === "string" && Object.hasOwn(SEARCH_ERROR_MESSAGES, c)) code = c as SearchErrorCode;
+    } catch {
+      if (seq !== searchSeq.current) return;
+    }
+    setSearch((cur) => (pageToken && cur.status === "ready" ? { ...cur, more: code } : { status: "error", q, code }));
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!looksLikeLink(link)) {
+      const parsed = parseSearchQuery(link, null);
+      if (!parsed.ok) {
+        setLinkError(SEARCH_ERROR_MESSAGES["invalid-query"]);
+        return;
+      }
+      setLinkError(null);
+      setShelf("search");
+      void runSearch(parsed.q, null);
+      return;
+    }
     const r = parseYouTubeLink(link);
     if (!r.ok) {
       setLinkError(r.reason);
@@ -87,8 +135,16 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
     play({ key: videoKey(r.source), title: "Pasted link", by: "YouTube", source: r.source });
   };
 
-  const rows: { video: SavedVideo; meta: string }[] =
-    shelf === "featured"
+  const rows: { video: SavedVideo; meta: string; thumbnail?: string | null }[] =
+    shelf === "search"
+      ? search.status === "ready"
+        ? search.results.map((r) => ({
+            video: { key: r.videoId, title: r.title, by: r.channelTitle, source: { provider: "youtube", videoId: r.videoId } },
+            meta: [r.channelTitle, r.publishedAt ? new Date(r.publishedAt).getFullYear() : null].filter(Boolean).join(" · "),
+            thumbnail: r.thumbnail,
+          }))
+        : []
+      : shelf === "featured"
       ? featured.filter((f) => isYt(f.source)).map((f) => ({ video: { key: videoKey(f.source as YtSource), title: f.title, by: f.uploader || "YouTube", source: f.source as YtSource }, meta: [f.meta, f.uploader].filter(Boolean).join(" · ") }))
       : shelf === "channels"
         ? channels.map((c) => ({
@@ -98,6 +154,7 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
         : (shelf === "history" ? seen : favs).map((v) => ({ video: v, meta: v.by }));
 
   const SHELVES: { id: Shelf; label: string; sub: string }[] = [
+    { id: "search", label: "Search", sub: search.status === "idle" ? "Type in the address bar" : `“${search.q}”` },
     { id: "featured", label: "Featured", sub: "From the TV and Music collections" },
     { id: "channels", label: "Official channels", sub: "Verified rights holders" },
     { id: "history", label: "History", sub: `${seen.length} watched` },
@@ -126,13 +183,13 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
       <div className="mx-main">
         <form onSubmit={submit} className="xp-toolbar flex items-center gap-2 px-3 py-2">
           <label htmlFor="video-link" className="shrink-0 font-medium">
-            Address
+            Search or address
           </label>
           <input
             id="video-link"
             value={link}
             onChange={(e) => setLink(e.target.value)}
-            placeholder="Paste a YouTube link"
+            placeholder="Search YouTube or paste a link"
             className="xp-input min-w-0 flex-1"
             autoComplete="off"
             spellCheck={false}
@@ -140,7 +197,7 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
             aria-invalid={linkError ? true : undefined}
           />
           <button type="submit" className="xp-button xp-button--primary">
-            Play
+            {link.trim() && !looksLikeLink(link) ? "Search" : "Play"}
           </button>
         </form>
         {linkError && (
@@ -151,7 +208,7 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
 
         <div className="mx-stage">
           <div className="mx-device">
-            <div ref={screen} className="mx-screen">
+            <div ref={screen} className="mx-screen" data-idle={!now || undefined}>
               {now ? (
                 <EmbedPlayer
                   key={`${now.video.key}:${now.attempt}`}
@@ -165,7 +222,7 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
               ) : (
                 <div className="mx-idle">
                   <div>
-                    <strong>Pick a video, a channel, or paste a YouTube link.</strong>
+                    <strong>Search YouTube, pick a video or channel, or paste a link.</strong>
                     Videos play in YouTube&apos;s own player. Nothing is loaded from YouTube until you choose something.
                   </div>
                 </div>
@@ -234,14 +291,29 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
               </button>
             )}
           </div>
-          {rows.length === 0 ? (
-            <p className="mx-mini-empty !py-6 text-center">{shelf === "history" ? "Videos you watch appear here." : "Press the heart while a video plays to keep it here."}</p>
+          {shelf === "search" && search.status !== "ready" ? (
+            <p className="mx-mini-empty !py-6 text-center" role={search.status === "error" ? "alert" : "status"} data-testid="search-state">
+              {search.status === "idle"
+                ? "Type what you're looking for in the address bar above and press Search. Results come from YouTube and play in its own player."
+                : search.status === "loading"
+                  ? `Searching YouTube for “${search.q}”…`
+                  : SEARCH_ERROR_MESSAGES[search.code]}
+            </p>
+          ) : rows.length === 0 ? (
+            <p className="mx-mini-empty !py-6 text-center">
+              {shelf === "search" ? "No embeddable videos found. Try different words." : shelf === "history" ? "Videos you watch appear here." : "Press the heart while a video plays to keep it here."}
+            </p>
           ) : (
             <ul className="mx-rows">
-              {rows.map(({ video, meta }) => {
+              {rows.map(({ video, meta, thumbnail }) => {
                 const isFav = favs.some((f) => f.key === video.key);
                 return (
                   <li key={video.key} aria-current={now?.video.key === video.key ? "true" : undefined}>
+                    {shelf === "search" && (
+                      // Thumbnails come straight from YouTube, only after the visitor searched.
+                      // eslint-disable-next-line @next/next/no-img-element -- external YouTube images, not optimised through this site
+                      <img className="mx-thumb" src={thumbnail ?? undefined} alt="" loading="lazy" referrerPolicy="no-referrer" width={128} height={72} hidden={!thumbnail} />
+                    )}
                     <div className="mx-row-text">
                       <p className="mx-row-title">{video.title}</p>
                       <p className="mx-row-meta">{meta}</p>
@@ -265,6 +337,21 @@ export function VideoApp({ channels, featured }: { channels: VideoChannel[]; fea
               })}
             </ul>
           )}
+          {shelf === "search" && search.status === "ready" && (search.next || search.more !== "idle") && (
+            <div className="flex flex-col items-center gap-2 p-3">
+              {search.more !== "idle" && search.more !== "loading" && (
+                <p role="alert" className="mx-mini-empty text-center">
+                  {SEARCH_ERROR_MESSAGES[search.more]}
+                </p>
+              )}
+              {search.next && (
+                <button type="button" className="xp-button" disabled={search.more === "loading"} onClick={() => void runSearch(search.q, search.next)}>
+                  {search.more === "loading" ? "Loading…" : "More results"}
+                </button>
+              )}
+            </div>
+          )}
+          {shelf === "search" && search.status === "ready" && <p className="mx-row-rights px-3 pb-3">Search results from YouTube. Only videos their owners allow to be embedded are shown.</p>}
         </section>
       </div>
     </div>

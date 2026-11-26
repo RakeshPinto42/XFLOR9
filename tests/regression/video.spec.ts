@@ -85,3 +85,51 @@ test("the transport bar drives YouTube's player: pause, seek, volume", async ({ 
   await controls.getByRole("button", { name: "Stop" }).click();
   await expect(page.getByTestId("video-app").getByTestId("embed-player")).toHaveCount(0);
 });
+
+test("search without an API key on the server says so, and links still play", async ({ page }) => {
+  await stubYouTube(page);
+  await openVideo(page);
+  // The regression server has no YOUTUBE_API_KEY: the real route answers "not configured".
+  await page.getByLabel("Search or address").fill("doordarshan 1990");
+  await expect(page.getByRole("button", { name: "Search", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.getByTestId("search-state")).toContainText("isn't set up");
+  await page.getByLabel("Search or address").fill("https://youtu.be/dQw4w9WgXcQ");
+  await page.getByLabel("Search or address").press("Enter");
+  await expect(page.locator(".mx-nowline")).toContainText("Playing");
+});
+
+test("search results: thumbnails after searching, watch one, more results", async ({ page }) => {
+  await stubYouTube(page);
+  const thumbs: string[] = [];
+  await page.route("https://i.ytimg.com/**", (route) => {
+    thumbs.push(route.request().url());
+    return route.fulfill({ status: 200, contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>' });
+  });
+  const queries: string[] = [];
+  await page.route("**/api/video/search?*", (route) => {
+    const u = new URL(route.request().url());
+    queries.push(`${u.searchParams.get("q")}|${u.searchParams.get("pageToken") ?? ""}`);
+    const page2 = u.searchParams.get("pageToken") === "NEXT1";
+    const r = (id: string, title: string) => ({ videoId: id, title, channelTitle: "Archive Channel", publishedAt: "1992-01-01T00:00:00.000Z", thumbnail: `https://i.ytimg.com/vi/${id}/mqdefault.jpg` });
+    return route.fulfill({
+      json: page2 ? { results: [r("ccccccccccc", "Third result")], nextPageToken: null } : { results: [r("aaaaaaaaaaa", "First result"), r("bbbbbbbbbbb", "Second result")], nextPageToken: "NEXT1" },
+    });
+  });
+  await openVideo(page);
+  expect(thumbs).toEqual([]); // nothing from YouTube before a search
+  await page.getByLabel("Search or address").fill("  surabhi   episode ");
+  await page.getByLabel("Search or address").press("Enter");
+  const list = page.getByRole("region", { name: "Search" });
+  await expect(list.getByText("First result")).toBeVisible();
+  expect(queries).toEqual(["surabhi episode|"]);
+  await expect.poll(() => thumbs.length).toBeGreaterThan(0);
+  await list.getByRole("button", { name: "More results" }).click();
+  await expect(list.getByText("Third result")).toBeVisible();
+  await expect(list.getByRole("button", { name: "More results" })).toHaveCount(0);
+  await list.getByRole("button", { name: "Watch Second result" }).click();
+  const src = new URL((await page.getByTestId("video-app").getByTestId("embed-player").getAttribute("src"))!);
+  expect(src.origin + src.pathname).toBe("https://www.youtube-nocookie.com/embed/bbbbbbbbbbb");
+  await page.getByRole("tab", { name: /History/ }).click();
+  await expect(page.getByRole("region", { name: "History" })).toContainText("Second result");
+});

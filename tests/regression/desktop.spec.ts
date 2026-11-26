@@ -166,7 +166,7 @@ test("Video: nothing loads from YouTube before a choice; a bad link is refused",
   await page.route(/youtube(-nocookie)?\.com/, (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<title>player</title>" }));
   await desktop(page);
   await page.getByRole("button", { name: /^Video:/ }).dblclick();
-  await expect(win(page, "video").getByText("Pick a video, a channel, or paste a YouTube link.")).toBeVisible();
+  await expect(win(page, "video").getByText("Search YouTube, pick a video or channel, or paste a link.")).toBeVisible();
   await page.getByLabel("Address").fill("https://example.com/watch?v=dQw4w9WgXcQ");
   await page.locator("form").filter({ has: page.getByLabel("Address") }).getByRole("button", { name: "Play", exact: true }).click();
   await expect(page.locator("#video-link-error")).toContainText("Only links to youtube.com or youtu.be");

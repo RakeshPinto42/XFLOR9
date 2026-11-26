@@ -22,13 +22,13 @@ from there; the monsoon render lives on as a wallpaper.
 | Security review and import isolation | 3581cb3 · a408599 |
 | TV, Music, Games modules (checkpoint before the desktop redesign) | 0abc9c9 |
 | **D1 Desktop**: boot, welcome, desktop, windows, taskbar, start menu, tray, themes, wallpapers, system sounds, Video, Notepad, Control Panel; 3D retired | e40b618 |
-| **D2 Applications**: XPLOR9 Amp (Music: playlist, equaliser, visualiser, video pane), XPLOR9 Tuner (Radio: deck, presets, station table), Television and Video (shared media player, transport, history, favourites), Arcade (launcher, Saanp and Mines windows with menus and levels), Reading Room (Explorer layout, icon and details views); Geist interface type; shared window menu bar | this milestone |
+| **D2 Applications**: XPLOR9 Amp (Music: playlist, equaliser, visualiser, video pane), XPLOR9 Tuner (Radio: deck, presets, station table), Television and Video (shared media player, transport, history, favourites), Arcade (launcher, Saanp and Mines windows with menus and levels), Reading Room (Explorer layout, icon and details views); Geist interface type; shared window menu bar | 89c70df |
+| **D3 YouTube discovery**: search in Video through a server route (key server-side only), cached results, daily budget and per-visitor limit, validated results, search-or-link address bar, more results | this milestone |
 
 ## Next, in order
 
 | Phase | Scope |
 |---|---|
-| D3 Video search | Search all of YouTube through the YouTube Data API (needs a free Google API key kept on the server; about 100 searches a day on the free quota). History and favourites already exist (D2). |
 | D4 More nostalgia | Screensaver after idle (original animation), a Paint-style drawing app saved locally, a card game (original Solitaire-style), a "My Computer" window with storage used and a clear-data control, desktop icon arrangement by drag. |
 | D5 Mobile pass | Test on the owner's phone (model to be provided); swipe between open apps; larger touch targets in app interiors. |
 | Final audits | Accessibility, performance, security and licensing review of the whole product. |

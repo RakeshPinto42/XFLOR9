@@ -365,3 +365,24 @@
     width: auto;
   }
 }
+
+.mx-thumb {
+  width: 128px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: #1b2030;
+  object-fit: cover;
+}
+@container (max-width: 520px) {
+  .mx-thumb {
+    width: 96px;
+    height: 54px;
+  }
+}
+
+/* Nothing playing: a short screen, so the list (search results, collections) is in view. */
+.mx-screen[data-idle] {
+  height: 150px;
+  aspect-ratio: auto;
+}
