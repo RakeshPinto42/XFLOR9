@@ -18,6 +18,11 @@ export interface AudioLike extends EventTarget {
   muted: boolean;
   readonly paused: boolean;
   readonly error: { code: number } | null;
+  /** Seconds (tracks only; live streams have no meaningful position). */
+  currentTime?: number;
+  readonly duration?: number;
+  /** True once a track has played to its end. */
+  readonly ended?: boolean;
   play(): Promise<void>;
   pause(): void;
   load(): void;
@@ -30,7 +35,12 @@ export interface CrossTabChannel {
 }
 
 export interface EngineDeps {
-  createAudio: () => AudioLike;
+  /**
+   * `cors: true` = an element that fetches with CORS, so its sound may be processed by Web Audio
+   * (Music's equaliser and visualiser). Radio stations never use it: most don't send CORS headers,
+   * and such an element would refuse them.
+   */
+  createAudio: (options?: { cors: boolean }) => AudioLike;
   isOnline: () => boolean;
   /** Subscribe to browser online/offline changes. */
   onConnectivityChange: (handler: (online: boolean) => void) => void;
@@ -64,7 +74,10 @@ export interface LoadOptions {
 }
 
 export class PlaybackEngine {
-  private readonly audio: AudioLike;
+  /** The element in use: `direct` for radio and most sources, `corsEl` for sources marked `cors`. */
+  private audio: AudioLike;
+  private readonly direct: AudioLike;
+  private corsEl: AudioLike | null = null;
   private state: PlaybackState;
   private listeners = new Set<() => void>();
   private generation = 0;
@@ -76,7 +89,7 @@ export class PlaybackEngine {
   private output = { gain: 1, mute: false };
 
   constructor(private readonly deps: EngineDeps) {
-    this.audio = deps.createAudio();
+    this.direct = this.audio = deps.createAudio();
     this.audio.preload = "none";
     const prefs = deps.loadPrefs();
     this.audio.volume = clamp(prefs.volume);
@@ -91,7 +104,7 @@ export class PlaybackEngine {
       volumeControllable: detectVolumeControl(this.audio, clamp(prefs.volume)),
     };
 
-    this.bindAudioEvents();
+    this.bindAudioEvents(this.direct);
     deps.onConnectivityChange((online) => {
       if (!online && this.isActive()) this.fail("offline");
     });
@@ -174,8 +187,36 @@ export class PlaybackEngine {
   }
 
   private applyOutput() {
-    this.audio.volume = clamp(this.state.volume * this.output.gain);
-    this.audio.muted = this.state.muted || this.output.mute;
+    for (const el of [this.direct, this.corsEl]) {
+      if (!el) continue;
+      el.volume = clamp(this.state.volume * this.output.gain);
+      el.muted = this.state.muted || this.output.mute;
+    }
+  }
+
+  /** The CORS element (created on first need), for building a Web Audio graph on it. */
+  ensureCorsElement(): AudioLike {
+    if (!this.corsEl) {
+      const el = this.deps.createAudio({ cors: true });
+      el.preload = "none";
+      this.corsEl = el;
+      this.bindAudioEvents(el);
+      this.applyOutput();
+    }
+    return this.corsEl;
+  }
+
+  /** Where the current track is (seconds); null duration for live streams or before it is known. */
+  position(): { current: number; duration: number | null } {
+    const d = this.audio.duration;
+    return { current: this.audio.currentTime ?? 0, duration: this.state.source?.live || !d || !Number.isFinite(d) ? null : d };
+  }
+
+  /** Jump within a track (ignored for live streams). */
+  seek(seconds: number) {
+    if (!this.state.source || this.state.source.live || !Number.isFinite(seconds)) return;
+    const { duration } = this.position();
+    this.audio.currentTime = Math.max(0, duration === null ? seconds : Math.min(seconds, duration));
   }
 
   /** Which MIME types this browser says it can decode (used for per-browser playability). */
@@ -206,6 +247,13 @@ export class PlaybackEngine {
       return;
     }
 
+    // Switch elements when this source needs the other one; the old one lets go of its stream.
+    const el = source.cors ? this.ensureCorsElement() : this.direct;
+    if (el !== this.audio) {
+      this.release();
+      this.audio = el;
+    }
+
     this.set({ status: "loading", error: null });
     this.activeUrl = source.url;
     this.audio.src = source.url;
@@ -227,8 +275,9 @@ export class PlaybackEngine {
     this.deps.channel?.post({ type: "started", tabId: this.tabId });
   }
 
-  private bindAudioEvents() {
-    const on = (type: string, handler: () => void) => this.audio.addEventListener(type, handler);
+  private bindAudioEvents(el: AudioLike) {
+    // Events from the element not in use are ignored.
+    const on = (type: string, handler: () => void) => el.addEventListener(type, () => el === this.audio && handler());
     on("playing", () => {
       if (!this.isCurrent()) return;
       this.clearTimer();
@@ -243,7 +292,9 @@ export class PlaybackEngine {
       this.armTimer(this.generation, BUFFER_TIMEOUT_MS, "network");
     });
     on("pause", () => {
-      // Paused by something other than us (OS media key, headphones unplugged).
+      // Paused by something other than us (OS media key, headphones unplugged). Browsers also
+      // fire "pause" just before "ended" when a track finishes: that one is left to "ended".
+      if (this.audio.ended) return;
       if (this.isCurrent() && (this.state.status === "playing" || this.state.status === "buffering")) this.pause();
     });
     on("ended", () => {

@@ -125,7 +125,12 @@ export function Desktop({ data }: { data: DesktopData }) {
       }
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Marks the moment the desktop's keyboard shortcuts are live (tests wait for it).
+    document.documentElement.dataset.desktopReady = "true";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      delete document.documentElement.dataset.desktopReady;
+    };
   }, [phase]);
 
   // Closing the start menu by clicking anywhere else.

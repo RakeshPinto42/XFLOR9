@@ -1,18 +1,12 @@
-"use client";
-
 import { archiveAudioUrl } from "@/features/media/catalogue";
-import { getPlaybackEngine } from "@/lib/playback/browser";
 import type { PlaybackSource } from "@/lib/playback/types";
 import type { Cassette, Track } from "./catalogue";
 
 /**
- * Public-domain tapes play through the site's shared audio player (so they keep playing across
- * pages, with the mini-player). This queue moves to the tape's next track when one ends; it is a
- * module-level singleton like the player itself, so it keeps working after leaving the Music page.
+ * How a public-domain record becomes a source for the site's shared audio player. Records are
+ * fetched with CORS (the Internet Archive allows it), so the equaliser and visualiser can
+ * process them. What plays next is decided by the playlist (playlist.ts, musicPlayer.ts).
  */
-
-let cassettes: readonly Cassette[] = [];
-let listening = false;
 
 const PREFIX = "music:";
 
@@ -25,6 +19,7 @@ export function trackSource(c: Cassette, t: Track): PlaybackSource {
     subtitle: [t.artist, t.year, c.name].filter(Boolean).join(" · "),
     url: archiveAudioUrl(t.source),
     live: false,
+    cors: true,
   };
 }
 
@@ -35,28 +30,8 @@ export function parseTrackId(sourceId: string | undefined): { cassetteId: string
   return cassetteId && trackId ? { cassetteId, trackId } : null;
 }
 
-export function playAudioTrack(all: readonly Cassette[], c: Cassette, t: Track) {
-  cassettes = all;
-  listen();
-  getPlaybackEngine().load(trackSource(c, t));
-}
-
 /** The track after (or before) `trackId` on its tape, or null at the end of the tape. */
 export function neighbour(c: Cassette, trackId: string, dir: 1 | -1): Track | null {
   const i = c.tracks.findIndex((t) => t.id === trackId);
   return i < 0 ? null : (c.tracks[i + dir] ?? null);
-}
-
-function listen() {
-  if (listening) return;
-  listening = true;
-  const engine = getPlaybackEngine();
-  engine.subscribe(() => {
-    const s = engine.getState();
-    if (s.status !== "ended") return;
-    const at = parseTrackId(s.source?.id);
-    const c = at && cassettes.find((x) => x.id === at.cassetteId);
-    const next = c && neighbour(c, at.trackId, 1);
-    if (c && next) engine.load(trackSource(c, next));
-  });
 }

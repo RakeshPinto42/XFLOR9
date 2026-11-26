@@ -1,0 +1,373 @@
+/* XPLOR9 Arcade: a light launcher, and game windows with their own faces (an LCD for Saanp,
+   the raised grey field and LED counters for Mines). */
+
+.arc {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font-family: var(--xp-font);
+  font-size: 13px;
+}
+.arc :focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
+}
+.arc-side {
+  display: flex;
+  width: 210px;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 8px 10px;
+  overflow: auto;
+  border-right: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+}
+.arc-cat {
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: left;
+}
+.arc-cat:hover {
+  background: var(--ui-surface-2);
+}
+.arc-cat[aria-current="true"] {
+  background: var(--ui-accent);
+  color: #fff;
+}
+.arc-scores {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 8px;
+  padding: 2px 10px;
+}
+.arc-scores dt {
+  color: var(--ui-muted);
+}
+.arc-scores dd {
+  font-family: var(--xp-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.arc-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  overflow: auto;
+}
+.arc-shelf {
+  padding: 16px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: radial-gradient(120% 100% at 50% 0%, #2a3350, #151a2a 75%);
+}
+.arc-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.arc-tile {
+  display: flex;
+  width: 128px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 10px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.04);
+  color: #fff;
+}
+.arc-tile:hover {
+  background: rgb(255 255 255 / 0.09);
+}
+.arc-tile[aria-pressed="true"] {
+  border-color: #6ea2ff;
+  background: rgb(79 141 255 / 0.22);
+}
+.arc-tile svg {
+  filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.5));
+}
+.arc-tile-name {
+  font-weight: 600;
+}
+.arc-tile-cat {
+  color: #9aa6c0;
+  font-size: 11.5px;
+}
+.arc-shelf .mx-mini-empty {
+  color: #9aa6c0;
+}
+.arc-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: #fff;
+}
+.arc-detail h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+.arc-detail p {
+  margin-top: 2px;
+  line-height: 1.5;
+}
+.arc-controls {
+  color: var(--ui-muted);
+  font-size: 12.5px;
+}
+.arc-note {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+/* ---------- game windows ---------- */
+.arc-game {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font-family: var(--xp-font);
+  font-size: 13px;
+}
+.arc-help {
+  max-width: 34rem;
+  margin: 8px auto 0;
+  padding: 8px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: #fff;
+  line-height: 1.5;
+}
+.arc-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 10px;
+}
+.arc-flag {
+  padding: 1px 8px;
+  border: 1px solid var(--ui-line-strong);
+  border-radius: 999px;
+  background: #fff;
+}
+.arc-flag[aria-pressed="true"] {
+  border-color: #c84b12;
+  background: #f2601d;
+  color: #fff;
+}
+
+/* Saanp: a green LCD handheld */
+.sn-body-wrap {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+}
+.sn-bezel {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #3a4155, #232838);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 4px 12px rgb(10 20 40 / 0.2);
+}
+.sn-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #cfe9a8;
+  font-family: var(--xp-mono);
+  font-size: 13px;
+}
+.sn-start {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #b8e07a;
+  color: #1d2a12;
+  font-family: var(--xp-font);
+  font-weight: 600;
+}
+.sn-board {
+  display: grid;
+  aspect-ratio: 1;
+  width: 100%;
+  padding: 4px;
+  border-radius: 6px;
+  background: #9fbf5a;
+  box-shadow: inset 0 0 0 3px #7f9e44, inset 0 4px 10px rgb(0 0 0 / 0.25);
+  touch-action: none;
+  outline: none;
+}
+.sn-board:focus-visible {
+  box-shadow: inset 0 0 0 3px #7f9e44, 0 0 0 3px #f2a93b;
+}
+.sn-board > div {
+  margin: 1px;
+  border-radius: 2px;
+}
+.sn-head {
+  background: #1d2a12;
+}
+.sn-body {
+  background: #2f4219;
+}
+.sn-food {
+  border-radius: 50% !important;
+  background: #e07d12;
+}
+.sn-status {
+  min-height: 1.4em;
+  margin-top: 6px;
+  color: #cfe9a8;
+  font-family: var(--xp-mono);
+  text-align: center;
+}
+.sn-pad {
+  display: none;
+  width: 156px;
+  margin: 10px auto 0;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.sn-pad-key {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: #2b3141;
+  color: #fff;
+  font-size: 18px;
+}
+@media (pointer: coarse) {
+  .sn-pad {
+    display: grid;
+  }
+}
+
+/* Mines: raised grey field, LED counters */
+.mn-wrap {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  padding: 10px;
+}
+.mn-panel {
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 8px;
+  border: 2px solid;
+  border-color: #fff #8a93a6 #8a93a6 #fff;
+  background: #c9cfdb;
+}
+.mn-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 5px 6px;
+  border: 2px solid;
+  border-color: #8a93a6 #fff #fff #8a93a6;
+}
+.mn-led {
+  min-width: 52px;
+  padding: 1px 4px;
+  background: #1a0505;
+  color: #ff3b2a;
+  font-family: var(--xp-mono);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-shadow: 0 0 6px rgb(255 59 42 / 0.6);
+}
+.mn-face {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid;
+  border-color: #fff #8a93a6 #8a93a6 #fff;
+  background: #c9cfdb;
+}
+.mn-face:active {
+  border-color: #8a93a6 #fff #fff #8a93a6;
+}
+.mn-grid {
+  display: grid;
+  overflow: auto;
+  border: 2px solid;
+  border-color: #8a93a6 #fff #fff #8a93a6;
+}
+.mn-cell {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 2px solid;
+  border-color: #fff #8a93a6 #8a93a6 #fff;
+  background: #c9cfdb;
+  font-family: var(--xp-mono);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+.mn-cell:hover:not([data-open]) {
+  background: #d6dbe5;
+}
+.mn-cell:focus-visible {
+  outline: 2px solid #2a62d9;
+  outline-offset: -2px;
+}
+.mn-cell[data-open] {
+  border: 1px solid #a7afc0;
+  background: #e4e8ef;
+}
+.mn-cell[data-mine] {
+  background: #f2601d;
+  color: #1b2030;
+}
+.mn-cell[data-near="1"] { color: #2a62d9; }
+.mn-cell[data-near="2"] { color: #2f8a2f; }
+.mn-cell[data-near="3"] { color: #d23a1c; }
+.mn-cell[data-near="4"] { color: #1d2f8a; }
+.mn-cell[data-near="5"] { color: #8a2a1d; }
+.mn-cell[data-near="6"] { color: #1d7a8a; }
+.mn-cell[data-near="7"] { color: #1b2030; }
+.mn-cell[data-near="8"] { color: #6b7385; }
+.mn-status {
+  min-height: 1.4em;
+  margin-top: 8px;
+  font-weight: 600;
+  text-align: center;
+}
+
+@container (max-width: 560px) {
+  .arc {
+    flex-direction: column;
+  }
+  .arc-side {
+    width: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--ui-line);
+  }
+  .arc-side .xp-sidebar-heading,
+  .arc-scores {
+    display: none;
+  }
+}

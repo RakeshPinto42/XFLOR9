@@ -106,6 +106,30 @@ const ICONS: Record<AppId | "start" | "folder" | "volume" | "muted" | "note" | "
       <path d="M9 19 h30 a6 6 0 0 1 5 3" stroke="#fff" strokeOpacity="0.55" strokeWidth="2" fill="none" />
     </>
   ),
+  saanp: ({ uid }) => (
+    <>
+      <linearGradient id={`${uid}-a`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#c6f06a" />
+        <stop offset="1" stopColor="#7fb52a" />
+      </linearGradient>
+      <rect x="4" y="4" width="40" height="40" rx="7" fill="#1d2a12" stroke={outline} strokeWidth="1.5" />
+      <path d="M11 34 h12 v-8 h-8 v-9 h20" fill="none" stroke={`url(#${uid}-a)`} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="35" cy="17" r="2" fill="#1d2a12" />
+      <ellipse cx="34" cy="33" rx="4" ry="5" fill="#ffb21f" stroke={outline} strokeWidth="0.8" />
+      <path d="M34 28 q2 -3 4 -2" stroke="#3a8a2a" strokeWidth="1.6" fill="none" />
+    </>
+  ),
+  mines: () => (
+    <>
+      <rect x="4" y="4" width="40" height="40" rx="5" fill="#d9dee8" stroke={outline} strokeWidth="1.5" />
+      <path d="M4 24 h40 M24 4 v40" stroke="#9aa4b8" strokeWidth="1" />
+      <circle cx="24" cy="24" r="9" fill="#1b2030" />
+      <path d="M24 10 v28 M10 24 h28 M14 14 l20 20 M34 14 l-20 20" stroke="#1b2030" strokeWidth="2.6" strokeLinecap="round" />
+      <circle cx="21" cy="21" r="2.6" fill="#fff" />
+      <path d="M33 5 v11" stroke="#1b2030" strokeWidth="1.6" />
+      <path d="M33 5 l8 3 -8 3z" fill="#e2492f" />
+    </>
+  ),
   reading: ({ uid }) => (
     <>
       <linearGradient id={`${uid}-a`} x1="0" y1="0" x2="1" y2="0">

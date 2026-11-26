@@ -1,0 +1,310 @@
+/* Reading Room (D2): Explorer-style pages. One set of tokens, scoped to the Reading Room, retunes
+   every page here (shelf, book details, reader controls) to the desktop's clean light look, so the
+   reader and the import isolation keep their own code untouched. */
+
+html {
+  /* The XPLOR9 wordmark keeps its own face even where headings change. */
+  --font-brand: var(--font-shrikhand);
+}
+
+.reading-site {
+  --color-plastic: #f4f6fa;
+  --color-panel: #ffffff;
+  --color-ink: #141a26;
+  --color-ink-soft: #5b6577;
+  --color-reading: #cfe3fb;
+  --color-music: #e2492f;
+  --color-tv: #2a62d9;
+  --color-radio: #f2a93b;
+  --font-shrikhand: var(--font-geist);
+  --font-hanken: var(--font-geist);
+  --rx-line: #d5dbe6;
+  --rx-accent: #2a62d9;
+  --rx-accent-soft: #e3ecfc;
+  background: #f4f6fa;
+  color: #141a26;
+  font-family: var(--font-geist), "Segoe UI", system-ui, sans-serif;
+}
+.reading-site .logo-mark {
+  font-family: var(--font-brand), serif;
+}
+/* Headings drawn with the display face become crisp interface headings. */
+.reading-site .font-display {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+/* Pill buttons and links become desktop buttons. */
+.reading-site :is(a, button, label, select).rounded-full {
+  border-radius: 6px;
+}
+.reading-site :is(input, select, textarea).rounded-xl {
+  border-radius: 6px;
+}
+.reading-site .rounded-2xl {
+  border-radius: 10px;
+}
+.reading-site :focus-visible {
+  outline: 2px solid var(--rx-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Explorer layout of the Reading Room index ---------- */
+.rx {
+  display: grid;
+  min-height: 100%;
+  grid-template-columns: 232px minmax(0, 1fr);
+}
+.rx-tasks {
+  padding: 14px 12px;
+  background: linear-gradient(180deg, #7ba2e7, #6182d6 40%, #5a79cf);
+}
+.rx-panel {
+  margin-bottom: 14px;
+  overflow: hidden;
+  border-radius: 8px 8px 4px 4px;
+  background: #dde6fb;
+  box-shadow: 0 1px 2px rgb(20 40 100 / 0.25);
+}
+.rx-panel h2 {
+  padding: 7px 12px;
+  background: linear-gradient(90deg, #ffffff, #c7d6f7);
+  color: #1d3b8a;
+  font-size: 13px;
+  font-weight: 700;
+}
+.rx-panel ul {
+  padding: 8px 12px 10px;
+}
+.rx-panel li + li {
+  margin-top: 5px;
+}
+.rx-panel a,
+.rx-panel button,
+.rx-panel label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #1d3b8a;
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+}
+.rx-panel a:hover,
+.rx-panel button:hover,
+.rx-panel label:hover {
+  text-decoration: underline;
+}
+.rx-panel p {
+  padding: 8px 12px 10px;
+  color: #2b3a66;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.rx-main {
+  min-width: 0;
+  padding: 18px 22px 28px;
+  background: #fff;
+}
+.rx-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rx-line);
+}
+.rx-head h1 {
+  font-size: 22px;
+  font-weight: 650;
+}
+.rx-head p {
+  color: #5b6577;
+  font-size: 13.5px;
+}
+.rx-folder {
+  scroll-margin-top: 12px;
+}
+.rx-folder > section,
+.rx-folder > div > section {
+  margin-bottom: 26px;
+}
+
+/* Bookshelf toolbar and views */
+.rx-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--rx-line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fbfcfe, #f1f4f9);
+}
+.rx-search {
+  min-width: 200px;
+  flex: 1;
+  padding: 5px 9px;
+  border: 1px solid #b7c1d3;
+  border-radius: 6px;
+  background: #fff;
+}
+.rx-views {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid #b7c1d3;
+  border-radius: 6px;
+  background: #fff;
+}
+.rx-views button {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.rx-views button[aria-pressed="true"] {
+  background: var(--rx-accent);
+  color: #fff;
+}
+.rx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.rx-chips > span {
+  width: 72px;
+  color: #5b6577;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.rx-chip {
+  padding: 3px 10px;
+  border: 1px solid #b7c1d3;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.rx-chip:hover {
+  border-color: var(--rx-accent);
+}
+.rx-chip[aria-pressed="true"] {
+  border-color: var(--rx-accent);
+  background: var(--rx-accent);
+  color: #fff;
+}
+.rx-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  gap: 18px 14px;
+}
+.rx-icon {
+  display: block;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  text-align: center;
+}
+.rx-icon:hover {
+  border-color: #c7d6f7;
+  background: #f2f6fe;
+}
+.rx-icon .book-cover {
+  width: 86px;
+  margin: 0 auto;
+  box-shadow: 2px 3px 8px rgb(20 30 60 / 0.25);
+}
+.rx-icon-title {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.rx-icon-meta {
+  color: #5b6577;
+  font-size: 12px;
+}
+.rx-details {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--rx-line);
+  font-size: 13px;
+}
+.rx-details th {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--rx-line);
+  background: #fafbfd;
+  color: #5b6577;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+.rx-details th button {
+  font-weight: 600;
+}
+.rx-details td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #eef1f6;
+}
+.rx-details tr:hover td {
+  background: #f7f9fc;
+}
+.rx-details a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.rx-details a:hover {
+  color: var(--rx-accent);
+  text-decoration: underline;
+}
+.rx-mini-cover {
+  width: 22px;
+  flex-shrink: 0;
+}
+.rx-mini-cover .book-cover__title,
+.rx-mini-cover .book-cover__author {
+  display: none;
+}
+
+/* Book covers: cloth-bound typographic covers, now with cooler, crisper finishes. */
+.reading-site .book-cover {
+  border-radius: 3px 6px 6px 3px;
+}
+
+@media (max-width: 760px) {
+  .rx {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rx-tasks {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px;
+  }
+  .rx-panel {
+    min-width: 210px;
+    margin-bottom: 0;
+  }
+  .rx-main {
+    padding: 14px;
+  }
+  .rx-col-wide {
+    display: none;
+  }
+}
+
+/* Icon-sized covers: type scaled to the cover, words never broken mid-way. */
+.rx-icon .book-cover {
+  width: 104px;
+}
+.rx-icon .book-cover__title {
+  font-size: clamp(0.62rem, 12.5cqi, 2.6rem);
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
+}
+.rx-icon .book-cover__author {
+  font-size: clamp(0.5rem, 7cqi, 1rem);
+}

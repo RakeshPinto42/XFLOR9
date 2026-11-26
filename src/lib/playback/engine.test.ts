@@ -12,6 +12,7 @@ class FakeAudio extends EventTarget implements AudioLike {
   ignoreVolume = false; // simulate iOS
   playResult: () => Promise<void> = () => Promise.resolve();
   loads = 0;
+  currentTime = 0;
   private _volume = 1;
   get volume() {
     return this._volume;
@@ -385,5 +386,83 @@ describe("tracks (Music): resume where paused, and report the end", () => {
     engine.play();
     audio.emit("playing");
     expect(engine.getState().status).toBe("playing");
+  });
+});
+
+describe("CORS element for processed audio (Music's equaliser)", () => {
+  const record: PlaybackSource = { id: "music:old:a", kind: "music", title: "Record", url: "https://archive.example/a.mp3", live: false, cors: true };
+  const twoElements = () => {
+    const direct = new FakeAudio();
+    const cors = new FakeAudio();
+    const created: boolean[] = [];
+    const s = setup({
+      createAudio: (o) => {
+        created.push(!!o?.cors);
+        return o?.cors ? cors : direct;
+      },
+    });
+    return { ...s, direct, cors, created };
+  };
+
+  it("radio never touches the CORS element; it is created only when a CORS source plays", () => {
+    const { engine, direct, created } = twoElements();
+    engine.load(station(1));
+    expect(direct.src).toBe("https://stream1.example/live");
+    expect(created).toEqual([false]);
+  });
+
+  it("switching between radio and a record moves to the right element and releases the other", () => {
+    const { engine, direct, cors } = twoElements();
+    engine.load(station(1));
+    direct.emit("playing");
+    engine.load(record);
+    expect(cors.src).toBe(record.url);
+    expect(direct.src).toBe(""); // the radio stream was let go
+    // A late event from the old element can't change the record's state.
+    direct.emit("playing");
+    expect(engine.getState().status).toBe("loading");
+    cors.emit("playing");
+    expect(engine.getState().status).toBe("playing");
+    engine.load(station(2));
+    expect(direct.src).toBe("https://stream2.example/live");
+    expect(cors.src).toBe("");
+  });
+
+  it("volume and mute apply to both elements", () => {
+    const { engine, direct, cors } = twoElements();
+    engine.ensureCorsElement();
+    engine.setVolume(0.5);
+    engine.setOutput(0.5, true);
+    expect(direct.volume).toBeCloseTo(0.25);
+    expect(cors.volume).toBeCloseTo(0.25);
+    expect(cors.muted).toBe(true);
+  });
+
+  it("seeks within tracks, clamped to the duration, and never within live streams", () => {
+    const { engine, cors } = twoElements();
+    Object.defineProperty(cors, "duration", { value: 100 });
+    cors.currentTime = 0;
+    engine.load(record);
+    engine.seek(250);
+    expect(engine.position()).toEqual({ current: 100, duration: 100 });
+    engine.seek(-5);
+    expect(engine.position().current).toBe(0);
+    engine.load(station(1));
+    engine.seek(30);
+    expect(engine.position().duration).toBeNull();
+  });
+});
+
+describe("a track reaching its end (browser event order)", () => {
+  it("'pause' fired just before 'ended' doesn't hide the end", () => {
+    const { engine, audio } = setup();
+    const track: PlaybackSource = { id: "music:t:1", kind: "music", title: "Track", url: "https://x.example/1.mp3", live: false };
+    engine.load(track);
+    audio.emit("playing");
+    // Real browsers: paused becomes true and "pause" fires, then "ended".
+    Object.defineProperty(audio, "ended", { value: true, configurable: true });
+    audio.pause();
+    audio.emit("ended");
+    expect(engine.getState().status).toBe("ended");
   });
 });

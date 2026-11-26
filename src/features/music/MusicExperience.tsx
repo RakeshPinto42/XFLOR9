@@ -1,270 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Icon } from "@/components/Icon";
-import { MEDIA_LANGUAGES, PROVIDER_NAMES, sourcePage } from "@/features/media/catalogue";
+import { useEffect, useRef, useState } from "react";
 import { EmbedPlayer, type EmbedPlayerHandle } from "@/features/media/EmbedPlayer";
-import { PlayerFrame } from "@/features/media/PlayerFrame";
-import { NO_RESPONSE, UNAVAILABLE_CODES, type PlayerEvent } from "@/features/media/playerMessages";
+import { MEDIA_LANGUAGES, PROVIDER_NAMES, sourcePage } from "@/features/media/catalogue";
 import { getPlaybackEngine, usePlayback } from "@/lib/playback/browser";
 import { useExclusiveMedia } from "@/lib/playback/mediaFocus";
-import { setMediaPlaying } from "@/lib/sound/browser";
 import { useLocalStore } from "@/lib/storage/store";
+import { getAnalyser } from "./audioGraph";
 import { cassettePlayback, type Cassette, type Track } from "./catalogue";
-import { musicFavourites, musicRecents, recordMusicPlay, toggleMusicFavourite } from "./musicStores";
-import { neighbour, parseTrackId, playAudioTrack } from "./queue";
+import { EQ_BANDS, EQ_LIMIT, EQ_PRESETS, bandLabel, presetName } from "./eq";
+import { initMusic, music, musicEq, musicView, useMusic, type Entry, type VideoNow } from "./musicPlayer";
+import { musicFavourites, musicRecents, toggleMusicFavourite } from "./musicStores";
+import { append, clear, clock, move, removeAt, replaceAll } from "./playlist";
+import { parseTrackId } from "./queue";
+import "./amp.css";
 
 /**
- * The Music app (M4): cassettes of songs. Each tape plays one way:
- *   - video tapes (official label uploads) play in YouTube's player (YouTube
- *     requires its player to be visible), and the view moves to the TV;
- *   - the public-domain tape plays as audio in the deck through the site's shared player, so it
- *     keeps playing across pages (mini-player) and moves on to the next track by itself.
- * One sound at a time: a video tape pauses the shared player, and the shared player starting
- * (radio or a tape) pauses the video.
+ * Music (D2): "XPLOR9 Amp", a desktop media player in the spirit of the classic skinned players.
+ * Main panel (display, visualiser, transport, seek, volume, balance, shuffle, repeat), a 10-band
+ * equaliser, a playlist you build and reorder, a media library of tapes, favourites and recently
+ * played, and a video pane for official uploads (YouTube's own player, which must stay visible).
+ *
+ * Every control does something real. The equaliser, balance and visualiser need the sound itself,
+ * which only the public-domain records allow (YouTube's player keeps its sound to itself); with a
+ * video playing they say so instead of pretending.
  */
 
-type VideoStatus = "loading" | "playing" | "paused" | "ended" | "unavailable" | "no-response" | "offline";
-interface VideoNow {
-  cassette: Cassette;
-  track: Track;
-  status: VideoStatus;
-  attempt: number;
-}
-
 const trackMeta = (t: Track) => [t.film, t.year, t.artist].filter(Boolean).join(" · ") || MEDIA_LANGUAGES[t.language];
-
-export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[]; uploaders: Record<string, string> }) {
-  const [video, setVideo] = useState<VideoNow | null>(null);
-  const [announce, setAnnounce] = useState("");
-  const unavailable = useRef(new Set<string>());
-  const player = useRef<EmbedPlayerHandle>(null);
-  const audio = usePlayback();
-  const favourites = useLocalStore(musicFavourites);
-  const recents = useLocalStore(musicRecents);
-  const byTrack = useMemo(() => {
-    const m = new Map<string, { cassette: Cassette; track: Track }>();
-    for (const cassette of cassettes) for (const track of cassette.tracks) m.set(track.id, { cassette, track });
-    return m;
-  }, [cassettes]);
-
-  // The audio tape the shared player holds (if any), and whether it is playing.
-  const audioAt = parseTrackId(audio.source?.id);
-  const audioNow = audioAt ? byTrack.get(audioAt.trackId) : undefined;
-
-
-  const play = useCallback(
-    (cassette: Cassette, track: Track) => {
-      recordMusicPlay(track.id);
-      if (cassettePlayback(cassette) === "audio") {
-        setVideo(null);
-        playAudioTrack(cassettes, cassette, track);
-        setAnnounce(`Playing “${track.title}” from ${cassette.name} in the tape deck.`);
-        return;
-      }
-      if (!navigator.onLine) {
-        setVideo({ cassette, track, status: "offline", attempt: 0 });
-        return;
-      }
-      setVideo((prev) => ({ cassette, track, status: "loading", attempt: (prev?.attempt ?? 0) + 1 }));
-      setAnnounce(`Playing “${track.title}” from ${cassette.name}.`);
-    },
-    [cassettes],
-  );
-
-  const stopVideo = useCallback(() => {
-    setVideo(null);
-    setAnnounce("Stopped.");
-  }, []);
-
-  /** Next or previous track on the same tape that hasn't failed during this visit. */
-  const stepVideo = useCallback(
-    (dir: 1 | -1) => {
-      if (!video) return;
-      let t = neighbour(video.cassette, video.track.id, dir);
-      while (t && unavailable.current.has(t.id)) t = neighbour(video.cassette, t.id, dir);
-      if (t) play(video.cassette, t);
-      else if (dir === 1) {
-        setAnnounce(`That was the end of ${video.cassette.name}.`);
-        stopVideo();
-      }
-    },
-    [video, play, stopVideo],
-  );
-
-  const onPlayerEvent = useCallback((e: PlayerEvent) => {
-    setVideo((cur) => {
-      if (!cur) return cur;
-      if (e.type === "error") {
-        if (e.code === NO_RESPONSE) return { ...cur, status: "no-response" };
-        if (UNAVAILABLE_CODES.has(e.code)) unavailable.current.add(cur.track.id);
-        return { ...cur, status: "unavailable" };
-      }
-      if (e.type === "state") {
-        const map: Partial<Record<string, VideoStatus>> = { playing: "playing", buffering: "playing", paused: "paused", ended: "ended" };
-        const status = map[e.state];
-        return status ? { ...cur, status } : cur;
-      }
-      return cur;
-    });
-  }, []);
-
-  // A finished or unavailable song moves on to the next on the tape.
-  const status = video?.status;
-  const trackId = video?.track.id;
-  useEffect(() => {
-    if (status !== "ended" && status !== "unavailable") return;
-    const t = window.setTimeout(() => stepVideo(1), status === "ended" ? 800 : 3000);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reacts to status/track changes only
-  }, [status, trackId]);
-
-  // One sound at a time; the rain dips under the video.
-  const videoPlaying = status === "playing";
-  // Another window (TV, Video) starting pauses this tape.
-  useExclusiveMedia("music", videoPlaying, () => player.current?.pause());
-  useEffect(() => {
-    if (!videoPlaying) return;
-    const engine = getPlaybackEngine();
-    if (["playing", "loading", "buffering"].includes(engine.getState().status)) engine.pause();
-    setMediaPlaying("music", true);
-    const unsubscribe = engine.subscribe(() => {
-      const s = engine.getState().status;
-      if (s === "playing" || s === "loading") player.current?.pause();
-    });
-    return () => {
-      unsubscribe();
-      setMediaPlaying("music", false);
-    };
-  }, [videoPlaying]);
-
-
-  const favouriteItems = favourites.map((id) => byTrack.get(id)).filter((x) => x !== undefined);
-  const recentItems = recents.map((id) => byTrack.get(id)).filter((x) => x !== undefined);
-  const problem = video && videoProblem(video);
-  const currentId = video?.track.id ?? audioNow?.track.id ?? null;
-
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6" aria-labelledby="music-title">
-      <p className="sr-only" aria-live="polite" data-testid="music-announce">
-        {problem ?? announce}
-      </p>
-
-      {!video ? (
-        <div className="max-w-2xl rounded-2xl bg-ink/85 p-5 text-panel shadow-lg backdrop-blur" data-testid="music-shop">
-          <h1 id="music-title" className="font-display text-4xl leading-tight">
-            Music
-          </h1>
-          <p className="mt-1 text-sm text-panel/85">
-            Tapes of film songs play in the labels&apos; official YouTube player;
-            the old records tape plays in the deck. Nothing loads from YouTube or the Internet Archive until you press play.
-          </p>
-          {audioNow && (
-            <InTheDeck
-              cassette={audioNow.cassette}
-              track={audioNow.track}
-              status={audio.status}
-              onPlay={play}
-            />
-          )}
-          <ul className="mt-4 space-y-3">
-            {cassettes.map((c) => (
-              <li key={c.id}>
-                <CassetteCard cassette={c} onPlay={play} favourites={favourites} currentId={currentId} uploaders={uploaders} />
-              </li>
-            ))}
-          </ul>
-          {favouriteItems.length > 0 && (
-            <section className="mt-6" aria-labelledby="music-favourites">
-              <h2 id="music-favourites" className="text-lg font-bold">
-                Favourites
-              </h2>
-              <TrackList items={favouriteItems} onPlay={play} favourites={favourites} currentId={currentId} uploaders={uploaders} showTape />
-            </section>
-          )}
-          {recentItems.length > 0 && (
-            <section className="mt-6" aria-labelledby="music-recent">
-              <h2 id="music-recent" className="text-lg font-bold">
-                Recently played
-              </h2>
-              <TrackList items={recentItems.slice(0, 6)} onPlay={play} favourites={favourites} currentId={currentId} uploaders={uploaders} showTape />
-            </section>
-          )}
-        </div>
-      ) : (
-        <h1 id="music-title" className="sr-only">
-          Music: playing {video.track.title}
-        </h1>
-      )}
-
-      {video && video.status !== "offline" && (
-        <PlayerFrame>
-          <EmbedPlayer
-            key={`${video.track.id}:${video.attempt}`}
-            ref={player}
-            source={video.track.source}
-            title={`${video.track.title} (YouTube player)`}
-            onEvent={onPlayerEvent}
-            className="h-full w-full border-0"
-          />
-        </PlayerFrame>
-      )}
-
-      {video && (
-        <DeckControls
-          video={video}
-          favourite={favourites.includes(video.track.id)}
-          uploaders={uploaders}
-          problem={problem}
-          onPrev={() => stepVideo(-1)}
-          onNext={() => stepVideo(1)}
-          onRetry={() => play(video.cassette, video.track)}
-          onStop={stopVideo}
-        />
-      )}
-    </section>
-  );
-}
-
-/** The public-domain tape in the deck (played by the shared audio player). */
-function InTheDeck({ cassette: c, track: t, status, onPlay }: { cassette: Cassette; track: Track; status: string; onPlay: (c: Cassette, t: Track) => void }) {
-  const engine = getPlaybackEngine();
-  const active = status === "playing" || status === "buffering" || status === "loading";
-  const prev = neighbour(c, t.id, -1);
-  const next = neighbour(c, t.id, 1);
-  const btn = "rounded-full p-2 hover:bg-panel/15 disabled:opacity-40 focus-visible:outline-2";
-  const label = status === "loading" ? "Loading…" : status === "buffering" ? "Buffering…" : status === "paused" ? "Paused" : status === "ended" ? "Finished" : status === "error" ? "Couldn't play (see the player below)" : "Playing";
-  return (
-    <div role="region" aria-label="In the tape deck" className="mt-4 flex items-center gap-3 rounded-xl bg-panel/15 p-3" data-testid="music-deck">
-      <TapeSwatch c={c} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold">{t.title}</p>
-        <p className="truncate text-xs text-panel/70">
-          {c.name} · {trackMeta(t)}
-        </p>
-        <p className="text-xs text-panel/60" data-testid="music-deck-status">
-          {label}
-        </p>
-      </div>
-      <button type="button" className={btn} disabled={!prev} onClick={() => prev && onPlay(c, prev)} aria-label="Previous song on this tape">
-        <Icon name="prev" />
-      </button>
-      <button type="button" className={btn} onClick={() => engine.toggle()} aria-label={active ? "Pause" : "Play"}>
-        <Icon name={active ? "pause" : "play"} />
-      </button>
-      <button type="button" className={btn} disabled={!next} onClick={() => next && onPlay(c, next)} aria-label="Next song on this tape">
-        <Icon name="next" />
-      </button>
-    </div>
-  );
-}
-
-function videoProblem({ status, track }: VideoNow): string | null {
-  if (status === "unavailable") return `“${track.title}” can't be played here (it may have been removed, or its owner doesn't allow it). Moving to the next song…`;
-  if (status === "no-response") return "The player didn't respond. Check your internet connection, then try again.";
-  if (status === "offline") return "You're offline, so songs can't play. Connect to the internet and try again.";
-  return null;
-}
+const isVideoEntry = (e: Entry | undefined) => !!e && cassettePlayback(e.cassette) === "video";
 
 function rightsLine(t: Track, uploaders: Record<string, string>): string {
   return t.rights.basis === "official-upload"
@@ -272,178 +35,724 @@ function rightsLine(t: Track, uploaders: Record<string, string>): string {
     : "Public-domain recording (India and US) · Internet Archive";
 }
 
-function TapeSwatch({ c }: { c: Cassette }) {
+type PlayState = "playing" | "paused" | "stopped" | "loading" | "problem";
+
+export function MusicExperience({ cassettes, uploaders }: { cassettes: Cassette[]; uploaders: Record<string, string> }) {
+  useState(() => initMusic(cassettes)); // once, before the first render reads the player
+  useEffect(() => music.mount(), []);
+  const { playlist, video, skip } = useMusic();
+  const audio = usePlayback();
+  const view = useLocalStore(musicView);
+  const libraryRef = useRef<HTMLElement>(null);
+
+  const current = music.entry(playlist.items[playlist.index]);
+  const currentIsVideo = isVideoEntry(current);
+  const audioAt = parseTrackId(audio.source?.id);
+  const audioIsCurrent = !!current && audioAt?.trackId === current.track.id && !currentIsVideo;
+
+  const state: PlayState = video
+    ? video.status === "playing"
+      ? "playing"
+      : video.status === "paused"
+        ? "paused"
+        : video.status === "loading"
+          ? "loading"
+          : video.status === "ended"
+            ? "stopped"
+            : "problem"
+    : audioIsCurrent
+      ? audio.status === "playing"
+        ? "playing"
+        : audio.status === "paused"
+          ? "paused"
+          : audio.status === "loading" || audio.status === "buffering"
+            ? "loading"
+            : audio.status === "error"
+              ? "problem"
+              : "stopped"
+      : "stopped";
+
+  // One sound at a time: a video playing here pauses TV, Video and the radio, and the other way round.
+  // (Records play through the shared player, which claims the speakers as "audio"; that must not pause them.)
+  useExclusiveMedia("music", video?.status === "playing", () => music.pauseVideo());
+
+  const problem = video ? videoProblem(video, current) : audioIsCurrent && audio.status === "error" ? (audio.error?.message ?? "This record couldn't play.") : null;
+
+  // Classic player keys: Z previous, X play, C pause, V stop, B next.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const t = e.target as HTMLElement;
+    if (e.ctrlKey || e.metaKey || e.altKey || t.closest("input, select, textarea, [role=listbox]")) return;
+    const k = e.key.toLowerCase();
+    const run: Record<string, () => void> = {
+      z: () => music.prev(),
+      x: () => (state === "playing" ? undefined : music.toggle()),
+      c: () => music.pause(),
+      v: () => music.stop(),
+      b: () => music.next(),
+    };
+    if (run[k]) {
+      e.preventDefault();
+      run[k]();
+    }
+  };
+
   return (
-    <span aria-hidden className="relative inline-block h-10 w-16 shrink-0 rounded-md shadow-inner" style={{ background: c.colours.shell }}>
-      <span className="absolute inset-x-1.5 top-1.5 h-3 rounded-sm" style={{ background: c.colours.label }} />
-      <span className="absolute bottom-1.5 left-4 h-3 w-3 rounded-full border-2 border-panel/70" />
-      <span className="absolute bottom-1.5 right-4 h-3 w-3 rounded-full border-2 border-panel/70" />
-    </span>
+    <div className="amp" onKeyDown={onKeyDown} data-testid="music-player">
+      <h1 className="sr-only">Music</h1>
+      <p className="sr-only" aria-live="polite" data-testid="music-announce">
+        {problem ?? (current ? `${state === "playing" ? "Playing" : state === "paused" ? "Paused" : state === "loading" ? "Loading" : "Stopped"}: ${current.track.title}` : "")}
+      </p>
+      <div className="amp-stack">
+        <MainPanel current={current} state={state} video={video} audioIsCurrent={audioIsCurrent} problem={problem} />
+        {view.eq && <EqPanel videoPlaying={currentIsVideo} />}
+        {view.playlist && <PlaylistPanel skip={skip} onAdd={() => libraryRef.current?.querySelector<HTMLElement>("button")?.focus()} />}
+      </div>
+      <div className="amp-side">
+        {video && current && <VideoPane video={video} entry={current} uploaders={uploaders} />}
+        <Library ref={libraryRef} cassettes={cassettes} uploaders={uploaders} currentId={current?.track.id ?? null} />
+      </div>
+    </div>
   );
 }
 
-function CassetteCard({
-  cassette: c,
-  onPlay,
-  favourites,
-  currentId,
-  uploaders,
-}: {
-  cassette: Cassette;
-  onPlay: (c: Cassette, t: Track) => void;
-  favourites: string[];
-  currentId: string | null;
-  uploaders: Record<string, string>;
-}) {
-  const how = cassettePlayback(c) === "audio" ? "Plays in the tape deck" : "Plays in YouTube's player";
+function videoProblem(v: VideoNow, e: Entry | undefined): string | null {
+  const title = e?.track.title ?? "This song";
+  if (v.status === "unavailable") return `“${title}” can't be played here (it may have been removed, or its owner doesn't allow it). Moving on…`;
+  if (v.status === "no-response") return "YouTube's player didn't respond. Check the connection, then press Play.";
+  if (v.status === "offline") return "You're offline, so songs can't play. Connect, then press Play.";
+  return null;
+}
+
+// ---------------------------------------------------------------------------- main panel
+
+function MainPanel({ current, state, video, audioIsCurrent, problem }: { current: Entry | undefined; state: PlayState; video: VideoNow | null; audioIsCurrent: boolean; problem: string | null }) {
+  const view = useLocalStore(musicView);
+  const { playlist } = useMusic();
+  const audio = usePlayback();
+  const favourites = useLocalStore(musicFavourites);
+  const time = usePosition(video, audioIsCurrent);
+  const [scrub, setScrub] = useState<number | null>(null);
+  const [balance, setBalanceValue] = useState(0);
+  const isVideo = isVideoEntry(current);
+  const volume = Math.round(audio.volume * 100);
+
+  const shown = view.remaining && time.duration !== null ? `-${clock(Math.max(0, time.duration - time.current))}` : clock(current ? time.current : null);
+  const title = current ? `${playlist.index + 1}. ${current.track.title}${current.track.film ? ` (${current.track.film})` : ""}` : "XPLOR9 Amp: add a tape from the library";
+  const fav = !!current && favourites.includes(current.track.id);
+
   return (
-    <div className="rounded-xl bg-panel/10 p-3" data-testid="music-cassette" data-id={c.id}>
-      <div className="flex items-start gap-3">
-        <TapeSwatch c={c} />
-        <div className="min-w-0 flex-1">
-          <h2 className="font-semibold">{c.name}</h2>
-          <p className="text-sm text-panel/85">{c.description}</p>
-          <p className="text-xs text-panel/65">
-            {c.tracks.length} songs · {how}
+    <section className="amp-panel amp-main" aria-label="Player">
+      <header className="amp-strip">
+        <span>
+          <span className="amp-brand">XPLOR9</span> Amp
+        </span>
+      </header>
+      <div className="amp-display">
+        {current && <TapeArt cassette={current.cassette} size={58} className="amp-art" />}
+        <div className="amp-display-left">
+          <div className="amp-readout">
+          <span className="amp-state" aria-hidden>
+            {state === "playing" ? "▶" : state === "paused" ? "❚❚" : state === "loading" ? "…" : state === "problem" ? "!" : "■"}
+          </span>
+          <button
+            type="button"
+            className="amp-time"
+            onClick={() => musicView.set((v) => ({ ...v, remaining: !v.remaining }))}
+            aria-label={`${view.remaining ? "Time remaining" : "Time elapsed"} ${shown}. Switch display.`}
+            data-testid="music-time"
+          >
+            {shown}
+          </button>
+          </div>
+          <Visualiser active={!isVideo && audioIsCurrent && state === "playing"} mode={isVideo ? "video" : "spectrum"} />
+        </div>
+        <div className="amp-display-right">
+          <div className="amp-marquee" title={title}>
+            <span className={title.length > 34 && state === "playing" ? "amp-marquee-run" : undefined}>{title}</span>
+          </div>
+          <p className="amp-info" data-testid="music-status">
+            {problem ? <span className="amp-warn">{problem}</span> : current ? `${isVideo ? "Video · YouTube" : "Record · Internet Archive"} · ${current.cassette.name}` : "No tape"}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => onPlay(c, c.tracks[0])}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-panel px-3 py-1.5 text-sm font-bold text-ink hover:bg-plastic focus-visible:outline-2 focus-visible:outline-offset-2"
-          aria-label={`Play the tape ${c.name}`}
-        >
-          <Icon name="play" className="h-4 w-4" /> Play tape
+      </div>
+
+      <label className="sr-only" htmlFor="amp-seek">
+        Position
+      </label>
+      <input
+        id="amp-seek"
+        className="amp-seek"
+        type="range"
+        min={0}
+        max={time.duration ?? 1}
+        step={0.5}
+        value={scrub ?? Math.min(time.current, time.duration ?? 0)}
+        disabled={time.duration === null}
+        onChange={(e) => setScrub(Number(e.target.value))}
+        onPointerUp={() => {
+          if (scrub !== null) music.seek(scrub);
+          setScrub(null);
+        }}
+        onKeyUp={() => {
+          if (scrub !== null) music.seek(scrub);
+          setScrub(null);
+        }}
+        aria-valuetext={`${clock(scrub ?? time.current)} of ${clock(time.duration)}`}
+      />
+
+      <div className="amp-controls">
+        <div className="amp-transport" role="group" aria-label="Transport">
+          <AmpButton label="Previous (Z)" onClick={() => music.prev()} glyph="prev" />
+          <AmpButton label="Play (X)" onClick={() => (state === "playing" ? undefined : music.toggle())} glyph="play" pressed={state === "playing"} />
+          <AmpButton label="Pause (C)" onClick={() => music.pause()} glyph="pause" pressed={state === "paused"} />
+          <AmpButton label="Stop (V)" onClick={() => music.stop()} glyph="stop" />
+          <AmpButton label="Next (B)" onClick={() => music.next()} glyph="next" />
+        </div>
+        <div className="amp-toggles">
+          <button type="button" className="amp-toggle" aria-pressed={playlist.shuffle} onClick={() => music.setPlaylist((p) => ({ ...p, shuffle: !p.shuffle }))}>
+            Shuffle
+          </button>
+          <button
+            type="button"
+            className="amp-toggle"
+            aria-pressed={playlist.repeat !== "off"}
+            aria-label={`Repeat: ${playlist.repeat === "off" ? "off" : playlist.repeat === "all" ? "whole playlist" : "this song"}`}
+            onClick={() => music.setPlaylist((p) => ({ ...p, repeat: p.repeat === "off" ? "all" : p.repeat === "all" ? "one" : "off" }))}
+          >
+            {playlist.repeat === "one" ? "Repeat 1" : "Repeat"}
+          </button>
+          <button type="button" className="amp-toggle" aria-pressed={view.eq} onClick={() => musicView.set((v) => ({ ...v, eq: !v.eq }))}>
+            EQ
+          </button>
+          <button type="button" className="amp-toggle" aria-pressed={view.playlist} onClick={() => musicView.set((v) => ({ ...v, playlist: !v.playlist }))}>
+            PL
+          </button>
+          <button
+            type="button"
+            className="amp-toggle"
+            aria-pressed={fav}
+            disabled={!current}
+            aria-label={current ? `${fav ? "Remove" : "Add"} ${current.track.title} ${fav ? "from" : "to"} favourites` : "Favourite"}
+            onClick={() => current && toggleMusicFavourite(current.track.id)}
+          >
+            ♥
+          </button>
+        </div>
+      </div>
+
+      <div className="amp-sliders">
+        <label className="amp-slider">
+          <span>Volume</span>
+          <input type="range" min={0} max={100} step={1} value={volume} onChange={(e) => music.setVolume(Number(e.target.value))} aria-valuetext={`${volume}%`} disabled={!audio.volumeControllable && !isVideo} />
+        </label>
+        <label className="amp-slider" title={isVideo ? "Balance works on the public-domain records" : undefined}>
+          <span>Balance</span>
+          <input
+            type="range"
+            min={-100}
+            max={100}
+            step={5}
+            value={balance}
+            disabled={isVideo}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setBalanceValue(v);
+              void import("./audioGraph").then((m) => m.setBalance(v / 100));
+            }}
+            onDoubleClick={() => {
+              setBalanceValue(0);
+              void import("./audioGraph").then((m) => m.setBalance(0));
+            }}
+            aria-valuetext={balance === 0 ? "Centre" : balance < 0 ? `${-balance}% left` : `${balance}% right`}
+          />
+        </label>
+        {problem && current && (
+          <button type="button" className="amp-toggle" onClick={() => music.playAt(playlist.index)}>
+            Try again
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+const GLYPHS: Record<string, React.ReactNode> = {
+  prev: <path d="M3 3h2v10H3zM14 3v10L6 8z" />,
+  play: <path d="M4 2.5v11L13.5 8z" />,
+  pause: <path d="M3.5 3h3v10h-3zM9.5 3h3v10h-3z" />,
+  stop: <path d="M3.5 3.5h9v9h-9z" />,
+  next: <path d="M11 3h2v10h-2zM2 3v10l8-5z" />,
+};
+function AmpButton({ label, onClick, glyph, pressed }: { label: string; onClick: () => void; glyph: string; pressed?: boolean }) {
+  return (
+    <button type="button" className="amp-button" onClick={onClick} aria-label={label} title={label} aria-pressed={pressed}>
+      <svg viewBox="0 0 16 16" aria-hidden>
+        <g fill="currentColor">{GLYPHS[glyph]}</g>
+      </svg>
+    </button>
+  );
+}
+
+/** Where the current song is: from YouTube's reports for videos, from the audio element for records. */
+function usePosition(video: VideoNow | null, audioIsCurrent: boolean) {
+  const [pos, setPos] = useState({ current: 0, duration: null as number | null });
+  useEffect(() => {
+    if (video || !audioIsCurrent) return;
+    const engine = getPlaybackEngine();
+    const t = window.setInterval(() => {
+      const p = engine.position();
+      setPos((old) => (old.current === p.current && old.duration === p.duration ? old : p));
+    }, 250);
+    return () => window.clearInterval(t);
+  }, [video, audioIsCurrent]);
+  if (video) return video.time;
+  return audioIsCurrent ? pos : { current: 0, duration: null };
+}
+
+/** The spectrum of what the records actually sound like (Web Audio analyser). Draws nothing it doesn't measure. */
+function Visualiser({ active, mode }: { active: boolean; mode: "spectrum" | "video" }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = canvas.current;
+    const g = c?.getContext("2d");
+    if (!c || !g) return;
+    g.clearRect(0, 0, c.width, c.height);
+    const analyser = active ? getAnalyser() : null;
+    if (!analyser || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    const bars = 19;
+    const peaks = new Array(bars).fill(0);
+    let raf = 0;
+    const draw = () => {
+      raf = requestAnimationFrame(draw);
+      if (document.hidden) return;
+      analyser.getByteFrequencyData(data);
+      g.clearRect(0, 0, c.width, c.height);
+      const w = c.width / bars;
+      for (let i = 0; i < bars; i++) {
+        // Logarithmic bands, like the ear hears.
+        const from = Math.floor(2 ** ((i / bars) * Math.log2(data.length / 2)));
+        const to = Math.max(from + 1, Math.floor(2 ** (((i + 1) / bars) * Math.log2(data.length / 2))));
+        let v = 0;
+        for (let k = from; k < to; k++) v = Math.max(v, data[k]);
+        const h = Math.round((v / 255) * c.height);
+        peaks[i] = Math.max(h, peaks[i] - 0.6);
+        const grad = g.createLinearGradient(0, c.height, 0, 0);
+        grad.addColorStop(0, "#1fbf3a");
+        grad.addColorStop(0.6, "#d8d82a");
+        grad.addColorStop(1, "#e8452a");
+        g.fillStyle = grad;
+        g.fillRect(i * w + 1, c.height - h, w - 2, h);
+        g.fillStyle = "#c8c8d8";
+        g.fillRect(i * w + 1, c.height - Math.round(peaks[i]) - 1, w - 2, 1);
+      }
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, [active]);
+  return (
+    <div className="amp-vis">
+      <canvas ref={canvas} width={114} height={30} aria-hidden data-testid="music-visualiser" data-active={active || undefined} />
+      {mode === "video" && <span className="amp-vis-note">VIDEO</span>}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------- equaliser
+
+function EqPanel({ videoPlaying }: { videoPlaying: boolean }) {
+  const eq = useLocalStore(musicEq);
+  const preset = presetName(eq.gains);
+  const setGain = (i: number, v: number) => musicEq.set((e) => ({ ...e, gains: e.gains.map((g, k) => (k === i ? v : g)) }));
+  return (
+    <section className="amp-panel amp-eqp" aria-label="Equaliser">
+      <header className="amp-strip">
+        <span>Equaliser</span>
+      </header>
+      <div className="amp-eq-top">
+        <button type="button" className="amp-toggle" aria-pressed={eq.enabled} onClick={() => musicEq.set((e) => ({ ...e, enabled: !e.enabled }))}>
+          On
+        </button>
+        <label className="flex items-center gap-1">
+          <span>Preset</span>
+          <select
+            className="amp-select"
+            value={preset ?? ""}
+            onChange={(e) => {
+              const g = EQ_PRESETS[e.target.value];
+              if (g) musicEq.set((x) => ({ ...x, gains: [...g] }));
+            }}
+          >
+            {!preset && <option value="">Custom</option>}
+            {Object.keys(EQ_PRESETS).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="button" className="amp-toggle" onClick={() => musicEq.set((e) => ({ ...e, preamp: 0, gains: [...EQ_PRESETS.Flat] }))}>
+          Reset
         </button>
       </div>
-      <details className="mt-2">
-        <summary className="cursor-pointer text-sm font-semibold text-panel/85 focus-visible:outline-2">Songs on this tape</summary>
-        <TrackList items={c.tracks.map((track) => ({ cassette: c, track }))} onPlay={onPlay} favourites={favourites} currentId={currentId} uploaders={uploaders} />
-      </details>
-    </div>
+      <div className="amp-eq" data-off={!eq.enabled || undefined}>
+        <EqSlider label="Preamp" short="PRE" value={eq.preamp} onChange={(v) => musicEq.set((e) => ({ ...e, preamp: v }))} />
+        <span className="amp-eq-gap" aria-hidden />
+        {EQ_BANDS.map((hz, i) => (
+          <EqSlider key={hz} label={`${bandLabel(hz)} hertz`} short={bandLabel(hz)} value={eq.gains[i]} onChange={(v) => setGain(i, v)} />
+        ))}
+      </div>
+      {videoPlaying && <p className="amp-note">The equaliser shapes the public-domain records. YouTube&apos;s player keeps its own sound.</p>}
+    </section>
   );
 }
 
-function TrackList({
-  items,
-  onPlay,
-  favourites,
-  currentId,
-  uploaders,
-  showTape = false,
-}: {
-  items: { cassette: Cassette; track: Track }[];
-  onPlay: (c: Cassette, t: Track) => void;
-  favourites: string[];
-  currentId: string | null;
-  uploaders: Record<string, string>;
-  showTape?: boolean;
-}) {
+function EqSlider({ label, short, value, onChange }: { label: string; short: string; value: number; onChange: (v: number) => void }) {
   return (
-    <ol className="mt-1 divide-y divide-panel/15">
-      {items.map(({ cassette: c, track: t }) => {
-        const fav = favourites.includes(t.id);
-        const current = currentId === t.id;
-        return (
-          <li key={`${c.id}:${t.id}`} className="flex items-center gap-2 py-2" data-testid="music-track" data-id={t.id} aria-current={current ? "true" : undefined}>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold">
-                {current && <span className="mr-1 font-pixel text-xs text-phosphor">▶</span>}
-                {t.title}
-              </p>
-              <p className="truncate text-xs text-panel/70">
-                {showTape ? `${c.name} · ` : ""}
-                {trackMeta(t)}
-              </p>
-              <p className="truncate text-xs text-panel/55">{rightsLine(t, uploaders)}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => toggleMusicFavourite(t.id)}
-              aria-pressed={fav}
-              aria-label={`${fav ? "Remove" : "Add"} ${t.title} ${fav ? "from" : "to"} favourites`}
-              className="rounded-full p-2 hover:bg-panel/15 aria-pressed:text-brand focus-visible:outline-2"
-            >
-              <Icon name="heart" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onPlay(c, t)}
-              aria-label={`Play ${t.title}`}
-              className="rounded-full bg-panel/90 p-2 text-ink hover:bg-plastic focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-              <Icon name="play" className="h-4 w-4" />
-            </button>
-          </li>
-        );
-      })}
-    </ol>
+    <label className="amp-eq-band">
+      <input
+        type="range"
+        min={-EQ_LIMIT}
+        max={EQ_LIMIT}
+        step={1}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        onDoubleClick={() => onChange(0)}
+        aria-label={label}
+        aria-valuetext={`${value > 0 ? "+" : ""}${value} decibels`}
+      />
+      <span aria-hidden>{short}</span>
+    </label>
   );
 }
 
-function DeckControls({
-  video,
-  favourite,
-  uploaders,
-  problem,
-  onPrev,
-  onNext,
-  onRetry,
-  onStop,
-}: {
-  video: VideoNow;
-  favourite: boolean;
-  uploaders: Record<string, string>;
-  problem: string | null;
-  onPrev: () => void;
-  onNext: () => void;
-  onRetry: () => void;
-  onStop: () => void;
-}) {
-  const { track: t, cassette: c, status } = video;
+// ---------------------------------------------------------------------------- playlist
+
+function PlaylistPanel({ skip, onAdd }: { skip: ReadonlySet<string>; onAdd: () => void }) {
+  const { playlist } = useMusic();
+  const [selected, setSelected] = useState(0);
+  const list = useRef<HTMLOListElement>(null);
+  const sel = Math.min(selected, playlist.items.length - 1);
+
+  const focusRow = (i: number) => {
+    setSelected(i);
+    requestAnimationFrame(() => list.current?.querySelector<HTMLElement>(`[data-index="${i}"]`)?.scrollIntoView({ block: "nearest" }));
+  };
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const n = playlist.items.length;
+    if (!n) return;
+    const go = (i: number) => {
+      e.preventDefault();
+      focusRow(Math.max(0, Math.min(n - 1, i)));
+    };
+    if (e.key === "ArrowDown") go(sel + 1);
+    else if (e.key === "ArrowUp") go(sel - 1);
+    else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(n - 1);
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      music.playAt(sel);
+    } else if (e.key === "Delete") {
+      e.preventDefault();
+      music.setPlaylist((p) => removeAt(p, sel));
+    }
+  };
+
+  return (
+    <section className="amp-panel amp-playlist" aria-label="Playlist">
+      <header className="amp-strip">
+        <span>Playlist</span>
+        <span>{playlist.items.length} songs</span>
+      </header>
+      {playlist.items.length === 0 ? (
+        <p className="amp-empty">
+          The playlist is empty. Choose a tape in the library, then <b>Play tape</b> or <b>Add to playlist</b>.
+        </p>
+      ) : (
+        <ol
+          ref={list}
+          className="amp-pl-list"
+          role="listbox"
+          aria-label="Playlist songs"
+          tabIndex={0}
+          aria-activedescendant={`pl-row-${sel}`}
+          onKeyDown={onKeyDown}
+          data-testid="music-playlist"
+        >
+          {playlist.items.map((id, i) => {
+            const e = music.entry(id);
+            if (!e) return null;
+            return (
+              <li
+                key={`${id}-${i}`}
+                id={`pl-row-${i}`}
+                data-index={i}
+                role="option"
+                aria-selected={i === sel}
+                aria-current={i === playlist.index ? "true" : undefined}
+                className="amp-pl-row"
+                onClick={() => setSelected(i)}
+                onDoubleClick={() => music.playAt(i)}
+              >
+                <span className="amp-pl-n">{i + 1}.</span>
+                <span className="amp-pl-title">
+                  {e.track.title}
+                  {skip.has(id) && <em> (can&apos;t play)</em>}
+                </span>
+                <span className="amp-pl-kind">{isVideoEntry(e) ? "YT" : "REC"}</span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+      <div className="amp-pl-buttons">
+        <button type="button" className="amp-toggle" onClick={onAdd}>
+          Add…
+        </button>
+        <button type="button" className="amp-toggle" disabled={!playlist.items.length} onClick={() => music.playAt(sel)}>
+          Play
+        </button>
+        <button type="button" className="amp-toggle" disabled={!playlist.items.length} onClick={() => music.setPlaylist((p) => removeAt(p, sel))}>
+          Remove
+        </button>
+        <button
+          type="button"
+          className="amp-toggle"
+          disabled={sel <= 0}
+          aria-label="Move up"
+          onClick={() => {
+            music.setPlaylist((p) => move(p, sel, -1));
+            focusRow(sel - 1);
+          }}
+        >
+          ▲
+        </button>
+        <button
+          type="button"
+          className="amp-toggle"
+          disabled={sel < 0 || sel >= playlist.items.length - 1}
+          aria-label="Move down"
+          onClick={() => {
+            music.setPlaylist((p) => move(p, sel, 1));
+            focusRow(sel + 1);
+          }}
+        >
+          ▼
+        </button>
+        <button
+          type="button"
+          className="amp-toggle"
+          disabled={!playlist.items.length}
+          onClick={() => {
+            music.stop();
+            music.setPlaylist((p) => clear(p));
+          }}
+        >
+          Clear
+        </button>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------- video pane
+
+function VideoPane({ video, entry, uploaders }: { video: VideoNow; entry: Entry; uploaders: Record<string, string> }) {
+  const player = useRef<EmbedPlayerHandle>(null);
+  const pane = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    music.registerVideo(player.current);
+    return () => music.registerVideo(null);
+  }, [video.attempt, video.trackId]);
   const fullscreenOk = typeof document !== "undefined" && document.fullscreenEnabled;
-  const btn = "inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold hover:bg-panel/15 focus-visible:outline-2 focus-visible:outline-offset-2";
-  const statusText = problem ?? (status === "loading" ? "Loading…" : status === "paused" ? "Paused" : rightsLine(t, uploaders));
   return (
-    <div role="region" aria-label="Tape controls" className="fixed inset-x-2 bottom-3 z-20 mx-auto max-w-3xl rounded-2xl bg-ink/90 p-3 text-panel shadow-xl backdrop-blur sm:inset-x-4" data-testid="music-controls">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold">
-            <span className="font-pixel text-xs text-phosphor">{c.name}</span> {t.title}
-          </p>
-          <p className="truncate text-xs text-panel/70">{trackMeta(t)}</p>
-          <p className="truncate text-xs text-panel/60" data-testid="music-status">
-            {statusText}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-1">
-          <button type="button" className={btn} onClick={onPrev} aria-label="Previous song on this tape">
-            <Icon name="prev" />
+    <section className="amp-panel amp-video" aria-label="Video">
+      <header className="amp-strip">
+        <span>Video</span>
+        {fullscreenOk && (
+          <button type="button" className="amp-strip-button" onClick={() => void pane.current?.requestFullscreen?.().catch(() => {})}>
+            Full screen
           </button>
-          <button type="button" className={btn} onClick={onNext} aria-label="Next song on this tape">
-            <Icon name="next" />
-          </button>
-          <button type="button" className={`${btn} aria-pressed:text-brand`} onClick={() => toggleMusicFavourite(t.id)} aria-pressed={favourite} aria-label={favourite ? "Remove from favourites" : "Add to favourites"}>
-            <Icon name="heart" />
-          </button>
-          {fullscreenOk && (
-            <button type="button" className={btn} onClick={() => void document.querySelector<HTMLElement>('[data-testid="tv-player"]')?.requestFullscreen?.().catch(() => {})} aria-label="Fullscreen">
-              <Icon name="expand" />
+        )}
+      </header>
+      <div ref={pane} className="amp-video-screen" data-testid="tv-player">
+        {video.status !== "offline" && (
+          <EmbedPlayer
+            key={`${video.trackId}:${video.attempt}`}
+            ref={player}
+            source={entry.track.source}
+            title={`${entry.track.title} (YouTube player)`}
+            onEvent={music.onVideoEvent}
+            onTime={music.onVideoTime}
+            className="h-full w-full border-0"
+          />
+        )}
+      </div>
+      <p className="amp-credit">
+        {rightsLine(entry.track, uploaders)} ·{" "}
+        <a href={sourcePage(entry.track.source)} target="_blank" rel="noopener noreferrer">
+          Open on YouTube
+        </a>
+      </p>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------- library
+
+type Shelf = { kind: "tape"; id: string } | { kind: "favourites" } | { kind: "recent" };
+
+const Library = function Library({
+  ref,
+  cassettes,
+  uploaders,
+  currentId,
+}: {
+  ref: React.Ref<HTMLElement>;
+  cassettes: Cassette[];
+  uploaders: Record<string, string>;
+  currentId: string | null;
+}) {
+  const [shelf, setShelf] = useState<Shelf>({ kind: "tape", id: cassettes[0].id });
+  const favourites = useLocalStore(musicFavourites);
+  const recents = useLocalStore(musicRecents);
+  const tape = shelf.kind === "tape" ? cassettes.find((c) => c.id === shelf.id) : undefined;
+  const entries: Entry[] =
+    shelf.kind === "tape" && tape
+      ? tape.tracks.map((track) => ({ cassette: tape, track }))
+      : (shelf.kind === "favourites" ? favourites : recents).map((id) => music.entry(id)).filter((e): e is Entry => !!e);
+  const ids = entries.map((e) => e.track.id);
+  const heading = tape ? tape.name : shelf.kind === "favourites" ? "Favourites" : "Recently played";
+
+  const playFrom = (start: number) => {
+    music.setPlaylist((p) => replaceAll(p, ids, start));
+    music.playAt(start);
+  };
+  const playOne = (id: string) => {
+    const p = music.get().playlist;
+    const at = p.items.indexOf(id);
+    if (at >= 0) return music.playAt(at);
+    music.setPlaylist(append(p, [id]));
+    music.playAt(music.get().playlist.items.length - 1);
+  };
+
+  return (
+    <section ref={ref} className="amp-panel amp-library" aria-label="Media library">
+      <header className="amp-strip">
+        <span>Media library</span>
+      </header>
+      <div className="amp-lib-body">
+        <nav className="amp-lib-tree" aria-label="Library">
+          <p className="amp-lib-group">Tapes</p>
+          {cassettes.map((c) => (
+            <button key={c.id} type="button" className="amp-lib-node" aria-current={shelf.kind === "tape" && shelf.id === c.id ? "true" : undefined} onClick={() => setShelf({ kind: "tape", id: c.id })}>
+              <TapeArt cassette={c} size={26} />
+              {c.name}
             </button>
-          )}
-          {(status === "no-response" || status === "offline") && (
-            <button type="button" className={btn} onClick={onRetry}>
-              <Icon name="retry" /> Try again
-            </button>
-          )}
-          <a className={btn} href={sourcePage(t.source)} target="_blank" rel="noopener noreferrer" aria-label={`Open on ${PROVIDER_NAMES[t.source.provider]} (new tab)`}>
-            <Icon name="external" />
-          </a>
-          <button type="button" className={`${btn} bg-panel text-ink hover:bg-plastic`} onClick={onStop}>
-            <Icon name="stop" /> Stop
+          ))}
+          <p className="amp-lib-group">Your music</p>
+          <button type="button" className="amp-lib-node" aria-current={shelf.kind === "favourites" ? "true" : undefined} onClick={() => setShelf({ kind: "favourites" })}>
+            ♥ Favourites ({favourites.length})
           </button>
+          <button type="button" className="amp-lib-node" aria-current={shelf.kind === "recent" ? "true" : undefined} onClick={() => setShelf({ kind: "recent" })}>
+            Recently played
+          </button>
+        </nav>
+        <div className="amp-lib-main">
+          <div className="amp-lib-head">
+            {tape && <TapeArt cassette={tape} size={72} className="amp-art" />}
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate font-bold">{heading}</h2>
+              {tape && (
+                <p className="amp-lib-desc">
+                  {tape.description} {cassettePlayback(tape) === "audio" ? "Plays as audio, with the equaliser." : "Plays in YouTube's player, in the video pane."}
+                </p>
+              )}
+            </div>
+            <div className="flex shrink-0 gap-1">
+              <button type="button" className="amp-toggle" disabled={!ids.length} onClick={() => playFrom(0)} aria-label={`Play tape: ${heading}`}>
+                Play tape
+              </button>
+              <button type="button" className="amp-toggle" disabled={!ids.length} onClick={() => music.setPlaylist((p) => append(p, ids))}>
+                Add to playlist
+              </button>
+            </div>
+          </div>
+          {entries.length === 0 ? (
+            <p className="amp-empty">{shelf.kind === "favourites" ? "No favourites yet. Press ♥ next to a song." : "Nothing played yet."}</p>
+          ) : (
+            <table className="amp-lib-table">
+              <thead>
+                <tr>
+                  <th scope="col">Title</th>
+                  <th scope="col">Film / artist</th>
+                  <th scope="col" className="amp-col-src">
+                    Source
+                  </th>
+                  <th scope="col">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((e) => {
+                  const fav = favourites.includes(e.track.id);
+                  return (
+                    <tr key={`${e.cassette.id}:${e.track.id}`} aria-current={currentId === e.track.id ? "true" : undefined} data-testid="music-track" onDoubleClick={() => playOne(e.track.id)}>
+                      <td className="font-bold">{e.track.title}</td>
+                      <td>{trackMeta(e.track)}</td>
+                      <td className="amp-col-src" title={rightsLine(e.track, uploaders)}>
+                        {isVideoEntry(e) ? "YouTube" : "Record"}
+                      </td>
+                      <td className="amp-lib-actions">
+                        <button type="button" className="amp-mini" onClick={() => playOne(e.track.id)} aria-label={`Play ${e.track.title}`}>
+                          ▶
+                        </button>
+                        <button type="button" className="amp-mini" onClick={() => music.setPlaylist((p) => append(p, [e.track.id]))} aria-label={`Add ${e.track.title} to the playlist`}>
+                          +
+                        </button>
+                        <button
+                          type="button"
+                          className="amp-mini"
+                          aria-pressed={fav}
+                          onClick={() => toggleMusicFavourite(e.track.id)}
+                          aria-label={`${fav ? "Remove" : "Add"} ${e.track.title} ${fav ? "from" : "to"} favourites`}
+                        >
+                          ♥
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+          <p className="amp-credit">Official uploads by the labels on YouTube, and public-domain records from the Internet Archive. Nothing loads from either until you press play.</p>
         </div>
       </div>
-    </div>
+    </section>
+  );
+};
+
+/** Cover art for a tape, drawn from its own colours (original artwork; no album covers are copied). */
+function TapeArt({ cassette: c, size, className }: { cassette: Cassette; size: number; className?: string }) {
+  const small = size < 40;
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} className={className} aria-hidden data-testid="tape-art">
+      <rect width="64" height="64" rx="6" fill={c.colours.shell} />
+      <rect x="6" y="9" width="52" height="34" rx="3" fill={c.colours.label} />
+      {!small && (
+        <text x="32" y="19.5" textAnchor="middle" fontSize="6.2" fontWeight="700" fill="#1b2030" fontFamily="var(--font-geist), sans-serif">
+          {c.name.length > 18 ? `${c.name.slice(0, 17)}…` : c.name}
+        </text>
+      )}
+      <rect x="14" y="24" width="36" height="13" rx="6.5" fill="#1b2030" opacity="0.88" />
+      <circle cx="21" cy="30.5" r="4" fill="#f4f1e8" />
+      <circle cx="43" cy="30.5" r="4" fill="#f4f1e8" />
+      <circle cx="21" cy="30.5" r="1.6" fill="#1b2030" />
+      <circle cx="43" cy="30.5" r="1.6" fill="#1b2030" />
+      <path d="M12 58 l5 -10 h30 l5 10z" fill="#000" opacity="0.18" />
+      <rect width="64" height="22" rx="6" fill="#fff" opacity="0.08" />
+    </svg>
   );
 }

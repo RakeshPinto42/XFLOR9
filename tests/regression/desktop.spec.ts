@@ -21,6 +21,7 @@ async function desktop(page: Page) {
   await page.addInitScript(() => sessionStorage.setItem("xplor9.session", "in"));
   await page.goto("/");
   await expect(taskbar(page)).toBeVisible();
+  await expect(page.locator("html[data-desktop-ready]")).toHaveCount(1); // shortcuts are live
 }
 
 test("switching on: start-up, welcome screen, then the desktop; a reload stays logged in", async ({ page }) => {
@@ -38,7 +39,7 @@ test("icons: double-click opens, Enter opens, one window per app", async ({ page
   await desktop(page);
   await page.getByRole("button", { name: /^Notepad:/ }).dblclick();
   await expect(win(page, "notepad")).toBeVisible();
-  await page.getByRole("button", { name: /^Games:/ }).focus();
+  await page.getByRole("button", { name: /^Arcade:/ }).focus();
   await page.keyboard.press("Enter");
   await expect(win(page, "games")).toBeVisible();
   await expect(win(page, "games")).toHaveAttribute("data-focused", "true");
@@ -167,11 +168,11 @@ test("Video: nothing loads from YouTube before a choice; a bad link is refused",
   await page.getByRole("button", { name: /^Video:/ }).dblclick();
   await expect(win(page, "video").getByText("Pick a video, a channel, or paste a YouTube link.")).toBeVisible();
   await page.getByLabel("Address").fill("https://example.com/watch?v=dQw4w9WgXcQ");
-  await page.getByRole("button", { name: "Play", exact: true }).click();
+  await page.locator("form").filter({ has: page.getByLabel("Address") }).getByRole("button", { name: "Play", exact: true }).click();
   await expect(page.locator("#video-link-error")).toContainText("Only links to youtube.com or youtu.be");
   expect(youtube).toEqual([]);
   await page.getByLabel("Address").fill("https://youtu.be/dQw4w9WgXcQ");
-  await page.getByRole("button", { name: "Play", exact: true }).click();
+  await page.locator("form").filter({ has: page.getByLabel("Address") }).getByRole("button", { name: "Play", exact: true }).click();
   const src = await win(page, "video").getByTestId("embed-player").getAttribute("src");
   expect(new URL(src!).origin + new URL(src!).pathname).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
 });
@@ -196,7 +197,7 @@ test.describe("phone", () => {
     expect(box.width).toBeGreaterThanOrEqual(389);
     await expect(page.getByRole("button", { name: "Maximise Notepad" })).toHaveCount(0);
     await page.getByRole("button", { name: "Minimise Notepad" }).tap();
-    await page.getByRole("button", { name: /^Games:/ }).tap();
+    await page.getByRole("button", { name: /^Arcade:/ }).tap();
     await expect(win(page, "games")).toBeVisible();
     await taskbar(page).getByRole("button", { name: "Notepad" }).tap();
     await expect(win(page, "notepad")).toBeVisible();

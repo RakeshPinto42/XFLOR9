@@ -52,3 +52,51 @@ export function uploadsPlaylist(channelId: string): string {
   if (!/^UC[A-Za-z0-9_-]{22}$/.test(channelId)) throw new Error(`Not a YouTube channel id: ${channelId}`);
   return `UU${channelId.slice(2)}`;
 }
+
+/** A video remembered in History or Favourites. */
+export interface SavedVideo {
+  /** Stable key: the video or list id. */
+  key: string;
+  title: string;
+  by: string;
+  source: Extract<MediaSource, { provider: "youtube" | "youtube-playlist" }>;
+}
+
+export const MAX_SAVED_VIDEOS = 50;
+
+export function videoKey(source: SavedVideo["source"]): string {
+  return source.provider === "youtube" ? source.videoId : source.playlistId;
+}
+
+/**
+ * Saved lists come back from storage (old, corrupted or edited by hand): every entry's source is
+ * checked again with the same rules as a pasted link, so nothing unvalidated reaches the player.
+ */
+export function parseSavedVideos(raw: unknown): SavedVideo[] {
+  if (!Array.isArray(raw)) return [];
+  const out: SavedVideo[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const r = item as Record<string, unknown>;
+    const s = r.source as Record<string, unknown> | undefined;
+    const id = s?.provider === "youtube" ? s.videoId : s?.provider === "youtube-playlist" ? s.playlistId : null;
+    if (typeof id !== "string") continue;
+    const check = parseYouTubeLink(s?.provider === "youtube" ? id : `https://www.youtube.com/playlist?list=${id}`);
+    if (!check.ok || videoKey(check.source) !== id || seen.has(id)) continue;
+    const text = (v: unknown, fallback: string) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 200) : fallback);
+    seen.add(id);
+    out.push({ key: id, title: text(r.title, "YouTube video"), by: text(r.by, "YouTube"), source: check.source });
+    if (out.length >= MAX_SAVED_VIDEOS) break;
+  }
+  return out;
+}
+
+/** Newest first, no duplicates. */
+export function rememberVideo(list: readonly SavedVideo[], v: SavedVideo): SavedVideo[] {
+  return [v, ...list.filter((x) => x.key !== v.key)].slice(0, MAX_SAVED_VIDEOS);
+}
+
+export function toggleSavedVideo(list: readonly SavedVideo[], v: SavedVideo): SavedVideo[] {
+  return list.some((x) => x.key === v.key) ? list.filter((x) => x.key !== v.key) : rememberVideo(list, v);
+}

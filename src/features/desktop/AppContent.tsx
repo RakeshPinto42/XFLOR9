@@ -24,6 +24,8 @@ const RadioExperience = dynamic(() => import("@/features/radio/RadioExperience")
 const TvExperience = dynamic(() => import("@/features/tv/TvExperience").then((m) => m.TvExperience), { loading: Loading });
 const MusicExperience = dynamic(() => import("@/features/music/MusicExperience").then((m) => m.MusicExperience), { loading: Loading });
 const GamesHub = dynamic(() => import("@/features/games/GamesHub").then((m) => m.GamesHub), { loading: Loading });
+const SaanpGame = dynamic(() => import("@/features/games/SaanpGame").then((m) => m.SaanpGame), { loading: Loading });
+const MinesGame = dynamic(() => import("@/features/games/MinesGame").then((m) => m.MinesGame), { loading: Loading });
 const VideoApp = dynamic(() => import("@/features/video/VideoApp").then((m) => m.VideoApp), { loading: Loading });
 const ReadingRoomApp = dynamic(() => import("./apps/ReadingRoomApp").then((m) => m.ReadingRoomApp), { loading: Loading });
 const Notepad = dynamic(() => import("./apps/Notepad").then((m) => m.Notepad), { loading: Loading });
@@ -33,29 +35,17 @@ const ControlPanel = dynamic(() => import("./apps/ControlPanel").then((m) => m.C
 export const AppContent = memo(function AppContent({ id, data }: { id: AppId; data: DesktopData }) {
   switch (id) {
     case "radio":
-      return (
-        <div className="xp-app-page h-full overflow-auto p-4">
-          <RadioExperience />
-        </div>
-      );
+      return <RadioExperience />;
     case "tv":
-      return (
-        <div className="xp-app-page xp-app-page--dark h-full overflow-auto">
-          <TvExperience catalogue={data.tv.catalogue} uploaders={data.tv.uploaders} />
-        </div>
-      );
+      return <TvExperience catalogue={data.tv.catalogue} uploaders={data.tv.uploaders} />;
     case "music":
-      return (
-        <div className="xp-app-page xp-app-page--dark h-full overflow-auto">
-          <MusicExperience cassettes={data.music.cassettes} uploaders={data.music.uploaders} />
-        </div>
-      );
+      return <MusicExperience cassettes={data.music.cassettes} uploaders={data.music.uploaders} />;
     case "games":
-      return (
-        <div className="xp-app-page h-full overflow-auto">
-          <GamesHub />
-        </div>
-      );
+      return <GamesHub />;
+    case "saanp":
+      return <SaanpGame />;
+    case "mines":
+      return <MinesGame />;
     case "video":
       return <VideoApp channels={data.video.channels} featured={data.video.featured} />;
     case "reading":

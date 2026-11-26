@@ -21,14 +21,14 @@ from there; the monsoon render lives on as a wallpaper.
 | R1–R5 Reading Room catalogue, reader, search, bookmarks, personal imports | 67be2b4 · 869719b · 0c213fd · 67cf362 · ba7871e |
 | Security review and import isolation | 3581cb3 · a408599 |
 | TV, Music, Games modules (checkpoint before the desktop redesign) | 0abc9c9 |
-| **D1 Desktop**: boot, welcome, desktop, windows, taskbar, start menu, tray, themes, wallpapers, system sounds, Video, Notepad, Control Panel; 3D retired | this milestone |
+| **D1 Desktop**: boot, welcome, desktop, windows, taskbar, start menu, tray, themes, wallpapers, system sounds, Video, Notepad, Control Panel; 3D retired | e40b618 |
+| **D2 Applications**: XPLOR9 Amp (Music: playlist, equaliser, visualiser, video pane), XPLOR9 Tuner (Radio: deck, presets, station table), Television and Video (shared media player, transport, history, favourites), Arcade (launcher, Saanp and Mines windows with menus and levels), Reading Room (Explorer layout, icon and details views); Geist interface type; shared window menu bar | this milestone |
 
 ## Next, in order
 
 | Phase | Scope |
 |---|---|
-| D2 App polish | Restyle Radio, TV, Music and Games interiors as desktop applications (toolbars, list views, menus) instead of the old web-page look; Music as a media-player window with a playlist; keyboard shortcuts per app; window menus (File, View, Help) where they do something real. |
-| D3 Video search | Search all of YouTube through the YouTube Data API (needs a free Google API key kept on the server; about 100 searches a day on the free quota). Recently watched and favourites for Video. |
+| D3 Video search | Search all of YouTube through the YouTube Data API (needs a free Google API key kept on the server; about 100 searches a day on the free quota). History and favourites already exist (D2). |
 | D4 More nostalgia | Screensaver after idle (original animation), a Paint-style drawing app saved locally, a card game (original Solitaire-style), a "My Computer" window with storage used and a clear-data control, desktop icon arrangement by drag. |
 | D5 Mobile pass | Test on the owner's phone (model to be provided); swipe between open apps; larger touch targets in app interiors. |
 | Final audits | Accessibility, performance, security and licensing review of the whole product. |

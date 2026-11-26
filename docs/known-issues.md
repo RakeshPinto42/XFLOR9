@@ -1,7 +1,7 @@
 # Known issues and technical debt (for the product-wide audit)
 
 Recorded as found, so the final audit has one list. Severity is a first estimate.
-Last updated: 2026-11-26 (D1 desktop).
+Last updated: 2026-11-26 (D2).
 
 ## Reading Room
 
@@ -47,12 +47,27 @@ advisories in the 3D asset tools) is resolved: `npm audit` now reports 0 vulnera
 
 | ID | Issue | Severity | Found | Status |
 |---|---|---|---|---|
-| DK-1 | Radio, TV, Music, Games and the Reading Room keep their earlier web-page styling inside their windows (beige pages, rounded cards). They work fully, but don't yet look like desktop applications. | Medium | D1 | Planned: D2 |
-| DK-2 | The master volume and Mute don't reach YouTube's or the Internet Archive's players; those have their own volume controls. | Low | D1 | YouTube could be scaled through its player API (D2) |
+| DK-1 | **Fixed in D2.** Every application now has its own desktop interface (Music, Radio, Television, Video, Arcade with Saanp and Mines windows, Reading Room). | Was Medium | D1 | Fixed |
+| DK-2 | The tray's overall volume and Mute don't reach YouTube's or the Internet Archive's players. Each app's own volume slider does set YouTube's player (through its API); the Internet Archive player has no remote control. | Low | D1 | Partly fixed in D2 |
 | DK-3 | Video can't search all of YouTube: that needs a YouTube Data API key on the server. Featured items, verified channels and pasted links work. | Medium (feature gap) | D1 | Planned: D3 |
 | DK-4 | A channel's "latest uploads" list is the rights holder's own uploads, but not curated by era. | Low | D1 | Content review |
 | DK-5 | Open windows are not reopened after a reload or a new log-in; only each app's window place is remembered. | Low | D1 | By design for now |
 | DK-6 | Alt+Tab and the Windows key belong to the operating system; the desktop uses Ctrl+Esc for the start menu and the taskbar for switching. | Info | D1 | Browser limitation |
-| DK-7 | The Reading Room's frame shares the browser's history: the browser's own Back button can step back inside the Reading Room before leaving the desktop. The window's Back/Forward buttons behave as expected. | Low | D1 | |
+| DK-7 | The Reading Room's frame shares the browser's history: the browser's own Back button can step back inside the Reading Room before leaving the desktop. The window's Back/Forward buttons and address bar follow the frame. | Low | D1 | |
 | DK-8 | Desktop icons can't be dragged into a custom arrangement. | Low | D1 | Planned: D4 |
-| DK-9 | Music and TV copy still mention "the shop's TV" and "the family set" from the 3D rooms in a few places. | Low | D1 | D2 |
+| DK-9 | **Fixed in D2.** Music and TV copy from the 3D rooms was rewritten. | Was Low | D1 | Fixed |
+
+## D2 applications
+
+| ID | Issue | Severity | Found | Status |
+|---|---|---|---|---|
+| D2-1 | **Fixed in D2.** Since M4, a finished record never moved on to the next song: browsers fire `pause` just before `ended`, and the player treated that as the visitor pausing. Unit-tested now with the real event order. | Was Medium | D2 | Fixed |
+| D2-2 | The equaliser, balance and spectrum visualiser work on the public-domain records only. YouTube's player is another site's frame, so no website can process its sound; Music says so instead of faking it. | Info | D2 | Platform limit |
+| D2-3 | Music's volume slider is the shared player's volume, so it also sets the radio's volume (one remembered player volume). | Low | D2 | By design |
+| D2-4 | A playlist that reaches a YouTube song while the Music window is closed stops there: YouTube requires its player to be visible. Records keep playing with the window closed. | Info | D2 | Provider terms |
+| D2-5 | Playwright's WebKit build on Windows can't play any audio (and has no Web Audio), so tests that need real sound skip there and say why; the rest of those tests still run. Real Safari plays audio. | Info | D2 | Test environment |
+| D2-6 | The tuner dial shows channel positions, not FM frequencies: the station directory doesn't publish frequencies, and none are invented. | Info | D2 | By design |
+| D2-7 | The visual reference image mentioned in the D2 brief did not arrive with the message; D2 follows the written direction until it is shared. | Info | D2 | Waiting for the image |
+| D2-8 | **Fixed in D2.** A race on slow browsers: Ctrl+Esc pressed in the instant after the desktop first painted could be missed (the shortcut listener attaches right after). The desktop now marks when its shortcuts are live; tests wait for that. | Was Low | D2 | Fixed |
+| D2-9 | Video's History and Favourites keep up to 50 items each; every saved entry is re-validated as a YouTube id when read back. | Info | D2 | By design |
+| D2-10 | The Arcade has two games. More (a card game, a drawing app) are planned for D4. | Info | D2 | Planned |

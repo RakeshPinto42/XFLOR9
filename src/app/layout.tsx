@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Hanken_Grotesk, Shrikhand, Silkscreen } from "next/font/google";
+import { Geist, Geist_Mono, Hanken_Grotesk, Shrikhand, Silkscreen } from "next/font/google";
 import "./globals.css";
 
 // next/font self-hosts these at build time: no runtime requests to Google.
 const shrikhand = Shrikhand({ weight: "400", subsets: ["latin"], variable: "--font-shrikhand" });
 const hanken = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-hanken" });
 const silkscreen = Silkscreen({ weight: "400", subsets: ["latin"], variable: "--font-silkscreen" });
+// The desktop's interface type: crisp and geometric (D2).
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
   title: { default: "XPLOR9: Your childhood. Reconnected.", template: "%s | XPLOR9" },
@@ -19,7 +22,7 @@ const embeddedScript = `try{if(window.self!==window.top)document.documentElement
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${shrikhand.variable} ${hanken.variable} ${silkscreen.variable} antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${shrikhand.variable} ${hanken.variable} ${silkscreen.variable} ${geist.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: embeddedScript }} />
       </head>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * The Reading Room runs as its own page inside the window (a same-origin frame), exactly as it
@@ -14,6 +14,20 @@ export function ReadingRoomApp() {
   const [loading, setLoading] = useState(true);
 
   const history = () => frame.current?.contentWindow?.history;
+
+  // The Reading Room moves between pages without full reloads, so the frame's load event alone
+  // misses most of them: the address follows the frame's location instead (same origin).
+  useEffect(() => {
+    const t = window.setInterval(() => {
+      try {
+        const loc = frame.current?.contentWindow?.location;
+        if (loc) setPath((p) => (p === loc.pathname + loc.search ? p : loc.pathname + loc.search));
+      } catch {
+        // Another origin (never expected here): keep the last known address.
+      }
+    }, 400);
+    return () => window.clearInterval(t);
+  }, []);
   const onLoad = () => {
     setLoading(false);
     try {

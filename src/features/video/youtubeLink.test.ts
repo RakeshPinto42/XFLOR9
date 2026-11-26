@@ -46,3 +46,34 @@ describe("pasted YouTube links", () => {
     expect(() => uploadsPlaylist("UU123")).toThrow();
   });
 });
+
+describe("saved videos (History, Favourites)", async () => {
+  const { parseSavedVideos, rememberVideo, toggleSavedVideo, MAX_SAVED_VIDEOS } = await import("./youtubeLink");
+  const v = (id: string) => ({ key: id, title: `T ${id}`, by: "Ch", source: { provider: "youtube" as const, videoId: id } });
+
+  it("re-checks every saved source and drops anything unsafe", () => {
+    const raw = [
+      v("dQw4w9WgXcQ"),
+      { key: "x", title: "bad", source: { provider: "youtube", videoId: "javascript:alert(1)" } },
+      { title: "list", source: { provider: "youtube-playlist", playlistId: "PLabcdefghijklmnop" } },
+      { source: { provider: "archive", identifier: "x" } },
+      v("dQw4w9WgXcQ"),
+      "junk",
+    ];
+    const out = parseSavedVideos(raw);
+    expect(out.map((x) => x.key)).toEqual(["dQw4w9WgXcQ", "PLabcdefghijklmnop"]);
+    expect(out[1].title).toBe("list");
+    expect(out[1].by).toBe("YouTube");
+    expect(parseSavedVideos(null)).toEqual([]);
+  });
+
+  it("history is newest first without duplicates; favourites toggle", () => {
+    let h = rememberVideo([], v("aaaaaaaaaaa"));
+    h = rememberVideo(h, v("bbbbbbbbbbb"));
+    h = rememberVideo(h, v("aaaaaaaaaaa"));
+    expect(h.map((x) => x.key)).toEqual(["aaaaaaaaaaa", "bbbbbbbbbbb"]);
+    expect(toggleSavedVideo(h, v("aaaaaaaaaaa")).map((x) => x.key)).toEqual(["bbbbbbbbbbb"]);
+    const many = Array.from({ length: MAX_SAVED_VIDEOS + 5 }, (_, i) => v(String(i).padStart(11, "x")));
+    expect(many.reduce(rememberVideo, [] as ReturnType<typeof v>[])).toHaveLength(MAX_SAVED_VIDEOS);
+  });
+});

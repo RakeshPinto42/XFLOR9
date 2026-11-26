@@ -65,8 +65,8 @@ test("nothing loads from YouTube or the Internet Archive until Watch; then the o
   expect(src.pathname).toBe("/embed/bI376UnsUMg");
   expect(await player(page).getAttribute("sandbox")).toContain("allow-scripts");
   await expect(page.getByTestId("tv-status")).toHaveText("Official upload by Films Division · YouTube"); // = playing
-  await expect(page.getByTestId("tv-guide")).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "TV remote control" })).toBeVisible();
+  await expect(page.getByTestId("tv-guide")).toBeVisible(); // the guide stays beside the screen (D2)
+  await expect(page.getByRole("group", { name: "Player controls" })).toBeVisible();
 
   await page.getByRole("button", { name: "Switch off" }).click();
   await expect(page.getByTestId("tv-guide")).toBeVisible();

@@ -17,3 +17,18 @@ describe("YouTube player messages", () => {
     expect(readPlayerMessage("x".repeat(200_000))).toBeNull();
   });
 });
+
+describe("player position reports", () => {
+  it("reads current time and duration from infoDelivery", async () => {
+    const { readPlayerTime } = await import("./playerMessages");
+    expect(readPlayerTime(JSON.stringify({ event: "infoDelivery", info: { currentTime: 12.5, duration: 200 } }))).toEqual({ current: 12.5, duration: 200 });
+    expect(readPlayerTime({ event: "infoDelivery", info: { currentTime: 3 } })).toEqual({ current: 3 });
+  });
+  it("ignores anything else", async () => {
+    const { readPlayerTime } = await import("./playerMessages");
+    expect(readPlayerTime(JSON.stringify({ event: "onReady" }))).toBeNull();
+    expect(readPlayerTime({ event: "infoDelivery", info: { currentTime: -1, duration: Number.NaN } })).toBeNull();
+    expect(readPlayerTime({ event: "infoDelivery", info: { currentTime: "5" } })).toBeNull();
+    expect(readPlayerTime("not json")).toBeNull();
+  });
+});

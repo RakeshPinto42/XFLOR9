@@ -24,6 +24,8 @@ export interface PlaybackSource {
   url: string;
   /** Live streams can't be resumed where they paused: pausing stops the download. */
   live: boolean;
+  /** Fetch with CORS so Web Audio may process it (only for hosts that send CORS headers). */
+  cors?: boolean;
 }
 
 export interface PlaybackState {

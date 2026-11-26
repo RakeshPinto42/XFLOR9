@@ -19,7 +19,11 @@ let engine: PlaybackEngine | null = null;
 export function getPlaybackEngine(): PlaybackEngine {
   if (engine) return engine;
   engine = new PlaybackEngine({
-    createAudio: () => new Audio(),
+    createAudio: (options) => {
+      const a = new Audio();
+      if (options?.cors) a.crossOrigin = "anonymous";
+      return a;
+    },
     isOnline: () => navigator.onLine,
     onConnectivityChange: (handler) => {
       window.addEventListener("online", () => handler(true));

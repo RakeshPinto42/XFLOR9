@@ -70,9 +70,9 @@ export function TuningKnob({ count, index, onChange, valueText, disabled = false
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      className="tuner__knob shrink-0"
+      className="rt-knob"
     >
-      <span className="tuner__knob-cap" style={{ transform: `rotate(${knobAngle(index, count)}deg)` }} aria-hidden />
+      <span className="rt-knob-cap" style={{ transform: `rotate(${knobAngle(index, count)}deg)` }} aria-hidden />
     </div>
   );
 }
