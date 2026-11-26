@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XPLOR9 D2 design review: contact sheet</title>
+<style>
+  body { margin: 0; padding: 28px; background: #eef1f6; color: #141a26; font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  p.lede { margin: 0 0 22px; color: #5b6577; max-width: 70ch; }
+  h2 { margin: 26px 0 10px; font-size: 15px; color: #2a62d9; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
+  .grid.phones { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  figure { margin: 0; padding: 8px; background: #fff; border: 1px solid #d5dbe6; border-radius: 8px; }
+  figure img { display: block; width: 100%; height: auto; border-radius: 4px; }
+  figcaption { margin-top: 6px; font-size: 12.5px; }
+  figcaption b { display: block; }
+  .missing { display: grid; place-items: center; aspect-ratio: 16/10; border: 2px dashed #b7c1d3; border-radius: 4px; color: #5b6577; text-align: center; padding: 12px; }
+</style>
+</head>
+<body>
+<h1>XPLOR9 · D2 design review</h1>
+<p class="lede">Screenshots from a production build (commit 89c70df), 1440×900 desktop and 390×844 phone. Videos and stations are real official uploads and live streams; nothing here is a mock-up.</p>
+
+<h2>Reference</h2>
+<div class="grid">
+  <figure>
+    <div class="missing">Reference image not received.<br>Save it as docs/design/reference/xplor9-reference.png and it will appear here.</div>
+    <img src="../reference/xplor9-reference.png" alt="" onerror="this.remove()">
+    <figcaption><b>Visual reference (from the D2 brief)</b>The image named in the brief has not reached the project.</figcaption>
+  </figure>
+  <figure><img src="01-desktop-start-menu.jpg" alt="Desktop with the start menu open"><figcaption><b>Desktop and start menu</b>Blue theme, original wallpaper, taskbar and tray.</figcaption></figure>
+  <figure><img src="13-control-panel-glass.jpg" alt="Control Panel with the Glass theme"><figcaption><b>Control Panel, Glass theme</b>Wallpapers and colour schemes.</figcaption></figure>
+</div>
+
+<h2>Applications (desktop)</h2>
+<div class="grid">
+  <figure><img src="02-music-record-equaliser.jpg" alt="Music player playing a record with the equaliser"><figcaption><b>Music: XPLOR9 Amp</b>Record playing, live spectrum, “Old record” equaliser preset, playlist, library.</figcaption></figure>
+  <figure><img src="03-music-video.jpg" alt="Music player with a YouTube video pane"><figcaption><b>Music: video tape</b>Official upload in YouTube's player, inside the Amp window.</figcaption></figure>
+  <figure><img src="04-radio-tuner.jpg" alt="Radio tuner playing a station"><figcaption><b>Radio: XPLOR9 Tuner</b>Station on air, dial, display, memory presets, station table.</figcaption></figure>
+  <figure><img src="05-television.jpg" alt="Television app playing a programme"><figcaption><b>Television</b>Channel selector, screen with transport bar, programme guide.</figcaption></figure>
+  <figure><img src="06-video.jpg" alt="Video app playing a channel's uploads"><figcaption><b>Video</b>Verified channel playing; collections, history, favourites.</figcaption></figure>
+  <figure><img src="07-arcade-launcher.jpg" alt="Arcade launcher"><figcaption><b>Arcade: launcher</b>Categories, games, best scores.</figcaption></figure>
+  <figure><img src="08-arcade-saanp.jpg" alt="Saanp game window"><figcaption><b>Arcade: Saanp</b>Own window with Game / Speed / Help menus.</figcaption></figure>
+  <figure><img src="09-arcade-mines.jpg" alt="Mines game window, intermediate level"><figcaption><b>Arcade: Mines</b>Intermediate level; the window fits the field.</figcaption></figure>
+  <figure><img src="10-reading-room.jpg" alt="Reading Room in Explorer style"><figcaption><b>Reading Room</b>Explorer task pane, your files, bookshelf (icons).</figcaption></figure>
+  <figure><img src="11-reading-details-view.jpg" alt="Reading Room bookshelf in details view"><figcaption><b>Reading Room: details view</b>Sortable list.</figcaption></figure>
+  <figure><img src="12-reading-reader.jpg" alt="EPUB reader showing Treasure Island"><figcaption><b>Reader</b>Treasure Island in the EPUB reader; address bar follows the page.</figcaption></figure>
+</div>
+
+<h2>Phone (390×844)</h2>
+<div class="grid phones">
+  <figure><img src="14-phone-music.jpg" alt="Music on a phone"><figcaption><b>Music</b></figcaption></figure>
+  <figure><img src="15-phone-radio.jpg" alt="Radio on a phone"><figcaption><b>Radio</b></figcaption></figure>
+  <figure><img src="16-phone-television.jpg" alt="Television on a phone"><figcaption><b>Television</b></figcaption></figure>
+  <figure><img src="17-phone-arcade.jpg" alt="Arcade on a phone"><figcaption><b>Arcade</b></figcaption></figure>
+</div>
+</body>
+</html>
