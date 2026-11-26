@@ -1,6 +1,6 @@
 # XPLOR9 roadmap
 
-Last updated: 2026-11-26. Open issues and technical debt: [known-issues.md](known-issues.md).
+Last updated: 2026-11-27. Open issues and technical debt: [known-issues.md](known-issues.md).
 Architecture: [desktop-architecture.md](desktop-architecture.md).
 
 ## Product direction (2026-11-26, the owner's brief)
@@ -23,15 +23,50 @@ from there; the monsoon render lives on as a wallpaper.
 | TV, Music, Games modules (checkpoint before the desktop redesign) | 0abc9c9 |
 | **D1 Desktop**: boot, welcome, desktop, windows, taskbar, start menu, tray, themes, wallpapers, system sounds, Video, Notepad, Control Panel; 3D retired | e40b618 |
 | **D2 Applications**: XPLOR9 Amp (Music: playlist, equaliser, visualiser, video pane), XPLOR9 Tuner (Radio: deck, presets, station table), Television and Video (shared media player, transport, history, favourites), Arcade (launcher, Saanp and Mines windows with menus and levels), Reading Room (Explorer layout, icon and details views); Geist interface type; shared window menu bar | 89c70df |
-| **D3 YouTube discovery**: search in Video through a server route (key server-side only), cached results, daily budget and per-visitor limit, validated results, search-or-link address bar, more results | this milestone |
+| **D3 YouTube discovery**: search in Video through a server route (key server-side only), cached results, daily budget and per-visitor limit, validated results, search-or-link address bar, more results | 6d681bf |
 
-## Next, in order
+## Product completion first (2026-11-27, the owner's direction)
 
-| Phase | Scope |
-|---|---|
-| D4 More nostalgia | Screensaver after idle (original animation), a Paint-style drawing app saved locally, a card game (original Solitaire-style), a "My Computer" window with storage used and a clear-data control, desktop icon arrangement by drag. |
-| D5 Mobile pass | Test on the owner's phone (model to be provided); swipe between open apps; larger touch targets in app interiors. |
-| Final audits | Accessibility, performance, security and licensing review of the whole product. |
+Functionality first, visual refinement later. The current XP/7-inspired interface stays as it is;
+UI changes happen only where functionality, usability, accessibility or a real defect needs them.
+A dedicated UI/UX phase follows once the product is functionally complete.
+
+Audit of what is still missing (checked in the code on 2026-11-27):
+
+| Area | What works | What's missing or fragile |
+|---|---|---|
+| Desktop | Windows, taskbar, start menu, tray, themes, sounds, phones | One app crashing takes down the whole desktop (no error boundaries). New windows don't take keyboard focus. Open windows are lost on reload. No backup of local data. |
+| Radio | Search, filters, favourites, history, presets, tuner, persistent playback | 105 of 606 HTTPS Indian stations (22 of the top 100) are HLS and only play in Safari. A dropped stream doesn't reconnect on its own. |
+| Music | Playlist, equaliser, visualiser, library, favourites | Only one playlist. Can't add songs found in Video. Records restart from the beginning. |
+| Television | Channels, guide, favourites, recents, transport, Where to Watch | Long programmes restart from the beginning; a series (YouTube playlist) doesn't move on by itself. |
+| Video | Search (with key), featured, channels, links, history, favourites | No way to keep a list ("watch later" / playlists); long videos restart from the beginning. |
+| Arcade | Saanp, Mines (3 levels), best scores | Two games only. |
+| Reading Room | Catalogue, EPUB/PDF reader, bookmarks, search, imports | Imported books have no bookmarks or search (RR-3). No Hindi/Kannada catalogue books yet (rights work). |
+| Across apps | One sound at a time | The tray only knows the radio/records player, not TV, Video or Music videos. No search across the whole computer. |
+| Release | Tests, security suite | Not deployed: hosting, the separate reader origin, site-wide security headers and a performance budget are still to do. |
+
+Milestones, in order (core functionality → integration dependencies → user value → technical risk → complexity):
+
+| # | Milestone | Scope | Why here |
+|---|---|---|---|
+| P1 | Reliability | Crash isolation per window (a failed app shows "stopped working" with Restart/Close; others and playback carry on). Keyboard focus moves into opened windows and back to the taskbar. Open windows come back after a reload. Live radio reconnects by itself after a dropped stream or when the network returns. | Core: a failure anywhere currently breaks everything; everything else builds on this. |
+| P2 | Your data | Back up all XPLOR9 data to a file and restore it (validated); storage used per app; clear one app's data or everything. In the Control Panel. | Everything lives only in this browser: without a backup, one cleared cache loses favourites, playlists and progress. |
+| P3 | One media system | The tray shows whatever is playing in any app (radio, records, TV, Video, Music videos) with pause, stop and "show". Music gets named playlists; songs and videos from Video and TV can be added to them. | Integration dependency for P4/P5; high user value. |
+| P4 | Pick up where you left off | Resume position for long programmes, videos and records; "Continue watching" in TV and Video; a series plays on. | Continuity is core to media apps. |
+| P5 | Find anything | A search box in the start menu across stations, presets, songs, tapes, programmes, books and your videos, with "search YouTube / radio for…" hand-offs. | Discovery across apps, using P3's shared model. |
+| P6 | More radio | HLS stations in every browser (hls.js, only for hosts that allow it; streams are never proxied). Measured on real stations before adoption. | Unlocks about a fifth of Indian stations; adds a dependency, so it comes after the core. |
+| P7 | Reading Room completion | Bookmarks and search inside imported books. | Closes RR-3. Hindi/Kannada books wait for verified editions (content, not code). |
+| P8 | Arcade | An original patience card game. | User value; contained. |
+| P9 | Phone pass | Real-device checks and fixes on the owner's phone. | Needs the phone model. |
+| P10 | Release readiness | Hosting and the separate reader origin, site-wide security headers, performance budget, licensing review of the catalogues, accessibility audit. | Needs decisions on hosting, domain and cost from the owner. |
+| — | UI/UX phase | The dedicated redesign, after P1–P10. | As directed. |
+
+Content and decisions that only the owner can supply (they don't block the code milestones):
+a YouTube Data API key (search), the phone model (P9), hosting/domain/cost (P10), and review of
+catalogue additions (more TV, music, Hindi/Kannada books).
+
+Dropped from the earlier D4 list as decorative: the screensaver and dragging desktop icons. Deferred:
+a Paint-style app (reconsider after P8).
 
 ## Decisions on record
 
