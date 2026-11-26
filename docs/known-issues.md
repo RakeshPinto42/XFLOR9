@@ -1,7 +1,7 @@
 # Known issues and technical debt (for the product-wide audit)
 
 Recorded as found, so the final audit has one list. Severity is a first estimate.
-Last updated: 2026-11-27 (P1).
+Last updated: 2026-11-27 (P2).
 
 ## Reading Room
 
@@ -91,3 +91,15 @@ advisories in the 3D asset tools) is resolved: `npm audit` now reports 0 vulnera
 | P1-4 | If an app's code download hangs without failing (no error from the browser), its window stays on "Starting…"; Close still works. Not seen in practice; a load that fails outright is handled. | Low | P1 | Watch |
 | P1-5 | Restarting an app whose code failed to download may need a reload of XPLOR9 (the message offers it; open windows come back). | Low | P1 | By design |
 | P1-6 | In one full WebKit run under heavy load, the bookshelf search test typed before the page had finished starting and missed the result; it passed on every re-run (3 of 3). | Low | P1 | Watch (test timing) |
+
+## P2 Your data
+
+| ID | Issue | Severity | Found | Status |
+|---|---|---|---|---|
+| P2-1 | **Fixed in P2.** Everything lived only in this browser with no way to keep or move it. Control Panel → Your data (also Start → Back up and restore) backs up every app to one file, restores it (checked first, all or nothing, per app), shows storage used per app and clears one app or everything. | Was High | P2 | Fixed |
+| P2-2 | Imported books larger than 280 MB in total can't go into one backup file (their progress and bookmarks still can); keep the original files. | Low | P2 | By design |
+| P2-3 | Restore replaces each ticked app's data rather than merging it (e.g. favourites added since the backup are replaced). The screen says so before restoring. | Info | P2 | By design |
+| P2-4 | Restoring or clearing restarts XPLOR9 (open windows come back; anything playing stops). | Info | P2 | By design |
+| P2-5 | Backup files aren't encrypted. They hold only what XPLOR9 keeps (favourites, notes, progress, imported books), but the note and books are readable by anyone who has the file. | Info | P2 | By design |
+| P2-6 | "Keep XPLOR9's data" asks the browser not to remove data when space is low; browsers decide for themselves (Chrome often agrees only for sites used a lot) and Safari may still remove data from sites not visited for a while. A backup file is the dependable way. | Info | P2 | Platform |
+| P2-7 | In one WebKit run, the "old addresses open their window" test failed once; it passed in the full run and on every re-run (3 of 3). Not related to P2's changes. | Low | P2 | Watch (test timing) |

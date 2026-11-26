@@ -467,6 +467,40 @@ html[data-dragging] {
   border-radius: 0 6px 6px 6px;
   background: #fff;
 }
+/* Control Panel: Your data */
+.xp-groupbox {
+  padding: 8px 12px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+}
+.xp-groupbox > legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+.xp-notice {
+  padding: 8px 12px;
+  border: 1px solid var(--ui-warn-line);
+  border-radius: 6px;
+  background: var(--ui-warn-bg);
+}
+.xp-table {
+  border-collapse: collapse;
+}
+.xp-table th,
+.xp-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--ui-line);
+  text-align: left;
+  vertical-align: middle;
+}
+.xp-table thead th {
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.xp-table td:last-child {
+  text-align: right;
+}
 .xp-list {
   padding: 6px;
 }

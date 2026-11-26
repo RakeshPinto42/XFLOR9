@@ -5,21 +5,24 @@ import { soundPrefs, useSoundPrefs } from "@/lib/sound/browser";
 import { MAX_NAME, THEMES, WALLPAPERS, cleanName, type ThemeId, type WallpaperId } from "../prefs";
 import { controlPanelTab, setDesktopPrefs, useDesktopPrefs, type ControlTab } from "../store";
 import { playSystemSound } from "../systemSounds";
+import { DataPanel, pendingDataNotice } from "./DataPanel";
 
-/** Control Panel: Display (colours, wallpaper), Sound (volume, system sounds), your name, About. */
+/** Control Panel: Display (colours, wallpaper), Sound (volume, system sounds), your name, your data (backup, restore, storage), About. */
 
 type Tab = ControlTab;
 const TABS: { id: Tab; label: string }[] = [
   { id: "display", label: "Display" },
   { id: "sound", label: "Sound" },
   { id: "user", label: "Your name" },
+  { id: "data", label: "Your data" },
   { id: "about", label: "About" },
 ];
 
 export function ControlPanel() {
   // The start menu or desktop menu may ask for a tab (also when the panel is already open).
   const requested = useSyncExternalStore(controlPanelTab.subscribe, controlPanelTab.get, controlPanelTab.get);
-  const [shown, setShown] = useState(requested);
+  // After a restore or clear, XPLOR9 restarts and the panel reopens on Your data with the result.
+  const [shown, setShown] = useState(() => (pendingDataNotice() && requested.n === 0 ? { tab: "data" as Tab, n: 0 } : requested));
   // A new request switches tab (derived during render, not in an effect).
   if (shown.n !== requested.n) setShown(requested);
   const tab = shown.tab;
@@ -37,6 +40,7 @@ export function ControlPanel() {
         {tab === "display" && <Display />}
         {tab === "sound" && <Sound />}
         {tab === "user" && <User />}
+        {tab === "data" && <DataPanel />}
         {tab === "about" && <About />}
       </div>
     </div>

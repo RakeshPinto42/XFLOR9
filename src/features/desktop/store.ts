@@ -93,7 +93,7 @@ export function useDesktop(): Desktop {
 }
 
 /** Which Control Panel tab to show when it opens (the start menu and desktop menu ask for one). */
-export type ControlTab = "display" | "sound" | "user" | "about";
+export type ControlTab = "display" | "sound" | "user" | "data" | "about";
 let controlTab: { tab: ControlTab; n: number } = { tab: "display", n: 0 };
 const tabListeners = new Set<() => void>();
 export const controlPanelTab = {

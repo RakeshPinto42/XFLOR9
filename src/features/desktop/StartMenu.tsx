@@ -81,6 +81,12 @@ export function StartMenu({ onOpen, onClose, onLogOff, onTurnOff }: { onOpen: (i
             </button>
           </li>
           <li role="none">
+            <button type="button" role="menuitem" className="xp-start-item" onClick={settings("data")}>
+              <DesktopIcon name="folder" size={24} />
+              Back up and restore
+            </button>
+          </li>
+          <li role="none">
             <button type="button" role="menuitem" className="xp-start-item" onClick={settings("about")}>
               <DesktopIcon name="start" size={24} />
               About XPLOR9

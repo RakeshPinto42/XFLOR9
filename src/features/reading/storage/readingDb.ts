@@ -195,6 +195,9 @@ function parseKeyed<K extends "addedAt" | "openedAt">(raw: unknown, field: K) {
   return { bookKey: r.bookKey, [field]: finite(r[field]) } as { bookKey: string } & Record<K, number>;
 }
 
+export const parseFavourite = (raw: unknown): FavouriteRecord | null => parseKeyed(raw, "addedAt");
+export const parseRecent = (raw: unknown): RecentRecord | null => parseKeyed(raw, "openedAt");
+
 /** Turns a bookmark excerpt from raw page text into one tidy line. */
 export function tidyExcerpt(text: string, max = 140): string {
   const t = text.replace(/\s+/g, " ").trim();
@@ -410,4 +413,99 @@ export async function deleteImport(id: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// ---------- backup, restore and clearing (P2) ----------
+
+/** Everything the Reading Room keeps except imported files' bytes. */
+export interface ReadingRecords {
+  progress: ProgressRecord[];
+  bookmarks: BookmarkRecord[];
+  favourites: FavouriteRecord[];
+  recent: RecentRecord[];
+  imports: ImportRecord[];
+}
+
+export interface ReadingSnapshot extends ReadingRecords {
+  /** Bytes of each imported file, by import id (empty when files are left out). */
+  files: Map<string, ArrayBuffer>;
+}
+
+const RECORD_STORES = ["progress", "bookmarks", "favourites", "recent", "imports"] as const;
+const ALL_STORES = [...RECORD_STORES, "importFiles"] as const;
+
+/** Reads everything in one consistent read. Bytes are read only when asked for. Throws if storage can't be read. */
+export async function exportReadingData(includeFiles: boolean): Promise<ReadingSnapshot> {
+  const tx = (await db()).transaction(ALL_STORES, "readonly");
+  const [progress, bookmarks, favourites, recent, imports, files] = await Promise.all([
+    tx.objectStore("progress").getAll(),
+    tx.objectStore("bookmarks").getAll(),
+    tx.objectStore("favourites").getAll(),
+    tx.objectStore("recent").getAll(),
+    tx.objectStore("imports").getAll(),
+    includeFiles ? tx.objectStore("importFiles").getAll() : Promise.resolve([]),
+  ]);
+  await tx.done;
+  const valid = <T>(list: unknown[], parse: (r: unknown) => T | null) => list.map(parse).filter((r): r is T => r !== null);
+  const records = {
+    progress: valid(progress, parseProgress),
+    bookmarks: valid(bookmarks, parseBookmark),
+    favourites: valid(favourites, parseFavourite),
+    recent: valid(recent, parseRecent),
+    imports: valid(imports, parseImport),
+  };
+  const ids = new Set(records.imports.map((r) => r.id));
+  const bytes = new Map<string, ArrayBuffer>();
+  for (const f of files) if (ids.has(f.id) && f.data instanceof ArrayBuffer && f.data.byteLength > 0) bytes.set(f.id, f.data);
+  // A book whose bytes are missing can't be backed up as a book.
+  if (includeFiles) records.imports = records.imports.filter((r) => bytes.has(r.id));
+  return { ...records, files: bytes };
+}
+
+/** Sizes for "storage used": the records (as saved in a backup) and the imported files' bytes. */
+export async function readingDataSize(): Promise<{ records: number; files: number; books: number }> {
+  const { progress, bookmarks, favourites, recent, imports } = await exportReadingData(false);
+  const lists = { progress, bookmarks, favourites, recent, imports };
+  const empty = Object.values(lists).every((l) => l.length === 0);
+  const records = empty ? 0 : new TextEncoder().encode(JSON.stringify(lists)).byteLength;
+  return { records, files: imports.reduce((n, r) => n + r.size, 0), books: imports.length };
+}
+
+/**
+ * Replaces the Reading Room's data in ONE transaction: it all happens or none of it does.
+ * With `files`, imported books are replaced too (records without bytes are dropped); without,
+ * the imported books already in this browser are kept as they are.
+ */
+export async function replaceReadingData(data: ReadingRecords, files: Map<string, ArrayBuffer> | null): Promise<void> {
+  const tx = (await db()).transaction(ALL_STORES, "readwrite");
+  const ops: Promise<unknown>[] = [];
+  for (const store of ["progress", "bookmarks", "favourites", "recent"] as const) ops.push(tx.objectStore(store).clear());
+  for (const r of data.progress) ops.push(tx.objectStore("progress").put(r));
+  for (const r of data.bookmarks) ops.push(tx.objectStore("bookmarks").put(r));
+  for (const r of data.favourites) ops.push(tx.objectStore("favourites").put(r));
+  for (const r of data.recent) ops.push(tx.objectStore("recent").put(r));
+  if (files) {
+    ops.push(tx.objectStore("imports").clear(), tx.objectStore("importFiles").clear());
+    for (const r of data.imports) {
+      const bytes = files.get(r.id);
+      if (!bytes) continue;
+      ops.push(tx.objectStore("imports").put(r), tx.objectStore("importFiles").put({ id: r.id, data: bytes }));
+    }
+  }
+  try {
+    await Promise.all([...ops, tx.done]);
+  } catch (err) {
+    try {
+      tx.abort();
+    } catch {
+      // already finished (aborted by the browser)
+    }
+    throw err;
+  }
+}
+
+/** Deletes everything the Reading Room keeps, imported books included, in one step. */
+export async function clearReadingData(): Promise<void> {
+  const tx = (await db()).transaction(ALL_STORES, "readwrite");
+  await Promise.all([...ALL_STORES.map((s) => tx.objectStore(s).clear()), tx.done]);
 }

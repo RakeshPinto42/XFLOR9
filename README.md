@@ -34,6 +34,7 @@ daily budget resets at midnight Pacific time, when Google resets the quota.
 
 - `src/features/desktop/`: the XPLOR9 computer: boot and welcome screens, desktop, windows, taskbar, start menu, Control Panel, Notepad, system sounds.
 - `src/features/{radio,tv,music,video,games,reading}/`: the applications.
+- `src/features/data/`: backup, restore, storage used and clearing (Control Panel → Your data). Your data stays in the browser unless you save a backup file.
 - `src/lib/`: playback engine, sound settings, local-only storage. Nothing leaves the browser.
 - `src/app/`: `/` (the desktop), `/reading/*` (Reading Room and reader), `/api/radio/*`. Old `/radio`, `/tv`, `/music`, `/games` addresses open the matching window.
 
