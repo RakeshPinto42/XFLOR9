@@ -183,8 +183,7 @@ test("Notepad keeps its text in this browser", async ({ page }) => {
   await page.locator("#notepad-text").fill("Shopping: Parle-G, Rasna");
   await expect(win(page, "notepad").getByText("Saved in this browser")).toBeVisible();
   await page.waitForTimeout(600);
-  await page.reload();
-  await page.getByRole("button", { name: /^Notepad:/ }).dblclick();
+  await page.reload(); // the window comes back by itself (session restore), with the saved text
   await expect(page.locator("#notepad-text")).toHaveValue("Shopping: Parle-G, Rasna");
 });
 

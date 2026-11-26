@@ -36,4 +36,6 @@ export interface PlaybackState {
   muted: boolean;
   /** False on iOS, where web pages cannot change audio volume. */
   volumeControllable: boolean;
+  /** Which reconnection attempt a dropped live stream is on (0 = not reconnecting). */
+  reconnecting: number;
 }

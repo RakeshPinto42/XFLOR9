@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { STORAGE_KEYS } from "@/lib/storage/local";
 import { createLocalStore, useLocalStore } from "@/lib/storage/store";
-import { APP_BY_ID, type AppId } from "./apps";
+import { APP_BY_ID, isAppId, type AppId } from "./apps";
 import { DEFAULT_DESKTOP_PREFS, parseDesktopPrefs, type DesktopPrefs } from "./prefs";
 import {
   EMPTY_DESKTOP,
@@ -14,11 +14,14 @@ import {
   moveWindow,
   openWindow,
   parseGeometry,
+  parseSession,
+  sessionSnapshot,
   resizeWindow,
   taskbarClick,
   toggleMaximize,
   type Desktop,
   type Rect,
+  type SavedWindow,
   type Size,
 } from "./windows";
 
@@ -104,4 +107,34 @@ export function openControlPanel(tab: ControlTab) {
   controlTab = { tab, n: controlTab.n + 1 };
   tabListeners.forEach((l) => l());
   wm.open("control");
+}
+
+// ---------- session restore: the open windows come back after a reload (this tab's session) ----------
+const SESSION_WINDOWS = "xplor9.session.windows";
+
+/** Reopen what was open before the reload, in the same order and state. Runs once per page. */
+export function restoreSession() {
+  if (state.windows.length) return;
+  let saved: SavedWindow[] = [];
+  try {
+    saved = parseSession(JSON.parse(window.sessionStorage.getItem(SESSION_WINDOWS) ?? "null"), isAppId);
+  } catch {
+    saved = [];
+  }
+  for (const w of saved) {
+    wm.open(w.id as AppId);
+    if (w.maximized) wm.toggleMaximize(w.id as AppId);
+  }
+  for (const w of saved) if (w.minimized) wm.minimize(w.id as AppId);
+}
+
+/** Keeps the saved session up to date; returns the unsubscribe. */
+export function persistSession() {
+  return wm.subscribe(() => {
+    try {
+      window.sessionStorage.setItem(SESSION_WINDOWS, JSON.stringify(sessionSnapshot(state)));
+    } catch {
+      // Storage blocked: a reload just starts with an empty desktop.
+    }
+  });
 }

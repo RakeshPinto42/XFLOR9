@@ -48,10 +48,14 @@ export interface EngineDeps {
   savePrefs: (prefs: { volume: number; muted: boolean }) => void;
   channel?: CrossTabChannel | null;
   onStateChange?: (state: PlaybackState) => void; // e.g. Media Session sync
+  /** Pauses before each reconnection attempt of a dropped live stream (default RECONNECT_DELAYS_MS). */
+  reconnectDelays?: readonly number[];
 }
 
 export const LOAD_TIMEOUT_MS = 15_000;
 export const BUFFER_TIMEOUT_MS = 20_000;
+/** A dropped live stream is retried after these pauses before the error is shown. */
+export const RECONNECT_DELAYS_MS = [2_000, 5_000, 10_000] as const;
 
 // HTMLMediaElement error codes
 const MEDIA_ERR_ABORTED = 1;
@@ -85,6 +89,8 @@ export class PlaybackEngine {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private onStarted: (() => void) | undefined;
   private readonly tabId = Math.random().toString(36).slice(2);
+  /** Reconnection attempts used for the current live stream (reset when it plays or is chosen again). */
+  private retries = 0;
   /** Site-wide sound settings applied on top of the player's own volume (A1 mixer). */
   private output = { gain: 1, mute: false };
 
@@ -102,11 +108,18 @@ export class PlaybackEngine {
       volume: clamp(prefs.volume),
       muted: prefs.muted,
       volumeControllable: detectVolumeControl(this.audio, clamp(prefs.volume)),
+      reconnecting: 0,
     };
 
     this.bindAudioEvents(this.direct);
     deps.onConnectivityChange((online) => {
       if (!online && this.isActive()) this.fail("offline");
+      // Back online: a live stream that the connection cut off comes back by itself.
+      const kind = this.state.error?.kind;
+      if (online && this.state.status === "error" && this.state.source?.live && (kind === "offline" || kind === "network" || kind === "timeout")) {
+        this.retries = 0;
+        this.start();
+      }
     });
     deps.channel?.onMessage((msg) => {
       // Another XPLOR9 tab started playing: step aside so two streams never overlap.
@@ -126,6 +139,7 @@ export class PlaybackEngine {
   /** Start a source. Replaces whatever is playing. */
   load(source: PlaybackSource, options: LoadOptions = {}) {
     this.onStarted = options.onStarted;
+    this.retries = 0;
     this.set({ source, error: null });
     this.start();
   }
@@ -134,6 +148,7 @@ export class PlaybackEngine {
   play() {
     if (!this.state.source) return;
     if (this.state.status === "playing" || this.state.status === "loading" || this.state.status === "buffering") return;
+    this.retries = 0;
     this.start();
   }
 
@@ -281,7 +296,8 @@ export class PlaybackEngine {
     on("playing", () => {
       if (!this.isCurrent()) return;
       this.clearTimer();
-      this.set({ status: "playing", error: null });
+      this.retries = 0;
+      this.set({ status: "playing", error: null, reconnecting: 0 });
       const started = this.onStarted;
       this.onStarted = undefined; // once per load
       started?.();
@@ -331,8 +347,23 @@ export class PlaybackEngine {
     this.clearTimer();
     this.generation++;
     this.release();
+    // A live stream that dropped (network trouble, a stall) gets a few more tries before the
+    // visitor sees an error. Formats the browser can't play, or a blocked start, never retry.
+    const delays = this.deps.reconnectDelays ?? RECONNECT_DELAYS_MS;
+    // Browsers report a stream that couldn't connect as "not supported", like a format they can't
+    // play; formats are checked before play is offered, so a live stream gets one retry for it.
+    const retryable = kind === "network" || kind === "timeout" || (kind === "unplayable" && this.retries === 0);
+    if (this.state.source?.live && retryable && this.retries < delays.length) {
+      const delay = delays[this.retries++];
+      const gen = this.generation;
+      this.set({ status: "loading", error: null, reconnecting: this.retries });
+      this.timer = setTimeout(() => {
+        if (gen === this.generation) this.start();
+      }, delay);
+      return;
+    }
     const error: PlaybackError = { kind, message: MESSAGES[kind] };
-    this.set({ status: "error", error });
+    this.set({ status: "error", error, reconnecting: 0 });
   }
 
   /** Stop downloading entirely (a paused live stream would otherwise keep streaming). */

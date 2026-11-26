@@ -1126,3 +1126,40 @@ html[data-dragging] {
   outline: 2px solid var(--ui-accent);
   outline-offset: -2px;
 }
+
+/* ---------- An application that stopped working (crash isolation) ---------- */
+.xp-crash {
+  display: flex;
+  height: 100%;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px;
+  overflow: auto;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font-family: var(--xp-font);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.xp-crash h3 {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.xp-crash p + p {
+  margin-top: 6px;
+  color: var(--ui-muted);
+}
+.xp-link {
+  color: var(--ui-accent);
+  text-decoration: underline;
+}
+
+/* The window itself takes focus when it opens: a visible ring, kept off the frame's shadow. */
+.xp-window:focus-visible {
+  outline: 2px solid var(--xp-focus);
+  outline-offset: 1px;
+}
+.xp-window:focus:not(:focus-visible) {
+  outline: none;
+}

@@ -1,7 +1,7 @@
 # Known issues and technical debt (for the product-wide audit)
 
 Recorded as found, so the final audit has one list. Severity is a first estimate.
-Last updated: 2026-11-26 (D3).
+Last updated: 2026-11-27 (P1).
 
 ## Reading Room
 
@@ -51,7 +51,7 @@ advisories in the 3D asset tools) is resolved: `npm audit` now reports 0 vulnera
 | DK-2 | The tray's overall volume and Mute don't reach YouTube's or the Internet Archive's players. Each app's own volume slider does set YouTube's player (through its API); the Internet Archive player has no remote control. | Low | D1 | Partly fixed in D2 |
 | DK-3 | **Done in D3.** Video searches all of YouTube once YOUTUBE_API_KEY is set on the server (see README). | Was Medium | D1 | Done |
 | DK-4 | A channel's "latest uploads" list is the rights holder's own uploads, but not curated by era. | Low | D1 | Content review |
-| DK-5 | Open windows are not reopened after a reload or a new log-in; only each app's window place is remembered. | Low | D1 | By design for now |
+| DK-5 | **Fixed in P1.** Open windows (and whether each was minimised or maximised) come back after a reload in the same session; logging off or turning off clears them. Apps start fresh: a video or station doesn't resume playing by itself. | Was Low | D1 | Fixed |
 | DK-6 | Alt+Tab and the Windows key belong to the operating system; the desktop uses Ctrl+Esc for the start menu and the taskbar for switching. | Info | D1 | Browser limitation |
 | DK-7 | The Reading Room's frame shares the browser's history: the browser's own Back button can step back inside the Reading Room before leaving the desktop. The window's Back/Forward buttons and address bar follow the frame. | Low | D1 | |
 | DK-8 | Desktop icons can't be dragged into a custom arrangement. | Low | D1 | Planned: D4 |
@@ -80,3 +80,14 @@ advisories in the 3D asset tools) is resolved: `npm audit` now reports 0 vulnera
 | D3-2 | The cache, daily budget and per-visitor limit live in each server instance's memory. On serverless hosting, instances don't share them, so the true stop is Google's own quota answer (handled: search closes for the day). | Low | D3 | By design |
 | D3-3 | Search result thumbnails load from YouTube (i.ytimg.com) once the visitor has searched; nothing loads from YouTube before that. | Info | D3 | By design |
 | D3-4 | Search shows only videos their owners allow to be embedded (videoEmbeddable=true); some popular videos are therefore missing. SafeSearch is "moderate". | Info | D3 | By design |
+
+## P1 Reliability
+
+| ID | Issue | Severity | Found | Status |
+|---|---|---|---|---|
+| P1-1 | **Fixed in P1.** Any app failing (a bug while drawing, or its code not downloading) took down the whole desktop. Each window now contains its own failure, with Restart and Close; everything else, including playback, carries on. | Was High | P1 | Fixed |
+| P1-2 | **Fixed in P1.** New windows didn't take keyboard focus. Focus now moves into a window that opens or comes forward, to its taskbar button when minimised, and to Start when closed. | Was Medium | P1 | Fixed |
+| P1-3 | **Fixed in P1.** A live station that dropped showed an error at once. It now reconnects by itself (after 2, 5 and 10 seconds) and comes back when the internet returns. A stream that fails to connect is retried once: browsers report that the same way as an unplayable format. | Was Medium | P1 | Fixed |
+| P1-4 | If an app's code download hangs without failing (no error from the browser), its window stays on "Starting…"; Close still works. Not seen in practice; a load that fails outright is handled. | Low | P1 | Watch |
+| P1-5 | Restarting an app whose code failed to download may need a reload of XPLOR9 (the message offers it; open windows come back). | Low | P1 | By design |
+| P1-6 | In one full WebKit run under heavy load, the bookshelf search test typed before the page had finished starting and missed the result; it passed on every re-run (3 of 3). | Low | P1 | Watch (test timing) |

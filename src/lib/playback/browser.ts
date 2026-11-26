@@ -62,6 +62,7 @@ const SERVER_STATE: PlaybackState = {
   volume: 0.8,
   muted: false,
   volumeControllable: true,
+  reconnecting: 0,
 };
 
 const subscribe = (listener: () => void) => getPlaybackEngine().subscribe(listener);

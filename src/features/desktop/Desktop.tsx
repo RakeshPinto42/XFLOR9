@@ -4,11 +4,12 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { getPlaybackEngine } from "@/lib/playback/browser";
 import { getMixer } from "@/lib/sound/browser";
 import { AppContent, type DesktopData } from "./AppContent";
+import { AppErrorBoundary } from "./AppErrorBoundary";
 import { APPS, APP_BY_ID, isAppId, type AppId } from "./apps";
 import { BootSequence, PoweredOff, ShutDownDialog, ShuttingDown, Welcome } from "./Boot";
 import { DesktopIcon } from "./icons";
 import { StartMenu } from "./StartMenu";
-import { openControlPanel, setDesktopPrefs, useDesktop, useDesktopPrefs, wm } from "./store";
+import { openControlPanel, persistSession, restoreSession, setDesktopPrefs, useDesktop, useDesktopPrefs, wm } from "./store";
 import { playSystemSound, playWhenReady } from "./systemSounds";
 import { Taskbar } from "./Taskbar";
 import { Window } from "./Window";
@@ -60,6 +61,13 @@ export function Desktop({ data }: { data: DesktopData }) {
   const [selected, setSelected] = useState<AppId | null>(null);
   const area = useRef<HTMLDivElement>(null);
   const lastPointer = useRef("");
+
+  // Back on the desktop (after a reload, or logging in): reopen what was open, and keep track of it.
+  useEffect(() => {
+    if (phase !== "desktop") return;
+    restoreSession();
+    return persistSession();
+  }, [phase]);
 
   // A direct link to an app (old /radio, /tv… addresses land here) opens it and skips the start-up.
   useEffect(() => {
@@ -204,7 +212,9 @@ export function Desktop({ data }: { data: DesktopData }) {
 
             {desktop.windows.map((w) => (
               <Window key={w.id} win={w} app={APP_BY_ID[w.id as AppId]} focused={focused === w.id} compact={compact}>
-                <AppContent id={w.id as AppId} data={data} />
+                <AppErrorBoundary title={APP_BY_ID[w.id as AppId].title} onClose={() => wm.close(w.id as AppId)}>
+                  <AppContent id={w.id as AppId} data={data} />
+                </AppErrorBoundary>
               </Window>
             ))}
 

@@ -179,3 +179,29 @@ export function parseGeometry(raw: unknown): Record<string, Rect> {
   }
   return out;
 }
+
+/** What a reload brings back: the open windows, bottom to top, and how each was shown. */
+export interface SavedWindow {
+  id: string;
+  minimized: boolean;
+  maximized: boolean;
+}
+
+export function sessionSnapshot(d: Desktop): SavedWindow[] {
+  return [...d.windows].sort((a, b) => a.z - b.z).map(({ id, minimized, maximized }) => ({ id, minimized, maximized }));
+}
+
+/** Saved sessions are untrusted: only known app ids, each once, at most `max`. */
+export function parseSession(raw: unknown, isKnown: (id: string) => boolean, max = 20): SavedWindow[] {
+  if (!Array.isArray(raw)) return [];
+  const out: SavedWindow[] = [];
+  const seen = new Set<string>();
+  for (const r of raw) {
+    const v = (typeof r === "object" && r !== null ? r : {}) as Record<string, unknown>;
+    if (typeof v.id !== "string" || !isKnown(v.id) || seen.has(v.id)) continue;
+    seen.add(v.id);
+    out.push({ id: v.id, minimized: v.minimized === true, maximized: v.maximized === true });
+    if (out.length >= max) break;
+  }
+  return out;
+}

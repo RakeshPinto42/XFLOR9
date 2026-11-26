@@ -23,6 +23,7 @@ from there; the monsoon render lives on as a wallpaper.
 | TV, Music, Games modules (checkpoint before the desktop redesign) | 0abc9c9 |
 | **D1 Desktop**: boot, welcome, desktop, windows, taskbar, start menu, tray, themes, wallpapers, system sounds, Video, Notepad, Control Panel; 3D retired | e40b618 |
 | **D2 Applications**: XPLOR9 Amp (Music: playlist, equaliser, visualiser, video pane), XPLOR9 Tuner (Radio: deck, presets, station table), Television and Video (shared media player, transport, history, favourites), Arcade (launcher, Saanp and Mines windows with menus and levels), Reading Room (Explorer layout, icon and details views); Geist interface type; shared window menu bar | 89c70df |
+| **P1 Reliability**: crash isolation per window, keyboard focus follows windows, session restore of open windows, live radio reconnects by itself | this milestone |
 | **D3 YouTube discovery**: search in Video through a server route (key server-side only), cached results, daily budget and per-visitor limit, validated results, search-or-link address bar, more results | 6d681bf |
 
 ## Product completion first (2026-11-27, the owner's direction)

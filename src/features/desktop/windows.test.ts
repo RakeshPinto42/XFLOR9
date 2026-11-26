@@ -131,3 +131,25 @@ describe("window manager", () => {
     });
   });
 });
+
+describe("session restore", async () => {
+  const { sessionSnapshot, parseSession } = await import("./windows");
+  it("snapshots windows bottom to top with how they were shown", () => {
+    let d = open(open(), "tv");
+    d = focusWindow(d, "radio");
+    d = minimizeWindow(d, "tv");
+    d = toggleMaximize(d, "radio");
+    expect(sessionSnapshot(d)).toEqual([
+      { id: "tv", minimized: true, maximized: false },
+      { id: "radio", minimized: false, maximized: true },
+    ]);
+  });
+  it("keeps only known apps, once each", () => {
+    const known = (id: string) => ["radio", "tv"].includes(id);
+    expect(parseSession([{ id: "radio", maximized: true }, { id: "evil" }, { id: "radio" }, "x", { id: "tv", minimized: "yes" }], known)).toEqual([
+      { id: "radio", minimized: false, maximized: true },
+      { id: "tv", minimized: false, maximized: false },
+    ]);
+    expect(parseSession(null, known)).toEqual([]);
+  });
+});

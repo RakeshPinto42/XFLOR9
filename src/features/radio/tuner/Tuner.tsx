@@ -93,7 +93,7 @@ export function Tuner({ stations, selectedIndex, onSelect, band, loading, childr
     if (pending) return "Tuning…";
     if (isCurrent) {
       if (player.status === "playing") return "Live";
-      if (player.status === "loading") return "Tuning…";
+      if (player.status === "loading") return player.reconnecting ? "Reconnecting…" : "Tuning…";
       if (player.status === "buffering") return "Buffering";
       if (player.status === "paused") return "Paused";
       if (player.status === "error") return "No reception";

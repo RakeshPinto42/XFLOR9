@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { DesktopApp } from "./apps";
 import { DesktopIcon } from "./icons";
 import { wm } from "./store";
@@ -46,6 +46,14 @@ function startDrag(e: React.PointerEvent, el: HTMLElement, apply: (dx: number, d
  */
 export function Window({ win, app, focused, compact, children }: { win: WindowState; app: DesktopApp; focused: boolean; compact: boolean; children: ReactNode }) {
   const el = useRef<HTMLElement>(null);
+
+  // Keyboard and screen-reader users land in the window that just opened or came to the front
+  // (unless focus is already inside it, e.g. a game that focused its board).
+  useEffect(() => {
+    const node = el.current;
+    if (!focused || win.minimized || !node || node.contains(document.activeElement)) return;
+    node.focus({ preventScroll: true });
+  }, [focused, win.minimized]);
   const maximized = win.maximized || compact;
 
   const drag = (e: React.PointerEvent, apply: (dx: number, dy: number) => Rect, done: (r: Rect) => void) => {
@@ -82,13 +90,20 @@ export function Window({ win, app, focused, compact, children }: { win: WindowSt
   const minimize = () => {
     playSystemSound("minimize");
     wm.minimize(app.id);
+    // Focus moves to the window's taskbar button, where it can be restored from.
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(`.xp-task[data-task-for="${app.id}"]`)?.focus());
   };
-  const close = () => wm.close(app.id);
+  const close = () => {
+    wm.close(app.id);
+    // Focus goes back to the Start button rather than being lost with the window.
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(".xp-start")?.focus());
+  };
 
   return (
     <section
       ref={el}
       role="dialog"
+      tabIndex={-1}
       aria-modal="false"
       aria-labelledby={`win-${app.id}-title`}
       hidden={win.minimized}

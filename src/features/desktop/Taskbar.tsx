@@ -27,6 +27,7 @@ export function Taskbar({ startOpen, onStart }: { startOpen: boolean; onStart: (
               <button
                 type="button"
                 className="xp-task"
+                data-task-for={app.id}
                 aria-pressed={focused === w.id}
                 data-minimized={w.minimized || undefined}
                 onClick={() => {
@@ -92,7 +93,9 @@ function NowPlaying() {
     state.status === "error"
       ? (state.error?.message ?? "Couldn't play")
       : state.status === "loading"
-        ? "Connecting…"
+        ? state.reconnecting
+          ? `Reconnecting (attempt ${state.reconnecting} of 3)…`
+          : "Connecting…"
         : state.status === "buffering"
           ? "Buffering…"
           : state.status === "playing"

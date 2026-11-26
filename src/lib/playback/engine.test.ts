@@ -133,7 +133,7 @@ describe("buffering", () => {
   });
 
   it("gives up with a network error if buffering never ends", () => {
-    const { engine, audio } = setup();
+    const { engine, audio } = setup({ reconnectDelays: [] });
     engine.load(station(1));
     audio.emit("playing");
     audio.emit("waiting");
@@ -149,7 +149,7 @@ describe("errors", () => {
     [3, "decode"],
     [2, "network"],
   ])("maps media error code %i to %s and releases the stream", (code, kind) => {
-    const { engine, audio } = setup();
+    const { engine, audio } = setup({ reconnectDelays: [] });
     engine.load(station(1));
     audio.fail(code);
     expect(engine.getState()).toMatchObject({ status: "error", error: { kind } });
@@ -165,7 +165,7 @@ describe("errors", () => {
   });
 
   it("times out if the station never starts", () => {
-    const { engine } = setup();
+    const { engine } = setup({ reconnectDelays: [] });
     engine.load(station(1));
     vi.advanceTimersByTime(LOAD_TIMEOUT_MS - 1);
     expect(engine.getState().status).toBe("loading");
@@ -202,7 +202,7 @@ describe("errors", () => {
   });
 
   it("treats a live stream ending as the station dropping out", () => {
-    const { engine, audio } = setup();
+    const { engine, audio } = setup({ reconnectDelays: [] });
     engine.load(station(1));
     audio.emit("playing");
     audio.emit("ended");
@@ -210,7 +210,7 @@ describe("errors", () => {
   });
 
   it("retries by playing again after an error", () => {
-    const { engine, audio } = setup();
+    const { engine, audio } = setup({ reconnectDelays: [] });
     engine.load(station(1));
     audio.fail(2);
     engine.play();
@@ -464,5 +464,86 @@ describe("a track reaching its end (browser event order)", () => {
     audio.pause();
     audio.emit("ended");
     expect(engine.getState().status).toBe("ended");
+  });
+});
+
+describe("dropped live streams reconnect by themselves", () => {
+  it("retries after 2, 5 and 10 seconds, and plays on when one works", async () => {
+    const { engine, audio } = setup();
+    engine.load(station(1));
+    audio.emit("playing");
+    audio.fail(2); // network
+    expect(engine.getState()).toMatchObject({ status: "loading", reconnecting: 1, error: null });
+    const loads = audio.loads;
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(audio.loads).toBe(loads);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(audio.loads).toBe(loads + 1); // tried again
+    expect(audio.src).toBe("https://stream1.example/live");
+    audio.emit("playing");
+    expect(engine.getState()).toMatchObject({ status: "playing", reconnecting: 0 });
+  });
+
+  it("shows the error after three failed attempts", async () => {
+    const { engine, audio } = setup();
+    engine.load(station(1));
+    for (const wait of [0, 2_000, 5_000, 10_000]) {
+      await vi.advanceTimersByTimeAsync(wait);
+      audio.fail(2);
+    }
+    expect(engine.getState()).toMatchObject({ status: "error", reconnecting: 0, error: { kind: "network" } });
+  });
+
+  it("a stream that couldn't connect (reported as unsupported) gets one retry, then the error", async () => {
+    const { engine, audio } = setup();
+    engine.load(station(1));
+    audio.fail(4);
+    expect(engine.getState()).toMatchObject({ status: "loading", reconnecting: 1 });
+    await vi.advanceTimersByTimeAsync(2_000);
+    audio.fail(4);
+    expect(engine.getState()).toMatchObject({ status: "error", error: { kind: "unplayable" } });
+  });
+
+  it("never retries a track, or a blocked start", async () => {
+    const { engine, audio } = setup();
+    engine.load(station(2, false));
+    audio.fail(2);
+    expect(engine.getState().status).toBe("error");
+  });
+
+  it("pausing during a reconnection cancels it", async () => {
+    const { engine, audio } = setup();
+    engine.load(station(1));
+    audio.fail(2);
+    engine.pause();
+    const loads = audio.loads;
+    await vi.advanceTimersByTimeAsync(20_000);
+    expect(audio.loads).toBe(loads);
+    expect(engine.getState().status).toBe("paused");
+  });
+
+  it("comes back by itself when the internet returns", () => {
+    let handler: (online: boolean) => void = () => {};
+    let online = true;
+    const { engine, audio } = setup({ isOnline: () => online, onConnectivityChange: (h) => (handler = h) });
+    engine.load(station(1));
+    audio.emit("playing");
+    online = false;
+    handler(false);
+    expect(engine.getState().error?.kind).toBe("offline");
+    online = true;
+    handler(true);
+    expect(engine.getState().status).toBe("loading");
+    audio.emit("playing");
+    expect(engine.getState().status).toBe("playing");
+  });
+
+  it("a stopped station stays stopped when the internet returns", () => {
+    let handler: (online: boolean) => void = () => {};
+    const { engine } = setup({ onConnectivityChange: (h) => (handler = h) });
+    engine.load(station(1));
+    engine.stop();
+    handler(true);
+    expect(engine.getState().status).toBe("idle");
   });
 });
